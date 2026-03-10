@@ -10,7 +10,7 @@ from pathlib import Path
 import mimetypes
 
 # Import routes
-from routes import programs, sessions, testimonials, stats, newsletter, upload
+from routes import programs, sessions, testimonials, stats, newsletter, upload, payments, webhook, currency
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -67,6 +67,9 @@ app.include_router(testimonials.router)
 app.include_router(stats.router)
 app.include_router(newsletter.router)
 app.include_router(upload.router)
+app.include_router(payments.router)
+app.include_router(webhook.router)
+app.include_router(currency.router)
 
 # Include the main router in the app
 app.include_router(api_router)
