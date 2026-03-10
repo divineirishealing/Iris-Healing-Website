@@ -17,7 +17,7 @@ const ProgramsSection = () => {
 
   const loadPrograms = async () => {
     try {
-      const response = await axios.get(`${API}/programs`);
+      const response = await axios.get(`${API}/programs?visible_only=true`);
       if (response.data && response.data.length > 0) {
         setPrograms(response.data);
       }

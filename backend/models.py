@@ -1,9 +1,8 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List, Dict
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
-# Existing models
 class Program(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
@@ -16,7 +15,9 @@ class Program(BaseModel):
     price_eur: float = 0.0
     price_gbp: float = 0.0
     duration: str = "90 days"
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    visible: bool = True
+    order: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ProgramCreate(BaseModel):
     title: str
@@ -29,6 +30,8 @@ class ProgramCreate(BaseModel):
     price_eur: float = 0.0
     price_gbp: float = 0.0
     duration: Optional[str] = "90 days"
+    visible: Optional[bool] = True
+    order: Optional[int] = 0
 
 class Session(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -40,7 +43,9 @@ class Session(BaseModel):
     price_eur: float = 0.0
     price_gbp: float = 0.0
     duration: str = "60-90 minutes"
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    visible: bool = True
+    order: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class SessionCreate(BaseModel):
     title: str
@@ -51,16 +56,32 @@ class SessionCreate(BaseModel):
     price_eur: float = 0.0
     price_gbp: float = 0.0
     duration: Optional[str] = "60-90 minutes"
+    visible: Optional[bool] = True
+    order: Optional[int] = 0
 
 class Testimonial(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    videoId: str
-    thumbnail: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    type: str = "graphic"  # "graphic" or "video"
+    name: str = ""
+    text: str = ""  # searchable text content
+    image: str = ""  # graphic image URL
+    videoId: str = ""  # YouTube video ID
+    thumbnail: str = ""
+    program_id: str = ""  # associated program (optional)
+    visible: bool = True
+    order: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class TestimonialCreate(BaseModel):
-    videoId: str
+    type: str = "graphic"
+    name: Optional[str] = ""
+    text: Optional[str] = ""
+    image: Optional[str] = ""
+    videoId: Optional[str] = ""
     thumbnail: Optional[str] = ""
+    program_id: Optional[str] = ""
+    visible: Optional[bool] = True
+    order: Optional[int] = 0
 
 class Stat(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -76,27 +97,45 @@ class StatCreate(BaseModel):
 class Newsletter(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: str
-    subscribed_at: datetime = Field(default_factory=datetime.utcnow)
+    subscribed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class NewsletterCreate(BaseModel):
     email: str
 
-# Payment Transaction Model
+class SiteSettings(BaseModel):
+    id: str = "site_settings"
+    heading_font: str = "Playfair Display"
+    body_font: str = "Lato"
+    heading_color: str = "#1a1a1a"
+    body_color: str = "#4a4a4a"
+    accent_color: str = "#D4AF37"
+    heading_size: str = "default"
+    body_size: str = "default"
+
+class SiteSettingsUpdate(BaseModel):
+    heading_font: Optional[str] = None
+    body_font: Optional[str] = None
+    heading_color: Optional[str] = None
+    body_color: Optional[str] = None
+    accent_color: Optional[str] = None
+    heading_size: Optional[str] = None
+    body_size: Optional[str] = None
+
 class PaymentTransaction(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     session_id: str
     customer_email: EmailStr
     customer_name: Optional[str] = None
-    item_type: str  # 'program' or 'session'
+    item_type: str
     item_id: str
     item_title: str
     amount: float
     currency: str
-    payment_status: str = "pending"  # pending, paid, failed, refunded
+    payment_status: str = "pending"
     stripe_payment_intent: Optional[str] = None
     metadata: Optional[Dict] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class PaymentTransactionCreate(BaseModel):
     session_id: str
@@ -109,16 +148,14 @@ class PaymentTransactionCreate(BaseModel):
     currency: str
     metadata: Optional[Dict] = None
 
-# Checkout Request
 class CheckoutRequest(BaseModel):
-    item_type: str  # 'program' or 'session'
+    item_type: str
     item_id: str
     currency: str = "usd"
     customer_email: EmailStr
     customer_name: Optional[str] = None
     origin_url: str
 
-# Currency Detection
 class CurrencyInfo(BaseModel):
     currency: str
     symbol: str

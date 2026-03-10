@@ -18,7 +18,7 @@ const SessionsSection = () => {
 
   const loadSessions = async () => {
     try {
-      const response = await axios.get(`${API}/sessions`);
+      const response = await axios.get(`${API}/sessions?visible_only=true`);
       if (response.data && response.data.length > 0) {
         setSessions(response.data);
         setSelectedSession(response.data[0]);

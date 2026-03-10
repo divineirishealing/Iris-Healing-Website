@@ -1,36 +1,45 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButtons from '../components/FloatingButtons';
+import { Search, Play, X } from 'lucide-react';
+import { resolveImageUrl } from '../lib/imageUtils';
+import { Dialog, DialogContent } from '../components/ui/dialog';
 
-const testimonialImages = [
-  'https://divineirishealing.com/assets/images/testimonials/1770288231_121a7ff8d43c21a47ee2.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770288262_5df1ff82fddb95f146db.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770288598_757da7a271614cb10822.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289072_ab4f5c6689469efb1b7f.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289093_21c29f8d6a2dc5b1c8a9.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289131_cf06997582aa897db7fc.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289153_a072f5d42a5e02165c0d.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289174_ac0c9bfc32bdb9d84fe4.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289192_8c6bc2f9b2dbd96e74ee.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289210_ef2a4f93ca54c382c728.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289233_e3aba475fa78bcff3752.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289258_972d592ed0dff3e89a5a.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289281_4a39ab61be8e4c6ebf18.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289418_aa10db6d9677c85dc8fb.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289438_c49463798e7912dd6e27.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1770289472_43d8c1c0643b30020f1c.jpeg',
-  'https://divineirishealing.com/assets/images/testimonials/1771406783_77c4cb3d51018f66cff5.png',
-  'https://divineirishealing.com/assets/images/testimonials/1771406888_f8b37016b522d4450f27.png',
-  'https://divineirishealing.com/assets/images/testimonials/1771406917_39f6286cdc703cdb44b1.png',
-  'https://divineirishealing.com/assets/images/testimonials/1771407030_074208cdb860ec07bcd0.png',
-  'https://divineirishealing.com/assets/images/testimonials/1771407096_e288442d79f8ba3078e2.png',
-  'https://divineirishealing.com/assets/images/testimonials/1771407127_934cf075f73a9a06cca1.png',
-  'https://divineirishealing.com/assets/images/testimonials/1771407192_2191bb436611415332f0.png',
-  'https://divineirishealing.com/assets/images/testimonials/1771407239_d3ea8d010f7f5ad2d89e.png',
-];
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 function TransformationsPage() {
+  const [testimonials, setTestimonials] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadTestimonials();
+  }, [searchQuery, activeTab]);
+
+  const loadTestimonials = async () => {
+    try {
+      let url = `${API}/testimonials?`;
+      if (activeTab === 'graphic') url += 'type=graphic&';
+      if (activeTab === 'video') url += 'type=video&';
+      if (searchQuery.trim()) url += `search=${encodeURIComponent(searchQuery.trim())}&`;
+      const response = await axios.get(url);
+      setTestimonials(response.data);
+    } catch (error) {
+      console.error('Error loading testimonials:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const graphicTestimonials = testimonials.filter(t => t.type === 'graphic');
+  const videoTestimonials = testimonials.filter(t => t.type === 'video');
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -38,13 +47,10 @@ function TransformationsPage() {
       {/* Hero */}
       <section
         data-testid="transformations-hero"
-        className="min-h-[50vh] flex flex-col items-center justify-center text-center px-4 pt-24"
+        className="min-h-[45vh] flex flex-col items-center justify-center text-center px-4 pt-24"
         style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #1a1a2e 75%, #0d1b2a 100%)' }}
       >
-        <h1
-          className="text-5xl md:text-7xl mb-6 tracking-wider"
-          style={{ color: '#D4AF37', fontWeight: 400 }}
-        >
+        <h1 className="text-5xl md:text-7xl mb-6 tracking-wider" style={{ color: '#D4AF37', fontWeight: 400 }}>
           TRANSFORMATIONS
         </h1>
         <p className="text-gray-400 text-sm tracking-[0.2em]">
@@ -52,30 +58,159 @@ function TransformationsPage() {
         </p>
       </section>
 
-      {/* Testimonials Grid */}
-      <section data-testid="transformations-grid" className="py-16 bg-gray-50">
+      {/* Search + Filter Bar */}
+      <section className="py-8 bg-gray-50 border-b sticky top-0 z-30">
         <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonialImages.map((image, index) => (
-              <div
-                key={index}
-                data-testid={`transformation-card-${index}`}
-                className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
-              >
-                <img
-                  src={image}
-                  alt={`Transformation ${index + 1}`}
-                  className="w-full h-auto object-contain"
-                  loading="lazy"
-                  onError={(e) => {
-                    e.target.parentElement.style.display = 'none';
-                  }}
-                />
-              </div>
-            ))}
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-4">
+            {/* Search */}
+            <div className="relative flex-1 w-full">
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                data-testid="transformations-search"
+                placeholder="Search testimonials..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 rounded-full border border-gray-200 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none text-sm"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2">
+              {[
+                { key: 'all', label: 'All' },
+                { key: 'graphic', label: 'Graphic' },
+                { key: 'video', label: 'Video' },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  data-testid={`tab-${tab.key}`}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-5 py-2 rounded-full text-xs font-medium tracking-wider transition-all ${
+                    activeTab === tab.key
+                      ? 'bg-[#D4AF37] text-white shadow-md'
+                      : 'bg-white text-gray-600 hover:bg-gray-100 border'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Graphic Testimonials */}
+      {(activeTab === 'all' || activeTab === 'graphic') && graphicTestimonials.length > 0 && (
+        <section data-testid="graphic-testimonials" className="py-12">
+          <div className="container mx-auto px-4">
+            {activeTab === 'all' && (
+              <h2 className="text-2xl text-center text-gray-900 mb-10">Graphic Testimonials</h2>
+            )}
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {graphicTestimonials.map((t) => (
+                <div
+                  key={t.id}
+                  data-testid={`graphic-card-${t.id}`}
+                  className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden cursor-pointer"
+                  onClick={() => setSelectedImage(resolveImageUrl(t.image))}
+                >
+                  <img
+                    src={resolveImageUrl(t.image)}
+                    alt={t.name || `Testimonial`}
+                    className="w-full h-auto object-contain"
+                    loading="lazy"
+                  />
+                  {t.name && (
+                    <div className="p-3 text-center">
+                      <p className="text-sm font-medium text-gray-800">{t.name}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Video Testimonials */}
+      {(activeTab === 'all' || activeTab === 'video') && videoTestimonials.length > 0 && (
+        <section data-testid="video-testimonials" className="py-12 bg-gray-900">
+          <div className="container mx-auto px-4">
+            {activeTab === 'all' && (
+              <h2 className="text-2xl text-center text-white mb-10">Video Testimonials</h2>
+            )}
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videoTestimonials.map((t) => (
+                <div
+                  key={t.id}
+                  data-testid={`video-card-${t.id}`}
+                  className="relative group cursor-pointer overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300"
+                  onClick={() => setSelectedVideo(t.videoId)}
+                >
+                  <img
+                    src={t.thumbnail || `https://img.youtube.com/vi/${t.videoId}/maxresdefault.jpg`}
+                    alt={t.name || 'Video testimonial'}
+                    className="w-full h-52 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-all duration-300 flex items-center justify-center">
+                    <div className="w-14 h-14 bg-[#D4AF37] rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                      <Play size={20} className="text-white ml-0.5" fill="white" />
+                    </div>
+                  </div>
+                  {t.name && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <p className="text-white text-sm font-medium">{t.name}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Empty State */}
+      {!loading && testimonials.length === 0 && (
+        <div className="py-20 text-center">
+          <p className="text-gray-500 text-lg">No testimonials found matching your search.</p>
+          <button onClick={() => { setSearchQuery(''); setActiveTab('all'); }} className="mt-4 text-[#D4AF37] hover:underline text-sm">
+            Clear filters
+          </button>
+        </div>
+      )}
+
+      {/* Video Modal */}
+      <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black">
+          {selectedVideo && (
+            <div className="relative" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Lightbox */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-3xl p-2 bg-white">
+          {selectedImage && (
+            <img src={selectedImage} alt="Testimonial" className="w-full h-auto rounded-lg" />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
       <FloatingButtons />

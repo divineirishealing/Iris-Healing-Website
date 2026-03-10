@@ -14,28 +14,31 @@ import ServicesPage from './pages/ServicesPage';
 import MediaPage from './pages/MediaPage';
 import TransformationsPage from './pages/TransformationsPage';
 import { Toaster } from './components/ui/toaster';
+import { SiteSettingsProvider } from './context/SiteSettingsContext';
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/programs" element={<AllProgramsPage />} />
-          <Route path="/program/:id" element={<ProgramDetailPage />} />
-          <Route path="/services" element={<ServicesPage />} />
-          <Route path="/sessions" element={<AllSessionsPage />} />
-          <Route path="/session/:id" element={<SessionDetailPage />} />
-          <Route path="/media" element={<MediaPage />} />
-          <Route path="/transformations" element={<TransformationsPage />} />
-          <Route path="/checkout/:type/:id" element={<CheckoutPage />} />
-          <Route path="/payment/success" element={<PaymentSuccessPage />} />
-          <Route path="/payment/cancel" element={<PaymentCancelPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-        </Routes>
-      </BrowserRouter>
-      <Toaster />
+      <SiteSettingsProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/programs" element={<AllProgramsPage />} />
+            <Route path="/program/:id" element={<ProgramDetailPage />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/sessions" element={<AllSessionsPage />} />
+            <Route path="/session/:id" element={<SessionDetailPage />} />
+            <Route path="/media" element={<MediaPage />} />
+            <Route path="/transformations" element={<TransformationsPage />} />
+            <Route path="/checkout/:type/:id" element={<CheckoutPage />} />
+            <Route path="/payment/success" element={<PaymentSuccessPage />} />
+            <Route path="/payment/cancel" element={<PaymentCancelPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+          </Routes>
+        </BrowserRouter>
+        <Toaster />
+      </SiteSettingsProvider>
     </div>
   );
 }

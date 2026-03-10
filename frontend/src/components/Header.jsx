@@ -76,6 +76,7 @@ const Header = () => {
               { label: 'SERVICES', path: '/services' },
               { label: 'UPCOMING SESSIONS', path: '/sessions' },
               { label: 'MEDIA', path: '/media' },
+              { label: 'TRANSFORMATIONS', path: '/transformations' },
             ].map(item => (
               <button
                 key={item.label}
