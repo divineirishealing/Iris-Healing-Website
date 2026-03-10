@@ -19,6 +19,7 @@ const ImageUploader = ({ value, onChange, label = "Image" }) => {
   const [useUrl, setUseUrl] = useState(false);
   const [urlInput, setUrlInput] = useState(value || '');
   const { toast } = useToast();
+  const uniqueId = useState(() => `img-upload-${Math.random().toString(36).slice(2, 9)}`)[0];
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -126,10 +127,10 @@ const ImageUploader = ({ value, onChange, label = "Image" }) => {
             onChange={handleFileUpload}
             disabled={uploading}
             className="hidden"
-            id="image-upload"
+            id={uniqueId}
           />
           <label
-            htmlFor="image-upload"
+            htmlFor={uniqueId}
             className={`border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-yellow-500 transition-colors ${
               uploading ? 'opacity-50 cursor-not-allowed' : ''
             }`}

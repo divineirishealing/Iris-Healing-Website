@@ -613,7 +613,15 @@ const AdminPanel = () => {
                     <p className="text-xs text-gray-400 mt-1">Press Enter to put text on a new line.</p>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                    {/* Title Font */}
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Font (text style)</p>
+                      <select data-testid="hero-title-font" value={siteSettings.hero_title_font || 'Cinzel'} onChange={e => setSiteSettings({...siteSettings, hero_title_font: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
+                        {FONT_OPTIONS.map(f => <option key={f} value={f} style={{fontFamily: f}}>{f}</option>)}
+                      </select>
+                    </div>
+
                     {/* Title Color */}
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Title Color</p>
@@ -649,6 +657,22 @@ const AdminPanel = () => {
                         }`}
                       >
                         B {siteSettings.hero_title_bold ? '(ON)' : '(OFF)'}
+                      </button>
+                    </div>
+
+                    {/* Italic Toggle */}
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Make Italic?</p>
+                      <button
+                        data-testid="hero-title-italic-toggle"
+                        onClick={() => setSiteSettings({...siteSettings, hero_title_italic: !siteSettings.hero_title_italic})}
+                        className={`w-full py-2 rounded-md text-sm border-2 transition-all ${
+                          siteSettings.hero_title_italic
+                            ? 'bg-gray-900 text-white border-gray-900 italic'
+                            : 'bg-white text-gray-400 border-gray-200 hover:border-gray-400'
+                        }`}
+                      >
+                        <em>I</em> {siteSettings.hero_title_italic ? '(ON)' : '(OFF)'}
                       </button>
                     </div>
 
@@ -690,6 +714,14 @@ const AdminPanel = () => {
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {/* Subtitle Font */}
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Font (text style)</p>
+                      <select data-testid="hero-subtitle-font" value={siteSettings.hero_subtitle_font || 'Lato'} onChange={e => setSiteSettings({...siteSettings, hero_subtitle_font: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
+                        {FONT_OPTIONS.map(f => <option key={f} value={f} style={{fontFamily: f}}>{f}</option>)}
+                      </select>
+                    </div>
+
                     {/* Subtitle Color */}
                     <div>
                       <p className="text-xs text-gray-500 mb-1">Subtitle Color</p>
@@ -727,6 +759,22 @@ const AdminPanel = () => {
                         B {siteSettings.hero_subtitle_bold ? '(ON)' : '(OFF)'}
                       </button>
                     </div>
+
+                    {/* Subtitle Italic */}
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Make Italic?</p>
+                      <button
+                        data-testid="hero-subtitle-italic-toggle"
+                        onClick={() => setSiteSettings({...siteSettings, hero_subtitle_italic: !siteSettings.hero_subtitle_italic})}
+                        className={`w-full py-2 rounded-md text-sm border-2 transition-all ${
+                          siteSettings.hero_subtitle_italic
+                            ? 'bg-gray-900 text-white border-gray-900 italic'
+                            : 'bg-white text-gray-400 border-gray-200 hover:border-gray-400'
+                        }`}
+                      >
+                        <em>I</em> {siteSettings.hero_subtitle_italic ? '(ON)' : '(OFF)'}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -756,7 +804,8 @@ const AdminPanel = () => {
                       color: siteSettings.hero_title_color || '#ffffff',
                       fontWeight: siteSettings.hero_title_bold ? 700 : 400,
                       fontSize: `calc(${siteSettings.hero_title_size || '70px'} * 0.4)`,
-                      fontFamily: "'Cinzel', serif",
+                      fontFamily: `'${siteSettings.hero_title_font || 'Cinzel'}', serif`,
+                      fontStyle: siteSettings.hero_title_italic ? 'italic' : 'normal',
                       lineHeight: 1.2,
                       whiteSpace: 'pre-line',
                     }}>
@@ -767,6 +816,8 @@ const AdminPanel = () => {
                       color: siteSettings.hero_subtitle_color || '#ffffff',
                       fontWeight: siteSettings.hero_subtitle_bold ? 700 : 300,
                       fontSize: `calc(${siteSettings.hero_subtitle_size || '14px'} * 0.9)`,
+                      fontFamily: `'${siteSettings.hero_subtitle_font || 'Lato'}', sans-serif`,
+                      fontStyle: siteSettings.hero_subtitle_italic ? 'italic' : 'normal',
                       letterSpacing: '0.3em',
                     }}>
                       {siteSettings.hero_subtitle || 'ETERNAL HAPPINESS'}

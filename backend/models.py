@@ -149,8 +149,12 @@ class SiteSettings(BaseModel):
     hero_title_align: str = "left"
     hero_title_bold: bool = False
     hero_title_size: str = "70px"
+    hero_title_font: str = "Cinzel"
+    hero_title_italic: bool = False
     hero_subtitle_bold: bool = False
     hero_subtitle_size: str = "14px"
+    hero_subtitle_font: str = "Lato"
+    hero_subtitle_italic: bool = False
     hero_show_lines: bool = True
     # Logo settings
     logo_url: str = ""
@@ -174,8 +178,12 @@ class SiteSettingsUpdate(BaseModel):
     hero_title_align: Optional[str] = None
     hero_title_bold: Optional[bool] = None
     hero_title_size: Optional[str] = None
+    hero_title_font: Optional[str] = None
+    hero_title_italic: Optional[bool] = None
     hero_subtitle_bold: Optional[bool] = None
     hero_subtitle_size: Optional[str] = None
+    hero_subtitle_font: Optional[str] = None
+    hero_subtitle_italic: Optional[bool] = None
     hero_show_lines: Optional[bool] = None
     logo_url: Optional[str] = None
     logo_width: Optional[int] = None

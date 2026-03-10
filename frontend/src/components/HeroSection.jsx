@@ -34,8 +34,12 @@ const HeroSection = () => {
   const titleAlign = settings?.hero_title_align || 'left';
   const titleBold = settings?.hero_title_bold || false;
   const titleSize = settings?.hero_title_size || '70px';
+  const titleFont = settings?.hero_title_font || 'Cinzel';
+  const titleItalic = settings?.hero_title_italic || false;
   const subtitleBold = settings?.hero_subtitle_bold || false;
   const subtitleSize = settings?.hero_subtitle_size || '14px';
+  const subtitleFont = settings?.hero_subtitle_font || 'Lato';
+  const subtitleItalic = settings?.hero_subtitle_italic || false;
   const showLines = settings?.hero_show_lines !== false;
   const sectionStyle = settings?.sections?.hero || {};
 
@@ -82,11 +86,11 @@ const HeroSection = () => {
           data-testid="hero-title"
           className="text-white mb-6 tracking-wider animate-fade-in leading-tight whitespace-pre-line"
           style={{
-            fontWeight: titleBold ? 700 : (sectionStyle.font_weight || 400),
-            fontFamily: sectionStyle.font_family ? `'${sectionStyle.font_family}', Georgia, serif` : "'Cinzel', 'Playfair Display', Georgia, serif",
+            fontWeight: titleBold ? 700 : 400,
+            fontFamily: `'${titleFont}', Georgia, serif`,
             fontSize: titleSize,
             color: titleColor,
-            fontStyle: sectionStyle.font_style || 'normal',
+            fontStyle: titleItalic ? 'italic' : 'normal',
           }}
         >
           {heroTitle}
@@ -105,6 +109,8 @@ const HeroSection = () => {
             animationDelay: '0.3s',
             fontWeight: subtitleBold ? 700 : 300,
             fontSize: subtitleSize,
+            fontFamily: `'${subtitleFont}', sans-serif`,
+            fontStyle: subtitleItalic ? 'italic' : 'normal',
           }}
         >
           {heroSubtitle}
