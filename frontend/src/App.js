@@ -10,6 +10,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
 import ContactPage from './pages/ContactPage';
+import ServicesPage from './pages/ServicesPage';
 import { Toaster } from './components/ui/toaster';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/programs" element={<AllProgramsPage />} />
           <Route path="/program/:id" element={<ProgramDetailPage />} />
+          <Route path="/services" element={<ServicesPage />} />
           <Route path="/sessions" element={<AllSessionsPage />} />
           <Route path="/session/:id" element={<SessionDetailPage />} />
           <Route path="/checkout/:type/:id" element={<CheckoutPage />} />
