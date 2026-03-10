@@ -86,6 +86,7 @@ class EnrollmentSubmit(BaseModel):
     item_type: str
     item_id: str
     currency: str
+    origin_url: Optional[str] = None
 
 
 # ─── HELPERS ───
@@ -436,7 +437,28 @@ async def enrollment_checkout(enrollment_id: str, data: EnrollmentSubmit, reques
     collection = "programs" if data.item_type == "program" else "sessions"
     item = await db[collection].find_one({"id": data.item_id})
 
-    origin = str(request.headers.get("origin", request.base_url)).rstrip('/')
+    # Build public-facing URLs for Stripe redirects
+    # Priority: client origin_url > Origin header > X-Forwarded-Host > Referer > base_url
+    origin = ""
+    if data.origin_url and "cluster-" not in data.origin_url:
+        origin = data.origin_url.strip().rstrip('/')
+    if not origin:
+        origin = request.headers.get("origin", "").strip()
+    if not origin or "cluster-" in origin:
+        fwd_host = request.headers.get("x-forwarded-host", "").strip()
+        if fwd_host and "cluster-" not in fwd_host:
+            scheme = request.headers.get("x-forwarded-proto", "https")
+            origin = f"{scheme}://{fwd_host}"
+        else:
+            referer = request.headers.get("referer", "").strip()
+            if referer:
+                from urllib.parse import urlparse
+                parsed = urlparse(referer)
+                origin = f"{parsed.scheme}://{parsed.netloc}"
+            else:
+                origin = str(request.base_url).rstrip('/')
+    origin = origin.rstrip('/')
+
     host_url = str(request.base_url).rstrip('/')
     success_url = f"{origin}/payment/success?session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = f"{origin}/payment/cancel?item_type={data.item_type}&item_id={data.item_id}"

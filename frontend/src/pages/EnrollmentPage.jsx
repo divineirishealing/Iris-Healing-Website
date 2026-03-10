@@ -307,6 +307,7 @@ function EnrollmentPage() {
     try {
       const res = await axios.post(`${API}/enrollment/${enrollmentId}/checkout`, {
         enrollment_id: enrollmentId, item_type: type, item_id: id, currency: pricing.pricing.currency,
+        origin_url: window.location.origin,
       });
       window.location.href = res.data.url;
     } catch (err) {
