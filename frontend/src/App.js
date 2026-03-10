@@ -11,6 +11,7 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
 import ContactPage from './pages/ContactPage';
 import ServicesPage from './pages/ServicesPage';
+import MediaPage from './pages/MediaPage';
 import { Toaster } from './components/ui/toaster';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/sessions" element={<AllSessionsPage />} />
           <Route path="/session/:id" element={<SessionDetailPage />} />
+          <Route path="/media" element={<MediaPage />} />
           <Route path="/checkout/:type/:id" element={<CheckoutPage />} />
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/payment/cancel" element={<PaymentCancelPage />} />
