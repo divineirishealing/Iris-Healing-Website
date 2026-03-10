@@ -27,7 +27,7 @@ const NewsletterSection = () => {
   };
 
   return (
-    <section data-testid="newsletter-section" className="py-20" style={{ background: 'linear-gradient(135deg, #fdf8ef 0%, #fef3e2 50%, #fdf0d5 100%)' }}>
+    <section data-testid="newsletter-section" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl text-[#8B6914] mb-6">

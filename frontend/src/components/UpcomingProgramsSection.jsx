@@ -2,10 +2,69 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { resolveImageUrl } from '../lib/imageUtils';
-import { MapPin, Monitor, Calendar } from 'lucide-react';
+import { MapPin, Monitor, Calendar, Clock, AlertTriangle } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+const CountdownTimer = ({ deadline }) => {
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft(deadline));
+
+  function getTimeLeft(dateStr) {
+    if (!dateStr) return null;
+    const target = new Date(dateStr);
+    if (isNaN(target.getTime())) return null;
+    const now = new Date();
+    const diff = target.getTime() - now.getTime();
+    if (diff <= 0) return { expired: true, days: 0, hours: 0, minutes: 0, seconds: 0 };
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return { expired: false, days, hours, minutes, seconds };
+  }
+
+  useEffect(() => {
+    if (!deadline) return;
+    const interval = setInterval(() => {
+      setTimeLeft(getTimeLeft(deadline));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [deadline]);
+
+  if (!timeLeft) return null;
+
+  if (timeLeft.expired) {
+    return (
+      <div data-testid="countdown-expired" className="flex items-center gap-2 text-red-500 text-xs font-medium">
+        <AlertTriangle size={14} />
+        <span>Registration Closed</span>
+      </div>
+    );
+  }
+
+  return (
+    <div data-testid="countdown-timer" className="flex items-center gap-2">
+      <Clock size={14} className="text-red-500 animate-pulse" />
+      <div className="flex gap-1.5">
+        {timeLeft.days > 0 && (
+          <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+            {timeLeft.days}d
+          </span>
+        )}
+        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+          {String(timeLeft.hours).padStart(2, '0')}h
+        </span>
+        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+          {String(timeLeft.minutes).padStart(2, '0')}m
+        </span>
+        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+          {String(timeLeft.seconds).padStart(2, '0')}s
+        </span>
+      </div>
+    </div>
+  );
+};
 
 const UpcomingProgramsSection = () => {
   const navigate = useNavigate();
@@ -25,6 +84,14 @@ const UpcomingProgramsSection = () => {
   };
 
   if (programs.length === 0) return null;
+
+  const isExpired = (program) => {
+    const deadline = program.deadline_date || program.start_date;
+    if (!deadline) return false;
+    const target = new Date(deadline);
+    if (isNaN(target.getTime())) return false;
+    return target.getTime() < Date.now();
+  };
 
   const typeIcon = (t) => {
     if (t === 'offline') return <MapPin size={14} />;
@@ -47,96 +114,141 @@ const UpcomingProgramsSection = () => {
         </div>
 
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {programs.map((program) => (
-            <div
-              key={program.id}
-              data-testid={`upcoming-card-${program.id}`}
-              className="group bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col"
-            >
-              {/* Program Image / Graphic */}
-              <div className="relative h-52 overflow-hidden">
-                <img
-                  src={resolveImageUrl(program.image)}
-                  alt={program.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  onError={(e) => {
-                    e.target.src = 'https://images.unsplash.com/photo-1545389336-cf090694435e?w=600&h=400&fit=crop';
-                  }}
-                />
-                {/* Type badge */}
-                <div className="absolute top-3 left-3">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shadow-md ${
-                    program.program_type === 'offline'
-                      ? 'bg-emerald-500 text-white'
-                      : program.program_type === 'hybrid'
-                        ? 'bg-purple-500 text-white'
-                        : 'bg-blue-500 text-white'
-                  }`}>
-                    {typeIcon(program.program_type)}
-                    {typeLabel(program.program_type)}
-                  </span>
-                </div>
-                {/* Offer badge */}
-                {program.offer_text && (
-                  <div className="absolute top-3 right-3">
-                    <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                      {program.offer_text}
+          {programs.map((program) => {
+            const expired = isExpired(program);
+            const deadline = program.deadline_date || program.start_date;
+
+            return (
+              <div
+                key={program.id}
+                data-testid={`upcoming-card-${program.id}`}
+                className={`group bg-white rounded-xl overflow-hidden shadow-lg transition-all duration-300 border border-gray-100 flex flex-col relative ${
+                  expired ? 'opacity-75' : 'hover:shadow-2xl'
+                }`}
+              >
+                {/* Program Image */}
+                <div className="relative h-52 overflow-hidden">
+                  <img
+                    src={resolveImageUrl(program.image)}
+                    alt={program.title}
+                    className={`w-full h-full object-cover transition-transform duration-500 ${!expired ? 'group-hover:scale-105' : 'grayscale-[30%]'}`}
+                    onError={(e) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1545389336-cf090694435e?w=600&h=400&fit=crop';
+                    }}
+                  />
+                  {/* Type badge */}
+                  <div className="absolute top-3 left-3">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shadow-md ${
+                      program.program_type === 'offline'
+                        ? 'bg-emerald-500 text-white'
+                        : program.program_type === 'hybrid'
+                          ? 'bg-purple-500 text-white'
+                          : 'bg-blue-500 text-white'
+                    }`}>
+                      {typeIcon(program.program_type)}
+                      {typeLabel(program.program_type)}
                     </span>
                   </div>
-                )}
-              </div>
 
-              {/* Content */}
-              <div className="p-6 flex-1 flex flex-col">
-                <p className="text-[#D4AF37] text-xs tracking-wider mb-1 uppercase">{program.category}</p>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 leading-tight">{program.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed mb-4 line-clamp-3 flex-1">{program.description}</p>
+                  {/* Limited Period Offer badge */}
+                  {!expired && (program.offer_text || program.offer_price_usd > 0) && (
+                    <div className="absolute top-3 right-3">
+                      <span className="bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse">
+                        {program.offer_text || 'LIMITED OFFER'}
+                      </span>
+                    </div>
+                  )}
 
-                {/* Date */}
-                {program.start_date && (
-                  <div className="flex items-center gap-2 text-gray-500 text-xs mb-4">
-                    <Calendar size={14} />
-                    <span>Starts: {program.start_date}</span>
-                  </div>
-                )}
+                  {/* Expired overlay */}
+                  {expired && (
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <span className="bg-gray-900/80 text-white text-xs font-bold px-4 py-2 rounded-full tracking-wider uppercase">
+                        Registration Closed
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-                {/* Pricing */}
-                <div className="border-t pt-4 mt-auto">
-                  <div className="flex items-baseline gap-3 mb-3">
-                    {program.offer_price_usd > 0 ? (
-                      <>
-                        <span className="text-2xl font-bold text-[#D4AF37]">${program.offer_price_usd}</span>
-                        <span className="text-sm text-gray-400 line-through">${program.price_usd}</span>
-                      </>
-                    ) : program.price_usd > 0 ? (
-                      <span className="text-2xl font-bold text-gray-900">${program.price_usd}</span>
-                    ) : (
-                      <span className="text-sm text-gray-500 italic">Contact for pricing</span>
-                    )}
-                  </div>
+                {/* Content */}
+                <div className="p-6 flex-1 flex flex-col">
+                  <p className="text-[#D4AF37] text-xs tracking-wider mb-1 uppercase">{program.category}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 leading-tight">{program.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed mb-4 line-clamp-3 flex-1">{program.description}</p>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => navigate(`/program/${program.id}`)}
-                      data-testid={`upcoming-know-more-${program.id}`}
-                      className="flex-1 bg-[#1a1a1a] hover:bg-[#333] text-white py-2.5 rounded-full text-xs tracking-wider transition-all duration-300 uppercase font-medium"
-                    >
-                      Know More
-                    </button>
-                    {(program.price_usd > 0 || program.offer_price_usd > 0) && (
+                  {/* Date */}
+                  {program.start_date && (
+                    <div className="flex items-center gap-2 text-gray-500 text-xs mb-3">
+                      <Calendar size={14} />
+                      <span>Starts: {program.start_date}</span>
+                    </div>
+                  )}
+
+                  {/* Countdown Timer */}
+                  {deadline && (
+                    <div className="mb-4">
+                      <CountdownTimer deadline={deadline} />
+                    </div>
+                  )}
+
+                  {/* Limited Period Offer highlight */}
+                  {!expired && (program.offer_text || program.offer_price_usd > 0) && (
+                    <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-3 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Clock size={14} className="text-amber-600" />
+                        <span className="text-amber-800 text-xs font-bold uppercase tracking-wider">
+                          Limited Period Offer - Sign Up Soon!
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pricing */}
+                  <div className="border-t pt-4 mt-auto">
+                    <div className="flex items-baseline gap-3 mb-3">
+                      {program.offer_price_usd > 0 ? (
+                        <>
+                          <span className="text-2xl font-bold text-[#D4AF37]">${program.offer_price_usd}</span>
+                          <span className="text-sm text-gray-400 line-through">${program.price_usd}</span>
+                        </>
+                      ) : program.price_usd > 0 ? (
+                        <span className="text-2xl font-bold text-gray-900">${program.price_usd}</span>
+                      ) : (
+                        <span className="text-sm text-gray-500 italic">Contact for pricing</span>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
                       <button
-                        onClick={() => navigate(`/checkout/program/${program.id}`)}
-                        data-testid={`upcoming-enroll-${program.id}`}
-                        className="flex-1 bg-[#D4AF37] hover:bg-[#b8962e] text-white py-2.5 rounded-full text-xs tracking-wider transition-all duration-300 uppercase font-medium"
+                        onClick={() => navigate(`/program/${program.id}`)}
+                        data-testid={`upcoming-know-more-${program.id}`}
+                        className="flex-1 bg-[#1a1a1a] hover:bg-[#333] text-white py-2.5 rounded-full text-xs tracking-wider transition-all duration-300 uppercase font-medium"
                       >
-                        Enroll Now
+                        Know More
                       </button>
-                    )}
+                      {!expired && (program.price_usd > 0 || program.offer_price_usd > 0) && (
+                        <button
+                          onClick={() => navigate(`/checkout/program/${program.id}`)}
+                          data-testid={`upcoming-enroll-${program.id}`}
+                          className="flex-1 bg-[#D4AF37] hover:bg-[#b8962e] text-white py-2.5 rounded-full text-xs tracking-wider transition-all duration-300 uppercase font-medium"
+                        >
+                          Enroll Now
+                        </button>
+                      )}
+                      {expired && (
+                        <button
+                          disabled
+                          data-testid={`upcoming-enroll-disabled-${program.id}`}
+                          className="flex-1 bg-gray-300 text-gray-500 py-2.5 rounded-full text-xs tracking-wider uppercase font-medium cursor-not-allowed"
+                        >
+                          Closed
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

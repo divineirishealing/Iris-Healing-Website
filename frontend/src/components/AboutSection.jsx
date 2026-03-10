@@ -1,15 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+function resolveUrl(url) {
+  if (!url) return '';
+  if (url.startsWith('/api/image/')) return `${BACKEND_URL}${url}`;
+  return url;
+}
 
 const AboutSection = () => {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${API}/settings`).then(r => setSettings(r.data)).catch(() => {});
+  }, []);
+
+  const logoUrl = settings?.logo_url
+    ? resolveUrl(settings.logo_url)
+    : 'https://divineirishealing.com/assets/images/Divine-iris-logo.png';
+  const logoWidth = settings?.logo_width || 96;
+
   return (
     <section id="about" data-testid="about-section" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         {/* Logo centered */}
         <div className="flex items-center justify-center mb-12">
           <img
-            src="https://divineirishealing.com/assets/images/Divine-iris-logo.png"
+            src={logoUrl}
             alt="Divine Iris Logo"
-            className="w-20 h-20 md:w-24 md:h-24 object-contain"
+            data-testid="site-logo"
+            style={{ width: `${logoWidth}px`, height: 'auto' }}
+            className="object-contain"
             onError={(e) => { e.target.style.display = 'none'; }}
           />
         </div>

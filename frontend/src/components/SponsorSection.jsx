@@ -4,7 +4,7 @@ const SponsorSection = () => {
   return (
     <section data-testid="sponsor-section" className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
           {/* Content */}
           <div>
             <h2 className="text-3xl md:text-4xl text-gray-900 mb-6 leading-tight">
@@ -32,8 +32,8 @@ const SponsorSection = () => {
           </div>
 
           {/* Image */}
-          <div className="order-first md:order-last">
-            <div className="rounded-lg overflow-hidden shadow-xl">
+          <div className="order-first md:order-last flex justify-center">
+            <div className="rounded-lg overflow-hidden shadow-xl max-w-md w-full">
               <img
                 src="https://divineirishealing.com/assets/images/sponsor-placeholder.jpg"
                 alt="Be The Sponsor"

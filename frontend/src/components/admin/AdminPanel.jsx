@@ -49,7 +49,7 @@ const AdminPanel = () => {
   const [showTestimonialForm, setShowTestimonialForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  const [programForm, setProgramForm] = useState({ title: '', category: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, price_aed: 0, visible: true, order: 0, program_type: 'online', offer_price_usd: 0, offer_price_inr: 0, offer_text: '', is_upcoming: false, start_date: '', enrollment_open: true });
+  const [programForm, setProgramForm] = useState({ title: '', category: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, price_aed: 0, visible: true, order: 0, program_type: 'online', offer_price_usd: 0, offer_price_inr: 0, offer_text: '', is_upcoming: false, start_date: '', deadline_date: '', enrollment_open: true });
   const [sessionForm, setSessionForm] = useState({ title: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, visible: true, order: 0 });
   const [testimonialForm, setTestimonialForm] = useState({ type: 'graphic', name: '', text: '', image: '', videoId: '', program_id: '', visible: true });
 
@@ -95,7 +95,7 @@ const AdminPanel = () => {
 
   const editProgram = (p) => {
     setEditingId(p.id);
-    setProgramForm({ title: p.title, category: p.category || '', description: p.description, image: p.image, price_usd: p.price_usd || 0, price_inr: p.price_inr || 0, price_eur: p.price_eur || 0, price_gbp: p.price_gbp || 0, price_aed: p.price_aed || 0, visible: p.visible !== false, order: p.order || 0, program_type: p.program_type || 'online', offer_price_usd: p.offer_price_usd || 0, offer_price_inr: p.offer_price_inr || 0, offer_text: p.offer_text || '', is_upcoming: p.is_upcoming || false, start_date: p.start_date || '', enrollment_open: p.enrollment_open !== false });
+    setProgramForm({ title: p.title, category: p.category || '', description: p.description, image: p.image, price_usd: p.price_usd || 0, price_inr: p.price_inr || 0, price_eur: p.price_eur || 0, price_gbp: p.price_gbp || 0, price_aed: p.price_aed || 0, visible: p.visible !== false, order: p.order || 0, program_type: p.program_type || 'online', offer_price_usd: p.offer_price_usd || 0, offer_price_inr: p.offer_price_inr || 0, offer_text: p.offer_text || '', is_upcoming: p.is_upcoming || false, start_date: p.start_date || '', deadline_date: p.deadline_date || '', enrollment_open: p.enrollment_open !== false });
     setShowProgramForm(true);
   };
 
@@ -123,7 +123,7 @@ const AdminPanel = () => {
   const resetProgramForm = () => {
     setShowProgramForm(false);
     setEditingId(null);
-    setProgramForm({ title: '', category: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, price_aed: 0, visible: true, order: 0, program_type: 'online', offer_price_usd: 0, offer_price_inr: 0, offer_text: '', is_upcoming: false, start_date: '', enrollment_open: true });
+    setProgramForm({ title: '', category: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, price_aed: 0, visible: true, order: 0, program_type: 'online', offer_price_usd: 0, offer_price_inr: 0, offer_text: '', is_upcoming: false, start_date: '', deadline_date: '', enrollment_open: true });
   };
 
   // ===== SESSIONS =====
@@ -327,6 +327,7 @@ const AdminPanel = () => {
                       </select>
                     </div>
                     <div><Label>Start Date</Label><Input value={programForm.start_date} onChange={e => setProgramForm({...programForm, start_date: e.target.value})} placeholder="e.g., March 15, 2026" /></div>
+                    <div><Label>Deadline Date (for countdown)</Label><Input type="date" value={programForm.deadline_date || ''} onChange={e => setProgramForm({...programForm, deadline_date: e.target.value})} /></div>
                     <div className="flex items-center gap-2">
                       <Switch checked={programForm.is_upcoming} onCheckedChange={v => setProgramForm({...programForm, is_upcoming: v})} />
                       <Label>Show in Upcoming Programs section</Label>
@@ -564,91 +565,207 @@ const AdminPanel = () => {
           {activeTab === 'settings' && siteSettings && (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Site Settings</h2>
-              <div className="bg-white rounded-lg p-6 shadow-sm border space-y-6">
-                {/* Font Settings */}
-                <div>
-                  <h3 className="font-medium text-gray-800 mb-4">Font Settings</h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Heading Font</Label>
-                      <select
-                        data-testid="heading-font-select"
-                        value={siteSettings.heading_font}
-                        onChange={e => setSiteSettings({...siteSettings, heading_font: e.target.value})}
-                        className="w-full border rounded-md px-3 py-2 text-sm"
-                        style={{ fontFamily: siteSettings.heading_font }}
-                      >
-                        {FONT_OPTIONS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
-                      </select>
-                      <p className="text-xs text-gray-400 mt-1" style={{ fontFamily: siteSettings.heading_font }}>Preview: The quick brown fox</p>
+
+              {/* Hero Section Settings */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border mb-6">
+                <h3 className="font-medium text-gray-800 mb-4 text-base">Hero Section</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <Label>Hero Background Video</Label>
+                    <div className="mt-1">
+                      {siteSettings.hero_video_url && (
+                        <div className="mb-3 flex items-center gap-3">
+                          <video src={resolveImageUrl(siteSettings.hero_video_url)} className="w-40 h-24 object-cover rounded border" muted />
+                          <button onClick={() => setSiteSettings({...siteSettings, hero_video_url: ''})} className="text-red-500 text-xs hover:underline">Remove</button>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/mov"
+                        data-testid="hero-video-upload"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          try {
+                            toast({ title: 'Uploading video...', description: 'This may take a moment' });
+                            const res = await axios.post(`${API}/upload/video`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                            setSiteSettings({...siteSettings, hero_video_url: res.data.url});
+                            toast({ title: 'Video uploaded!' });
+                          } catch (err) {
+                            toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+                          }
+                        }}
+                        className="text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-[#D4AF37] file:text-white hover:file:bg-[#b8962e] cursor-pointer"
+                      />
                     </div>
-                    <div>
-                      <Label>Body Font</Label>
-                      <select
-                        data-testid="body-font-select"
-                        value={siteSettings.body_font}
-                        onChange={e => setSiteSettings({...siteSettings, body_font: e.target.value})}
-                        className="w-full border rounded-md px-3 py-2 text-sm"
-                        style={{ fontFamily: siteSettings.body_font }}
-                      >
-                        {FONT_OPTIONS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
-                      </select>
-                      <p className="text-xs text-gray-400 mt-1" style={{ fontFamily: siteSettings.body_font }}>Preview: The quick brown fox jumps over</p>
+                  </div>
+                  <div>
+                    <Label>Hero Title</Label>
+                    <Textarea value={siteSettings.hero_title || ''} onChange={e => setSiteSettings({...siteSettings, hero_title: e.target.value})} rows={2} placeholder="Divine Iris\nHealing" />
+                  </div>
+                  <div>
+                    <Label>Hero Subtitle</Label>
+                    <Input value={siteSettings.hero_subtitle || ''} onChange={e => setSiteSettings({...siteSettings, hero_subtitle: e.target.value})} placeholder="ETERNAL HAPPINESS" />
+                  </div>
+                  <div>
+                    <Label>Hero Subtitle Color</Label>
+                    <div className="flex gap-2 items-center">
+                      <input type="color" value={siteSettings.hero_subtitle_color || '#ffffff'} onChange={e => setSiteSettings({...siteSettings, hero_subtitle_color: e.target.value})} className="w-10 h-10 rounded cursor-pointer border" />
+                      <Input value={siteSettings.hero_subtitle_color || '#ffffff'} onChange={e => setSiteSettings({...siteSettings, hero_subtitle_color: e.target.value})} />
                     </div>
                   </div>
                 </div>
-
-                {/* Color Settings */}
-                <div>
-                  <h3 className="font-medium text-gray-800 mb-4">Color Settings</h3>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <Label>Heading Color</Label>
-                      <div className="flex gap-2 items-center">
-                        <input type="color" value={siteSettings.heading_color} onChange={e => setSiteSettings({...siteSettings, heading_color: e.target.value})} className="w-10 h-10 rounded cursor-pointer border" />
-                        <Input value={siteSettings.heading_color} onChange={e => setSiteSettings({...siteSettings, heading_color: e.target.value})} className="flex-1" />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Body Color</Label>
-                      <div className="flex gap-2 items-center">
-                        <input type="color" value={siteSettings.body_color} onChange={e => setSiteSettings({...siteSettings, body_color: e.target.value})} className="w-10 h-10 rounded cursor-pointer border" />
-                        <Input value={siteSettings.body_color} onChange={e => setSiteSettings({...siteSettings, body_color: e.target.value})} className="flex-1" />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Accent Color</Label>
-                      <div className="flex gap-2 items-center">
-                        <input type="color" value={siteSettings.accent_color} onChange={e => setSiteSettings({...siteSettings, accent_color: e.target.value})} className="w-10 h-10 rounded cursor-pointer border" />
-                        <Input value={siteSettings.accent_color} onChange={e => setSiteSettings({...siteSettings, accent_color: e.target.value})} className="flex-1" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Size Settings */}
-                <div>
-                  <h3 className="font-medium text-gray-800 mb-4">Size Settings</h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Heading Size</Label>
-                      <select value={siteSettings.heading_size} onChange={e => setSiteSettings({...siteSettings, heading_size: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
-                        {SIZE_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <Label>Body Size</Label>
-                      <select value={siteSettings.body_size} onChange={e => setSiteSettings({...siteSettings, body_size: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
-                        {SIZE_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <Button data-testid="save-settings-btn" onClick={saveSiteSettings} className="bg-[#D4AF37] hover:bg-[#b8962e]">
-                  <Save size={14} className="mr-1" /> Save Settings
-                </Button>
               </div>
+
+              {/* Logo Settings */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border mb-6">
+                <h3 className="font-medium text-gray-800 mb-4 text-base">Site Logo</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <Label>Logo Image</Label>
+                    <div className="mt-1">
+                      {siteSettings.logo_url && (
+                        <div className="mb-3 flex items-center gap-3 bg-gray-50 p-3 rounded">
+                          <img src={resolveImageUrl(siteSettings.logo_url)} alt="Current Logo" className="h-16 object-contain" />
+                          <button onClick={() => setSiteSettings({...siteSettings, logo_url: ''})} className="text-red-500 text-xs hover:underline">Remove</button>
+                        </div>
+                      )}
+                      <ImageUploader value={siteSettings.logo_url || ''} onChange={url => setSiteSettings({...siteSettings, logo_url: url})} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Logo Width (px): {siteSettings.logo_width || 96}px</Label>
+                    <input
+                      type="range"
+                      min="40"
+                      max="300"
+                      value={siteSettings.logo_width || 96}
+                      onChange={e => setSiteSettings({...siteSettings, logo_width: parseInt(e.target.value)})}
+                      className="w-full mt-2"
+                      data-testid="logo-width-slider"
+                    />
+                    <div className="flex justify-between text-xs text-gray-400 mt-1">
+                      <span>40px</span>
+                      <span>300px</span>
+                    </div>
+                  </div>
+                  {siteSettings.logo_url && (
+                    <div className="flex items-center justify-center bg-gray-50 rounded p-4">
+                      <img src={resolveImageUrl(siteSettings.logo_url)} alt="Preview" style={{ width: `${siteSettings.logo_width || 96}px` }} className="object-contain" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Global Font & Color Settings */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border mb-6 space-y-6">
+                <h3 className="font-medium text-gray-800 text-base">Global Defaults</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Heading Font</Label>
+                    <select data-testid="heading-font-select" value={siteSettings.heading_font} onChange={e => setSiteSettings({...siteSettings, heading_font: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm" style={{ fontFamily: siteSettings.heading_font }}>
+                      {FONT_OPTIONS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
+                    </select>
+                    <p className="text-xs text-gray-400 mt-1" style={{ fontFamily: siteSettings.heading_font }}>Preview: The quick brown fox</p>
+                  </div>
+                  <div>
+                    <Label>Body Font</Label>
+                    <select data-testid="body-font-select" value={siteSettings.body_font} onChange={e => setSiteSettings({...siteSettings, body_font: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm" style={{ fontFamily: siteSettings.body_font }}>
+                      {FONT_OPTIONS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
+                    </select>
+                    <p className="text-xs text-gray-400 mt-1" style={{ fontFamily: siteSettings.body_font }}>Preview: The quick brown fox jumps over</p>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Heading Color</Label>
+                    <div className="flex gap-2 items-center"><input type="color" value={siteSettings.heading_color} onChange={e => setSiteSettings({...siteSettings, heading_color: e.target.value})} className="w-10 h-10 rounded cursor-pointer border" /><Input value={siteSettings.heading_color} onChange={e => setSiteSettings({...siteSettings, heading_color: e.target.value})} className="flex-1" /></div>
+                  </div>
+                  <div>
+                    <Label>Body Color</Label>
+                    <div className="flex gap-2 items-center"><input type="color" value={siteSettings.body_color} onChange={e => setSiteSettings({...siteSettings, body_color: e.target.value})} className="w-10 h-10 rounded cursor-pointer border" /><Input value={siteSettings.body_color} onChange={e => setSiteSettings({...siteSettings, body_color: e.target.value})} className="flex-1" /></div>
+                  </div>
+                  <div>
+                    <Label>Accent Color</Label>
+                    <div className="flex gap-2 items-center"><input type="color" value={siteSettings.accent_color} onChange={e => setSiteSettings({...siteSettings, accent_color: e.target.value})} className="w-10 h-10 rounded cursor-pointer border" /><Input value={siteSettings.accent_color} onChange={e => setSiteSettings({...siteSettings, accent_color: e.target.value})} className="flex-1" /></div>
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Heading Size</Label>
+                    <select value={siteSettings.heading_size} onChange={e => setSiteSettings({...siteSettings, heading_size: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
+                      {SIZE_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <Label>Body Size</Label>
+                    <select value={siteSettings.body_size} onChange={e => setSiteSettings({...siteSettings, body_size: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
+                      {SIZE_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Per-Section Style Overrides */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border mb-6">
+                <h3 className="font-medium text-gray-800 mb-4 text-base">Per-Section Style Overrides</h3>
+                <p className="text-xs text-gray-500 mb-4">Leave blank to use global defaults. Set a value to override for that section only.</p>
+                {['hero', 'about', 'programs', 'sessions', 'stats', 'testimonials', 'sponsor', 'newsletter', 'footer'].map(section => {
+                  const sectionData = siteSettings.sections?.[section] || {};
+                  const updateSection = (key, val) => {
+                    const sections = { ...(siteSettings.sections || {}) };
+                    sections[section] = { ...(sections[section] || {}), [key]: val };
+                    setSiteSettings({ ...siteSettings, sections });
+                  };
+                  return (
+                    <details key={section} className="mb-3 border rounded-lg">
+                      <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 capitalize">{section} Section</summary>
+                      <div className="px-4 pb-4 pt-2 grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                          <Label className="text-xs">Font</Label>
+                          <select value={sectionData.font_family || ''} onChange={e => updateSection('font_family', e.target.value)} className="w-full border rounded px-2 py-1.5 text-xs">
+                            <option value="">Global default</option>
+                            {FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Size</Label>
+                          <select value={sectionData.font_size || ''} onChange={e => updateSection('font_size', e.target.value)} className="w-full border rounded px-2 py-1.5 text-xs">
+                            <option value="">Default</option>
+                            <option value="12px">12px</option><option value="14px">14px</option><option value="16px">16px</option><option value="18px">18px</option><option value="20px">20px</option><option value="24px">24px</option><option value="28px">28px</option><option value="32px">32px</option><option value="40px">40px</option><option value="48px">48px</option><option value="56px">56px</option><option value="64px">64px</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Color</Label>
+                          <div className="flex gap-1 items-center"><input type="color" value={sectionData.font_color || '#000000'} onChange={e => updateSection('font_color', e.target.value)} className="w-7 h-7 rounded cursor-pointer border" /><input value={sectionData.font_color || ''} onChange={e => updateSection('font_color', e.target.value)} placeholder="#hex" className="flex-1 border rounded px-2 py-1.5 text-xs w-16" /></div>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Style</Label>
+                          <select value={sectionData.font_style || ''} onChange={e => updateSection('font_style', e.target.value)} className="w-full border rounded px-2 py-1.5 text-xs">
+                            <option value="">Normal</option><option value="italic">Italic</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Weight</Label>
+                          <select value={sectionData.font_weight || ''} onChange={e => updateSection('font_weight', e.target.value)} className="w-full border rounded px-2 py-1.5 text-xs">
+                            <option value="">Default</option><option value="300">Light (300)</option><option value="400">Regular (400)</option><option value="500">Medium (500)</option><option value="600">Semi-Bold (600)</option><option value="700">Bold (700)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Bg Color</Label>
+                          <div className="flex gap-1 items-center"><input type="color" value={sectionData.bg_color || '#ffffff'} onChange={e => updateSection('bg_color', e.target.value)} className="w-7 h-7 rounded cursor-pointer border" /><input value={sectionData.bg_color || ''} onChange={e => updateSection('bg_color', e.target.value)} placeholder="#hex" className="flex-1 border rounded px-2 py-1.5 text-xs w-16" /></div>
+                        </div>
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+
+              <Button data-testid="save-settings-btn" onClick={saveSiteSettings} className="bg-[#D4AF37] hover:bg-[#b8962e]">
+                <Save size={14} className="mr-1" /> Save All Settings
+              </Button>
             </div>
           )}
         </main>

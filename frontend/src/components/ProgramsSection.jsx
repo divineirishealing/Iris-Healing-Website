@@ -33,7 +33,7 @@ const ProgramsSection = () => {
           Flagship Programs
         </h2>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {programs.slice(0, 6).map((program) => (
             <div
               key={program.id}
