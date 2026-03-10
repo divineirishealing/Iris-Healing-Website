@@ -5,63 +5,59 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with admin panel a
 
 ## Architecture
 - **Frontend**: React + TailwindCSS + shadcn/ui
-- **Backend**: FastAPI + Motor (async MongoDB)
+- **Backend**: FastAPI + Motor (async MongoDB) + emergentintegrations (Stripe)
 - **Database**: MongoDB
-- **Fonts**: Configurable via admin (default: Playfair Display headings, Lato body)
+- **Payments**: Stripe (test mode) via emergentintegrations library
 
 ## What's Been Implemented
 
 ### Visual Fidelity (COMPLETED)
 - [x] Playfair Display + Lato fonts, golden (#D4AF37) color scheme
-- [x] Hero section, About section, golden menu overlay, footer
-- [x] Image upload/display bug FIXED, Admin logout on refresh FIXED
+- [x] Hero, About, golden menu overlay, footer, floating buttons
+- [x] Image upload/display FIXED, Admin logout on refresh FIXED
 
 ### Enhanced Admin Panel (COMPLETED)
-- [x] Visibility toggle (show/hide) for programs, sessions, testimonials
-- [x] Drag reordering (up/down arrows) for programs, sessions
-- [x] Site Settings: global font, color, size customization (Cinzel, Caveat, etc.)
-- [x] Programs: CRUD + program_type (online/offline/hybrid), offer pricing, offer badge text, is_upcoming toggle, start date
+- [x] Visibility toggle + reorder for programs, sessions, testimonials
+- [x] Site Settings: global font, color, size customization
+- [x] Programs: CRUD + program_type, offer pricing, enrollment_open toggle
 - [x] Sessions: CRUD with 21 sessions from original site
-- [x] Testimonials: 44 items (32 graphic + 12 video) with search indexing
-- [x] Subscribers list, Stats view
+- [x] Testimonials: 44 items (32 graphic + 12 video) with search
+- [x] AED base pricing for all items
 
 ### Services Page - Personal Sessions (COMPLETED)
-- [x] Exact match to original site layout
-- [x] Left sidebar with 21 session names + chevron arrows
-- [x] "Claim your Personal space" header overlay on session image
-- [x] Session title in UPPERCASE, Lato body text
-- [x] Dark rounded "VIEW DETAILS & BOOK" button
-- [x] Active state with gold left border
+- [x] Static "Claim your Personal space" iris header
+- [x] Left sidebar with 21 sessions, right side shows details on click
+- [x] Pricing display with auto-detected currency
+- [x] "VIEW DETAILS & BOOK" button
 
-### Upcoming Programs Section (COMPLETED)
-- [x] Section on homepage above "Shine a Light"
-- [x] Program cards with image, pricing, offer badges (e.g., "20% OFF")
-- [x] Program type badge (Online/In-Person/Hybrid)
-- [x] Start date display, original price + offer price with strikethrough
-- [x] "Know More" + "Enroll Now" buttons
-- [x] Only shows when programs are marked as upcoming in admin
+### Upcoming Programs + Transformations (COMPLETED)
+- [x] Upcoming Programs section on homepage with offer badges, type badges
+- [x] Transformations page with real-time search + tab filtering
 
-### Transformations Page (COMPLETED)
-- [x] 44 testimonials (32 graphic + 12 video)
-- [x] Real-time search bar
-- [x] All/Graphic/Video tab filtering
-- [x] Image lightbox + YouTube video modal
-- [x] Added to footer and menu navigation
+### Stripe Payment Gateway (COMPLETED)
+- [x] **Multi-currency**: AED (base), USD, INR, EUR, GBP
+- [x] **Auto-detection**: Currency detected via IP, defaults to AED
+- [x] **Manual switcher**: Dropdown on checkout page to pick currency
+- [x] **Checkout flow**: Item summary → currency select → order total → Stripe redirect
+- [x] **Stripe Checkout Sessions**: Created via emergentintegrations library
+- [x] **Payment Success/Cancel pages**: With status polling and retry
+- [x] **Enrollment toggle**: Programs can be open/closed for enrollment
+  - Open: "Enroll Now" → checkout page
+  - Closed: "Express Your Interest" → contact page
+- [x] **Transaction records**: Stored in payment_transactions collection
+- [x] **Webhook handler**: /api/webhook/stripe for payment completion
 
 ### Admin Credentials
 - URL: /admin | Username: admin | Password: divineadmin2024
 
 ## Prioritized Backlog
 
-### P0 - High Priority
-- [ ] Complete Stripe payment flow (end-to-end with test key)
-- [ ] Multi-currency detection on frontend
-
 ### P1 - Medium Priority
-- [ ] "Express Your Interest" → contact page with pre-filled program name
-- [ ] Media page with video content
+- [ ] Admin Transactions tab to view all payments
+- [ ] "Express Your Interest" pre-fill program name on contact page
+- [ ] Media page with video content from original site
 
 ### P2 - Low Priority
 - [ ] Mobile responsiveness audit
 - [ ] SEO meta tags
-- [ ] Admin transactions view
+- [ ] Email notifications for admin on new payments/subscriptions
