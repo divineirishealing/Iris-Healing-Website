@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { useToast } from '../../hooks/use-toast';
 import { Pencil, Trash2, Plus, LogOut } from 'lucide-react';
+import ImageUploader from './ImageUploader';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -240,11 +241,10 @@ const AdminPanel = ({ onLogout }) => {
                       required
                       rows={4}
                     />
-                    <Input
-                      placeholder="Image URL (e.g., https://images.unsplash.com/...)"
+                    <ImageUploader
+                      label="Program Image"
                       value={programForm.image}
-                      onChange={(e) => setProgramForm({ ...programForm, image: e.target.value })}
-                      required
+                      onChange={(url) => setProgramForm({ ...programForm, image: url })}
                     />
                     <div className="flex gap-2">
                       <Button type="submit" className="flex-1">
@@ -318,11 +318,10 @@ const AdminPanel = ({ onLogout }) => {
                       required
                       rows={4}
                     />
-                    <Input
-                      placeholder="Image URL"
+                    <ImageUploader
+                      label="Session Image"
                       value={sessionForm.image}
-                      onChange={(e) => setSessionForm({ ...sessionForm, image: e.target.value })}
-                      required
+                      onChange={(url) => setSessionForm({ ...sessionForm, image: url })}
                     />
                     <div className="flex gap-2">
                       <Button type="submit" className="flex-1">

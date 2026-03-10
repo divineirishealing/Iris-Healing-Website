@@ -8,10 +8,14 @@ import logging
 from pathlib import Path
 
 # Import routes
-from routes import programs, sessions, testimonials, stats, newsletter
+from routes import programs, sessions, testimonials, stats, newsletter, upload
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Create uploads directory
+UPLOAD_DIR = ROOT_DIR / 'uploads'
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -35,6 +39,10 @@ app.include_router(sessions.router)
 app.include_router(testimonials.router)
 app.include_router(stats.router)
 app.include_router(newsletter.router)
+app.include_router(upload.router)
+
+# Mount uploads directory for static file serving
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 # Include the main router in the app
 app.include_router(api_router)
