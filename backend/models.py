@@ -17,6 +17,12 @@ class Program(BaseModel):
     duration: str = "90 days"
     visible: bool = True
     order: int = 0
+    program_type: str = "online"  # online / offline / hybrid
+    offer_price_usd: float = 0.0
+    offer_price_inr: float = 0.0
+    offer_text: str = ""
+    is_upcoming: bool = False
+    start_date: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ProgramCreate(BaseModel):
@@ -32,6 +38,12 @@ class ProgramCreate(BaseModel):
     duration: Optional[str] = "90 days"
     visible: Optional[bool] = True
     order: Optional[int] = 0
+    program_type: Optional[str] = "online"
+    offer_price_usd: Optional[float] = 0.0
+    offer_price_inr: Optional[float] = 0.0
+    offer_text: Optional[str] = ""
+    is_upcoming: Optional[bool] = False
+    start_date: Optional[str] = ""
 
 class Session(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

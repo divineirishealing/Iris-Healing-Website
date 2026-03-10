@@ -49,7 +49,7 @@ const AdminPanel = () => {
   const [showTestimonialForm, setShowTestimonialForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  const [programForm, setProgramForm] = useState({ title: '', category: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, visible: true, order: 0 });
+  const [programForm, setProgramForm] = useState({ title: '', category: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, visible: true, order: 0, program_type: 'online', offer_price_usd: 0, offer_price_inr: 0, offer_text: '', is_upcoming: false, start_date: '' });
   const [sessionForm, setSessionForm] = useState({ title: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, visible: true, order: 0 });
   const [testimonialForm, setTestimonialForm] = useState({ type: 'graphic', name: '', text: '', image: '', videoId: '', program_id: '', visible: true });
 
@@ -95,7 +95,7 @@ const AdminPanel = () => {
 
   const editProgram = (p) => {
     setEditingId(p.id);
-    setProgramForm({ title: p.title, category: p.category || '', description: p.description, image: p.image, price_usd: p.price_usd || 0, price_inr: p.price_inr || 0, price_eur: p.price_eur || 0, price_gbp: p.price_gbp || 0, visible: p.visible !== false, order: p.order || 0 });
+    setProgramForm({ title: p.title, category: p.category || '', description: p.description, image: p.image, price_usd: p.price_usd || 0, price_inr: p.price_inr || 0, price_eur: p.price_eur || 0, price_gbp: p.price_gbp || 0, visible: p.visible !== false, order: p.order || 0, program_type: p.program_type || 'online', offer_price_usd: p.offer_price_usd || 0, offer_price_inr: p.offer_price_inr || 0, offer_text: p.offer_text || '', is_upcoming: p.is_upcoming || false, start_date: p.start_date || '' });
     setShowProgramForm(true);
   };
 
@@ -123,7 +123,7 @@ const AdminPanel = () => {
   const resetProgramForm = () => {
     setShowProgramForm(false);
     setEditingId(null);
-    setProgramForm({ title: '', category: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, visible: true, order: 0 });
+    setProgramForm({ title: '', category: '', description: '', image: '', price_usd: 0, price_inr: 0, price_eur: 0, price_gbp: 0, visible: true, order: 0, program_type: 'online', offer_price_usd: 0, offer_price_inr: 0, offer_text: '', is_upcoming: false, start_date: '' });
   };
 
   // ===== SESSIONS =====
@@ -314,6 +314,22 @@ const AdminPanel = () => {
                     <div><Label>Price INR</Label><Input type="number" value={programForm.price_inr} onChange={e => setProgramForm({...programForm, price_inr: parseFloat(e.target.value) || 0})} /></div>
                     <div><Label>Price EUR</Label><Input type="number" value={programForm.price_eur} onChange={e => setProgramForm({...programForm, price_eur: parseFloat(e.target.value) || 0})} /></div>
                     <div><Label>Price GBP</Label><Input type="number" value={programForm.price_gbp} onChange={e => setProgramForm({...programForm, price_gbp: parseFloat(e.target.value) || 0})} /></div>
+                    <div><Label>Offer Price USD</Label><Input type="number" value={programForm.offer_price_usd} onChange={e => setProgramForm({...programForm, offer_price_usd: parseFloat(e.target.value) || 0})} placeholder="0 = no offer" /></div>
+                    <div><Label>Offer Price INR</Label><Input type="number" value={programForm.offer_price_inr} onChange={e => setProgramForm({...programForm, offer_price_inr: parseFloat(e.target.value) || 0})} placeholder="0 = no offer" /></div>
+                    <div className="md:col-span-2"><Label>Offer Badge Text</Label><Input value={programForm.offer_text} onChange={e => setProgramForm({...programForm, offer_text: e.target.value})} placeholder="e.g., 20% OFF, Early Bird, Limited Offer" /></div>
+                    <div>
+                      <Label>Program Type</Label>
+                      <select value={programForm.program_type} onChange={e => setProgramForm({...programForm, program_type: e.target.value})} className="w-full border rounded-md px-3 py-2 text-sm">
+                        <option value="online">Online</option>
+                        <option value="offline">In-Person (Offline)</option>
+                        <option value="hybrid">Hybrid (Online + In-Person)</option>
+                      </select>
+                    </div>
+                    <div><Label>Start Date</Label><Input value={programForm.start_date} onChange={e => setProgramForm({...programForm, start_date: e.target.value})} placeholder="e.g., March 15, 2026" /></div>
+                    <div className="flex items-center gap-2">
+                      <Switch checked={programForm.is_upcoming} onCheckedChange={v => setProgramForm({...programForm, is_upcoming: v})} />
+                      <Label>Show in Upcoming Programs section</Label>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Switch checked={programForm.visible} onCheckedChange={v => setProgramForm({...programForm, visible: v})} />
                       <Label>Visible on website</Label>
@@ -337,7 +353,11 @@ const AdminPanel = () => {
                     {p.image && <img src={resolveImageUrl(p.image)} alt={p.title} className="w-14 h-14 object-cover rounded" />}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm text-gray-900 truncate">{p.title}</p>
-                      <p className="text-xs text-gray-500">{p.category}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-gray-500">{p.category}</p>
+                        {p.is_upcoming && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">Upcoming</span>}
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded capitalize">{p.program_type || 'online'}</span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <button data-testid={`program-toggle-${p.id}`} onClick={() => toggleProgramVisibility(p)} className="p-1.5 rounded hover:bg-gray-100" title={p.visible ? 'Hide' : 'Show'}>

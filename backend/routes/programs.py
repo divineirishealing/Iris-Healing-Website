@@ -16,10 +16,12 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 @router.get("", response_model=List[Program])
-async def get_programs(visible_only: Optional[bool] = None):
+async def get_programs(visible_only: Optional[bool] = None, upcoming_only: Optional[bool] = None):
     query = {}
     if visible_only:
         query["visible"] = True
+    if upcoming_only:
+        query["is_upcoming"] = True
     programs = await db.programs.find(query).sort("order", 1).to_list(100)
     return [Program(**program) for program in programs]
 

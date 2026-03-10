@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import Header from '../components/Header';
 import HeroSection from '../components/HeroSection';
 import AboutSection from '../components/AboutSection';
+import UpcomingProgramsSection from '../components/UpcomingProgramsSection';
 import SponsorSection from '../components/SponsorSection';
 import ProgramsSection from '../components/ProgramsSection';
 import SessionsSection from '../components/SessionsSection';
@@ -33,6 +34,7 @@ function HomePage() {
       <Header />
       <HeroSection />
       <AboutSection />
+      <UpcomingProgramsSection />
       <SponsorSection />
       <ProgramsSection />
       <SessionsSection />

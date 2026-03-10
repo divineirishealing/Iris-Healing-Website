@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { ChevronRight } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButtons from '../components/FloatingButtons';
@@ -34,70 +35,129 @@ function ServicesPage() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Hero */}
+      {/* Hero Banner */}
       <section
-        className="min-h-[35vh] flex flex-col items-center justify-center text-center px-4 pt-24"
+        className="min-h-[30vh] flex flex-col items-center justify-center text-center px-4 pt-24"
         style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #1a1a2e 75%, #0d1b2a 100%)' }}
       >
         <h1
           data-testid="services-title"
-          className="text-4xl md:text-6xl mb-4 tracking-wider"
+          className="text-4xl md:text-5xl mb-3 tracking-wider"
           style={{ color: '#D4AF37', fontWeight: 400 }}
         >
           Book Personal Session
         </h1>
       </section>
 
-      {/* Sidebar Layout - matches original site exactly */}
-      <div className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto grid md:grid-cols-[300px_1fr] gap-8">
-            {/* Left Sidebar - Session List */}
-            <div data-testid="services-sidebar" className="bg-gray-50 rounded-lg p-4 h-fit md:sticky md:top-24">
-              <h3 className="text-sm font-semibold text-gray-500 tracking-wider mb-4 px-3">PERSONAL SESSIONS</h3>
-              <div className="space-y-0.5 max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-                {sessions.map((session) => (
-                  <button
-                    key={session.id}
-                    data-testid={`service-tab-${session.id}`}
-                    onClick={() => setSelectedSession(session)}
-                    className={`w-full text-left px-4 py-3 rounded-md transition-all text-sm leading-snug ${
+      {/* Main Layout - exact match to original */}
+      <div className="bg-white">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row">
+          {/* Left Sidebar */}
+          <aside
+            data-testid="services-sidebar"
+            className="w-full md:w-[380px] md:min-w-[380px] border-r border-gray-200 bg-white"
+          >
+            <div className="md:sticky md:top-16 md:max-h-screen md:overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+              {sessions.map((session, idx) => (
+                <button
+                  key={session.id}
+                  data-testid={`service-tab-${session.id}`}
+                  onClick={() => setSelectedSession(session)}
+                  className={`w-full flex items-center justify-between px-6 py-4 text-left transition-all border-b border-gray-100 group ${
+                    selectedSession?.id === session.id
+                      ? 'bg-white border-l-[3px] border-l-[#D4AF37]'
+                      : 'hover:bg-gray-50 border-l-[3px] border-l-transparent'
+                  }`}
+                >
+                  <span
+                    className={`text-sm ${
                       selectedSession?.id === session.id
-                        ? 'bg-[#D4AF37] text-white font-medium shadow-md'
-                        : 'hover:bg-gray-100 text-gray-700'
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-700'
                     }`}
+                    style={{ fontFamily: "'Lato', sans-serif" }}
                   >
                     {session.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Right - Session Detail */}
-            {selectedSession && (
-              <div data-testid="service-detail" className="bg-white">
-                <div className="mb-8 rounded-lg overflow-hidden shadow-lg">
-                  <img
-                    src={resolveImageUrl(selectedSession.image)}
-                    alt={selectedSession.title}
-                    className="w-full h-72 md:h-96 object-cover"
-                    onError={(e) => {
-                      e.target.src = 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=800&h=400&fit=crop';
-                    }}
+                  </span>
+                  <ChevronRight
+                    size={16}
+                    className={`flex-shrink-0 ml-3 transition-colors ${
+                      selectedSession?.id === session.id
+                        ? 'text-[#D4AF37]'
+                        : 'text-gray-400 group-hover:text-gray-600'
+                    }`}
                   />
-                </div>
-                <h2 className="text-3xl md:text-4xl text-gray-900 mb-6">{selectedSession.title}</h2>
-                <p className="text-gray-600 leading-relaxed text-base mb-8 whitespace-pre-line">{selectedSession.description}</p>
-                <button
-                  onClick={() => navigate(`/session/${selectedSession.id}`)}
-                  data-testid="view-details-book-btn"
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full text-sm transition-all duration-300 tracking-wider"
-                >
-                  VIEW DETAILS & BOOK
                 </button>
+              ))}
+            </div>
+          </aside>
+
+          {/* Right Content */}
+          {selectedSession && (
+            <main data-testid="service-detail" className="flex-1 px-6 md:px-12 py-8 md:py-12">
+              {/* "Claim your Personal space" header with iris image */}
+              <div className="relative mb-8 rounded-lg overflow-hidden">
+                <img
+                  src={resolveImageUrl(selectedSession.image)}
+                  alt={selectedSession.title}
+                  className="w-full h-[320px] md:h-[400px] object-cover"
+                  onError={(e) => {
+                    e.target.src = 'https://divineirishealing.com/assets/images/personal_sessions/1772606496_19c12e333a98b4e53349.png';
+                  }}
+                />
+                <div className="absolute top-6 left-6 md:top-10 md:left-10">
+                  <h2
+                    className="text-3xl md:text-5xl leading-tight"
+                    style={{
+                      fontFamily: "'Playfair Display', Georgia, serif",
+                      fontWeight: 700,
+                      color: '#1a1a1a',
+                    }}
+                  >
+                    Claim your
+                    <br />
+                    <em className="font-normal">Personal space</em>
+                  </h2>
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Session title - UPPERCASE */}
+              <h3
+                data-testid="service-detail-title"
+                className="text-xl md:text-2xl tracking-[0.08em] mb-6"
+                style={{
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  fontWeight: 400,
+                  color: '#1a1a1a',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {selectedSession.title}
+              </h3>
+
+              {/* Description */}
+              <p
+                className="leading-relaxed mb-10 max-w-[700px]"
+                style={{
+                  fontFamily: "'Lato', sans-serif",
+                  fontSize: '15px',
+                  color: '#4a4a4a',
+                  lineHeight: '1.8',
+                }}
+              >
+                {selectedSession.description}
+              </p>
+
+              {/* CTA Button - dark, rounded */}
+              <button
+                onClick={() => navigate(`/session/${selectedSession.id}`)}
+                data-testid="view-details-book-btn"
+                className="inline-block bg-[#1a1a1a] hover:bg-[#333] text-white px-10 py-4 rounded-full text-xs tracking-[0.2em] transition-all duration-300 uppercase font-medium"
+              >
+                View Details & Book
+              </button>
+            </main>
+          )}
         </div>
       </div>
 
