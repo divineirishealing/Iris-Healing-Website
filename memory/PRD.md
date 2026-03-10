@@ -11,23 +11,30 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with admin panel, 
 
 ## What's Been Implemented
 
-### Multi-Step Enrollment System (COMPLETED - Mar 10, 2026)
-- [x] **Step 1 - Profile**: Name, Relationship, Age, Gender, Country dropdown with IP detection
-- [x] **Step 2 - Attendance Mode**: Online/Offline selection with mandatory offline location modal
-- [x] **Step 3 - Contact Verification**:
-  - Email: Regex + MX record lookup + disposable domain rejection (no OTP)
-  - Phone: 6-digit OTP verification (MOCK — ready for Firebase swap)
-- [x] **Step 4 - Billing**: Server-side pricing with security checks → Stripe checkout
+### Multi-Person Enrollment System v2 (COMPLETED - Feb 2026)
+- [x] **3-Step Flow**: Participants → Verify → Pay (reduced from 4 steps)
+- [x] **Per-Participant Fields**: name, relationship, age, gender, country, attendance_mode (online/offline), notify toggle, optional email/phone
+- [x] **Booker Section**: Name, email, country — verified separately
+- [x] **Attendance Mode Per Person**: Each participant independently selects Online (Zoom) or Remote Healing (offline)
+- [x] **Notification Preferences**: Toggle per participant — if enabled, collects their email and phone for session info
+- [x] **Dynamic Participant Management**: Add/remove participant forms dynamically
+- [x] **Payment Summary**: Shows each participant with attendance mode badge (Zoom/Remote) and per-person pricing
+- [x] **Total Pricing**: Correctly multiplies per-person price × participant count
 
 ### Anti-Fraud India-Gating (COMPLETED - Mar 10, 2026)
 - [x] **VPN/Proxy Detection**: ip-api.com detects VPN, Tor, proxy, hosting IPs
 - [x] **Strict India Validation**: ALL must pass for INR pricing:
   - IP must be Indian (no VPN/proxy)
-  - Claimed country must be India
+  - Booker country must be India
   - Phone must be +91 prefix
 - [x] **BIN Validation**: Card BIN checked against Indian bank prefixes + binlist.net API
 - [x] **PPP Tiers**: Fixed AED base, INR multiplier (0.14x)
 - [x] **If ANY check fails → AED base price** with detailed fraud warning
+
+### Phone OTP Verification (COMPLETED - MOCKED)
+- [x] 6-digit OTP generated server-side
+- [x] Mock OTP displayed on frontend for testing
+- [x] OTP expiry (5 min), max attempts (5)
 
 ### Stats Section (COMPLETED - Mar 10, 2026)
 - [x] Exact replica of original: black background, gold particles.js canvas animation
@@ -53,9 +60,7 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with admin panel, 
 - URL: /admin | Username: admin | Password: divineadmin2024
 
 ## Key API Endpoints
-- `POST /api/enrollment/start` — Create enrollment with IP detection
-- `PUT /api/enrollment/{id}/attendance` — Set online/offline
-- `POST /api/enrollment/{id}/validate-email` — MX record check
+- `POST /api/enrollment/start` — Create enrollment with booker info + participants (per-person country, attendance_mode, notify, email, phone)
 - `POST /api/enrollment/{id}/send-otp` — Send phone OTP (MOCK)
 - `POST /api/enrollment/{id}/verify-otp` — Verify OTP
 - `GET /api/enrollment/{id}/pricing` — Get pricing with security checks
