@@ -259,6 +259,7 @@ const AdminPanel = ({ onLogout }) => {
                               
                               if (file.size > 5 * 1024 * 1024) {
                                 toast({ title: 'File too large', description: 'Max 5MB', variant: 'destructive' });
+                                e.target.value = '';
                                 return;
                               }
                               
@@ -266,17 +267,28 @@ const AdminPanel = ({ onLogout }) => {
                               formData.append('file', file);
                               
                               try {
-                                const response = await axios.post(`${API}/upload/image`, formData);
+                                toast({ title: 'Uploading...', description: 'Please wait' });
+                                const response = await axios.post(`${API}/upload/image`, formData, {
+                                  headers: { 'Content-Type': 'multipart/form-data' }
+                                });
                                 const imageUrl = `${BACKEND_URL}${response.data.url}`;
                                 setProgramForm({ ...programForm, image: imageUrl });
-                                toast({ title: 'Image uploaded!' });
+                                toast({ title: 'Success!', description: 'Image uploaded successfully' });
+                                console.log('Image uploaded:', imageUrl);
                               } catch (error) {
-                                toast({ title: 'Upload failed', variant: 'destructive' });
+                                console.error('Upload error:', error);
+                                toast({ 
+                                  title: 'Upload failed', 
+                                  description: error.response?.data?.detail || 'Please try again',
+                                  variant: 'destructive' 
+                                });
                               }
+                              e.target.value = '';
                             }}
-                            className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
+                            className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 cursor-pointer"
                           />
                         </label>
+                        <p className="text-xs text-gray-500 mt-1">Max 5MB - JPG, PNG, GIF, WebP</p>
                       </div>
                       
                       <div className="text-center text-sm text-gray-500">OR</div>
@@ -290,8 +302,25 @@ const AdminPanel = ({ onLogout }) => {
                       
                       {/* Image preview */}
                       {programForm.image && (
-                        <div className="mt-2">
-                          <img src={programForm.image} alt="Preview" className="w-full h-32 object-cover rounded border" />
+                        <div className="mt-2 relative">
+                          <p className="text-xs text-gray-600 mb-1">Current Image:</p>
+                          <img 
+                            src={programForm.image} 
+                            alt="Preview" 
+                            className="w-full h-48 object-cover rounded border-2 border-gray-300"
+                            onError={(e) => {
+                              console.error('Image failed to load:', programForm.image);
+                              e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23ddd"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="18" fill="%23999"%3EImage Not Found%3C/text%3E%3C/svg%3E';
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setProgramForm({ ...programForm, image: '' })}
+                            className="absolute top-8 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs hover:bg-red-600"
+                          >
+                            Remove
+                          </button>
+                          <p className="text-xs text-gray-500 mt-1 break-all">{programForm.image}</p>
                         </div>
                       )}
                     </div>
@@ -386,6 +415,7 @@ const AdminPanel = ({ onLogout }) => {
                               
                               if (file.size > 5 * 1024 * 1024) {
                                 toast({ title: 'File too large', description: 'Max 5MB', variant: 'destructive' });
+                                e.target.value = '';
                                 return;
                               }
                               
@@ -393,17 +423,28 @@ const AdminPanel = ({ onLogout }) => {
                               formData.append('file', file);
                               
                               try {
-                                const response = await axios.post(`${API}/upload/image`, formData);
+                                toast({ title: 'Uploading...', description: 'Please wait' });
+                                const response = await axios.post(`${API}/upload/image`, formData, {
+                                  headers: { 'Content-Type': 'multipart/form-data' }
+                                });
                                 const imageUrl = `${BACKEND_URL}${response.data.url}`;
                                 setSessionForm({ ...sessionForm, image: imageUrl });
-                                toast({ title: 'Image uploaded!' });
+                                toast({ title: 'Success!', description: 'Image uploaded successfully' });
+                                console.log('Image uploaded:', imageUrl);
                               } catch (error) {
-                                toast({ title: 'Upload failed', variant: 'destructive' });
+                                console.error('Upload error:', error);
+                                toast({ 
+                                  title: 'Upload failed', 
+                                  description: error.response?.data?.detail || 'Please try again',
+                                  variant: 'destructive' 
+                                });
                               }
+                              e.target.value = '';
                             }}
-                            className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
+                            className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 cursor-pointer"
                           />
                         </label>
+                        <p className="text-xs text-gray-500 mt-1">Max 5MB - JPG, PNG, GIF, WebP</p>
                       </div>
                       
                       <div className="text-center text-sm text-gray-500">OR</div>
@@ -417,8 +458,25 @@ const AdminPanel = ({ onLogout }) => {
                       
                       {/* Image preview */}
                       {sessionForm.image && (
-                        <div className="mt-2">
-                          <img src={sessionForm.image} alt="Preview" className="w-full h-32 object-cover rounded border" />
+                        <div className="mt-2 relative">
+                          <p className="text-xs text-gray-600 mb-1">Current Image:</p>
+                          <img 
+                            src={sessionForm.image} 
+                            alt="Preview" 
+                            className="w-full h-48 object-cover rounded border-2 border-gray-300"
+                            onError={(e) => {
+                              console.error('Image failed to load:', sessionForm.image);
+                              e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23ddd"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="18" fill="%23999"%3EImage Not Found%3C/text%3E%3C/svg%3E';
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setSessionForm({ ...sessionForm, image: '' })}
+                            className="absolute top-8 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs hover:bg-red-600"
+                          >
+                            Remove
+                          </button>
+                          <p className="text-xs text-gray-500 mt-1 break-all">{sessionForm.image}</p>
                         </div>
                       )}
                     </div>
