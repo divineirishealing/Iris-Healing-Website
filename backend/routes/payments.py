@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional
 import os
@@ -7,10 +7,12 @@ from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime, timezone
 import uuid
+import logging
 
 from emergentintegrations.payments.stripe.checkout import (
     StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse, CheckoutStatusResponse
 )
+from routes.emails import send_email, enrollment_confirmation_email, participant_notification_email
 
 ROOT_DIR = Path(__file__).parent.parent
 load_dotenv(ROOT_DIR / '.env')
@@ -23,10 +25,66 @@ db = client[os.environ['DB_NAME']]
 
 STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY')
 
-# Currency multipliers for multi-currency (AED as base)
+logger = logging.getLogger(__name__)
+
 CURRENCY_SYMBOLS = {
-    'aed': 'AED', 'usd': '$', 'inr': '₹', 'eur': '€', 'gbp': '£'
+    'aed': 'AED ', 'usd': '$', 'inr': '₹', 'eur': '€', 'gbp': '£'
 }
+
+
+async def send_enrollment_emails(session_id: str):
+    """Send confirmation email to booker + notification emails to participants who opted in."""
+    tx = await db.payment_transactions.find_one({"stripe_session_id": session_id}, {"_id": 0})
+    if not tx:
+        return
+
+    enrollment_id = tx.get("enrollment_id")
+    if not enrollment_id:
+        return
+
+    enrollment = await db.enrollments.find_one({"id": enrollment_id}, {"_id": 0})
+    if not enrollment:
+        return
+
+    booker_name = enrollment.get("booker_name", "")
+    booker_email = enrollment.get("booker_email", "")
+    phone = enrollment.get("phone", "")
+    participants = enrollment.get("participants", [])
+    item_title = tx.get("item_title", "")
+    total = tx.get("amount", 0)
+    currency = tx.get("currency", "aed")
+    symbol = CURRENCY_SYMBOLS.get(currency, currency.upper() + " ")
+
+    # 1. Send booker confirmation
+    if booker_email:
+        html = enrollment_confirmation_email(
+            booker_name=booker_name,
+            item_title=item_title,
+            participants=participants,
+            total=total,
+            currency_symbol=symbol,
+            attendance_modes=[p.get("attendance_mode", "online") for p in participants],
+            booker_email=booker_email,
+            phone=phone,
+        )
+        await send_email(booker_email, f"Enrollment Confirmed — {item_title}", html)
+
+    # 2. Send participant notifications (only those who opted in)
+    for p in participants:
+        if p.get("notify") and p.get("email"):
+            p_html = participant_notification_email(
+                participant_name=p["name"],
+                item_title=item_title,
+                attendance_mode=p.get("attendance_mode", "online"),
+                booker_name=booker_name,
+            )
+            await send_email(p["email"], f"You've Been Enrolled — {item_title}", p_html)
+
+    # Mark emails as sent
+    await db.payment_transactions.update_one(
+        {"stripe_session_id": session_id},
+        {"$set": {"emails_sent": True, "updated_at": datetime.now(timezone.utc)}}
+    )
 
 
 class CreateCheckoutRequest(BaseModel):
@@ -117,7 +175,7 @@ async def create_checkout(req: CreateCheckoutRequest, http_request: Request):
 
 
 @router.get("/status/{session_id}")
-async def check_payment_status(session_id: str, http_request: Request):
+async def check_payment_status(session_id: str, http_request: Request, background_tasks: BackgroundTasks):
     # Check if already processed
     tx = await db.payment_transactions.find_one({"stripe_session_id": session_id})
     if not tx:
@@ -150,6 +208,10 @@ async def check_payment_status(session_id: str, http_request: Request):
                 "updated_at": datetime.now(timezone.utc),
             }}
         )
+
+        # Send confirmation emails when payment is newly confirmed
+        if new_status == "paid" and not tx.get("emails_sent"):
+            background_tasks.add_task(send_enrollment_emails, session_id)
 
         return {
             "status": status.status,
