@@ -1,76 +1,67 @@
 # Divine Iris Healing - Product Requirements Document
 
 ## Original Problem Statement
-Build a pixel-perfect clone of https://divineirishealing.com/ - a wellness/healing website. Requirements include:
-- Exact replica of design, layout, colors, fonts, images, animations
-- Admin panel for non-technical user to manage content (programs, sessions, testimonials)
-- Image upload functionality
-- Stripe payment gateway (test mode) with multi-currency support
+Build a pixel-perfect clone of https://divineirishealing.com/ with admin panel and Stripe payments.
 
 ## Architecture
 - **Frontend**: React + TailwindCSS + shadcn/ui
 - **Backend**: FastAPI + Motor (async MongoDB)
 - **Database**: MongoDB
 - **Fonts**: Configurable via admin (default: Playfair Display headings, Lato body)
-- **Color scheme**: Configurable via admin (default: Gold #D4AF37)
 
 ## What's Been Implemented
 
-### Phase 1 & 2 - Visual Fidelity & Bug Fixes (COMPLETED - Feb 2026)
-- [x] Playfair Display + Lato fonts integrated globally
-- [x] Hero section, About section, golden menu overlay, footer with programs
-- [x] Image upload/display bug FIXED
-- [x] Admin logout on refresh FIXED
+### Visual Fidelity (COMPLETED)
+- [x] Playfair Display + Lato fonts, golden (#D4AF37) color scheme
+- [x] Hero section, About section, golden menu overlay, footer
+- [x] Image upload/display bug FIXED, Admin logout on refresh FIXED
 
-### Phase 3 - Enhanced Admin Panel (COMPLETED - Feb 2026)
-- [x] **Visibility Toggle**: Show/hide programs, sessions, testimonials on public site
-- [x] **Reordering**: Up/down arrow controls to rearrange display order
-- [x] **Site Settings**: Global font, color, and size customization (Cinzel, Caveat, Playfair Display, Montserrat, etc.)
-- [x] Programs CRUD with image upload, pricing, category
-- [x] Sessions CRUD with image upload, pricing
-- [x] Testimonials management (graphic images + video YouTube) with text for search indexing
+### Enhanced Admin Panel (COMPLETED)
+- [x] Visibility toggle (show/hide) for programs, sessions, testimonials
+- [x] Drag reordering (up/down arrows) for programs, sessions
+- [x] Site Settings: global font, color, size customization (Cinzel, Caveat, etc.)
+- [x] Programs: CRUD + program_type (online/offline/hybrid), offer pricing, offer badge text, is_upcoming toggle, start date
+- [x] Sessions: CRUD with 21 sessions from original site
+- [x] Testimonials: 44 items (32 graphic + 12 video) with search indexing
 - [x] Subscribers list, Stats view
 
-### Phase 4 - Personal Sessions (COMPLETED - Feb 2026)
-- [x] **21 sessions** from original site seeded with real images/descriptions
-- [x] Services page with sidebar layout (session list left, detail right)
-- [x] Clicking session shows detail with image, description, "View Details & Book" button
+### Services Page - Personal Sessions (COMPLETED)
+- [x] Exact match to original site layout
+- [x] Left sidebar with 21 session names + chevron arrows
+- [x] "Claim your Personal space" header overlay on session image
+- [x] Session title in UPPERCASE, Lato body text
+- [x] Dark rounded "VIEW DETAILS & BOOK" button
+- [x] Active state with gold left border
 
-### Phase 5 - Transformations Page (COMPLETED - Feb 2026)
-- [x] 44 testimonials (32 graphic + 12 video) from original site
-- [x] **Real-time search** across testimonial text and names
-- [x] **Tab filtering**: All / Graphic / Video
-- [x] Image lightbox for graphic testimonials
-- [x] YouTube video modal for video testimonials
-- [x] Added to footer and navigation menu
+### Upcoming Programs Section (COMPLETED)
+- [x] Section on homepage above "Shine a Light"
+- [x] Program cards with image, pricing, offer badges (e.g., "20% OFF")
+- [x] Program type badge (Online/In-Person/Hybrid)
+- [x] Start date display, original price + offer price with strikethrough
+- [x] "Know More" + "Enroll Now" buttons
+- [x] Only shows when programs are marked as upcoming in admin
 
-### Backend APIs
-- Programs CRUD + visibility toggle + reorder: /api/programs
-- Sessions CRUD + visibility toggle + reorder: /api/sessions
-- Testimonials CRUD + search + type filter + visibility: /api/testimonials
-- Site Settings: GET/PUT /api/settings
-- Stats, Newsletter, Image Upload/Serving, Payments, Currency
+### Transformations Page (COMPLETED)
+- [x] 44 testimonials (32 graphic + 12 video)
+- [x] Real-time search bar
+- [x] All/Graphic/Video tab filtering
+- [x] Image lightbox + YouTube video modal
+- [x] Added to footer and menu navigation
 
 ### Admin Credentials
-- URL: /admin
-- Username: admin
-- Password: divineadmin2024
+- URL: /admin | Username: admin | Password: divineadmin2024
 
 ## Prioritized Backlog
 
 ### P0 - High Priority
 - [ ] Complete Stripe payment flow (end-to-end with test key)
-- [ ] Multi-currency detection on frontend (based on user's country/IP)
+- [ ] Multi-currency detection on frontend
 
 ### P1 - Medium Priority
 - [ ] "Express Your Interest" → contact page with pre-filled program name
-- [ ] Media page with video content from original site
+- [ ] Media page with video content
 
 ### P2 - Low Priority
-- [ ] Full responsiveness audit on mobile
+- [ ] Mobile responsiveness audit
 - [ ] SEO meta tags
-- [ ] Transactions view in admin panel
-
-### P3 - Future
-- [ ] Email notifications for admin
-- [ ] Analytics dashboard
+- [ ] Admin transactions view
