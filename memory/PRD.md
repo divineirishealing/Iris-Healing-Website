@@ -12,13 +12,21 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with a comprehensi
 
 ## What's Been Implemented
 
+### Program UI/UX Simplification Refactor (COMPLETED - Mar 2026)
+- [x] **Interactive Duration Selector**: 1 Month / 3 Months / Annual buttons on all program cards (Upcoming + Flagship sections)
+- [x] **Contact for Pricing**: Annual tier with price=0 shows "Contact for Pricing" button instead of price
+- [x] **Excel-like Pricing Table**: Admin panel has spreadsheet-style table for managing Duration/AED/INR/USD/Offer columns
+- [x] **All 6 Programs Flagship**: Every program has 3 duration tiers seeded with proper pricing
+- [x] **Merged Mode Field**: Session mode and program type merged into single "Mode" dropdown (Online / Remote)
+- [x] **Simplified Admin Hints**: Helper text "Leave Annual at 0 = Contact for Pricing"
+
 ### Programs Enhancement (COMPLETED - Mar 2026)
 - [x] **Session Mode**: Each program has Online (Zoom) / Remote Healing / Both
 - [x] **Start & End Dates**: Displayed on program detail and upcoming sections
 - [x] **Flagship Programs**: Toggle to enable custom duration tiers
-- [x] **Custom Duration Tiers**: Admin defines any number of tiers (label, duration value/unit, per-tier pricing in AED/INR/USD)
+- [x] **Custom Duration Tiers**: Admin defines tiers (label, per-tier pricing in AED/INR/USD)
 - [x] **Duration Tier Cards**: Program detail page shows tier cards with Select buttons
-- [x] **Upcoming Programs**: Shows session mode badges, dates, available durations
+- [x] **Upcoming Programs**: Shows session mode badges, dates, countdown timers, duration selectors
 
 ### Promotions & Coupons System (COMPLETED - Mar 2026)
 - [x] **3 Promo Types**: Coupon Code, Early Bird, Limited Time Offer
@@ -26,26 +34,24 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with a comprehensi
 - [x] **Multi-Currency Fixed Discounts**: AED (base), INR, USD
 - [x] **Applicability**: All programs or specific programs (checkboxes)
 - [x] **Usage Limits**: Max uses, used count tracking
-- [x] **Date Control**: Start date, expiry date
-- [x] **Validation API**: POST /api/promotions/validate - checks code, expiry, usage, program applicability
-- [x] **Admin CRUD**: Full create/edit/delete in Promotions tab
+- [x] **Validation API**: POST /api/promotions/validate
 
 ### Comprehensive Admin Panel (12 Tabs)
-1. Hero Banner — Video, title/subtitle styling, live preview
-2. About — Logo, photo, bio, name, title, button
-3. Programs — CRUD, session mode, dates, flagship toggle, duration tiers, pricing
-4. Sessions — CRUD, visibility, reorder, pricing
-5. Testimonials — CRUD, graphic/video types
-6. Stats — Full CRUD
-7. Newsletter — Heading, description, button, footer text
-8. Header & Footer — Social links, contact info, copyright
-9. Enrollments — View all enrollments + payments
-10. Promotions — Create/edit/delete coupons, early bird, limited time offers
-11. Subscribers — Email list
-12. Global Styles — Fonts, colors, sizes, per-section overrides
+1. Hero Banner
+2. About
+3. Programs (with Excel-like pricing)
+4. Sessions
+5. Testimonials
+6. Stats
+7. Newsletter
+8. Header & Footer
+9. Enrollments
+10. Promotions
+11. Subscribers
+12. Global Styles
 
 ### Multi-Person Enrollment v2
-- [x] 3-step flow: Participants → Verify → Pay
+- [x] 3-step flow: Participants -> Verify -> Pay
 - [x] Per-participant: country, attendance mode, notification toggle
 - [x] Anti-fraud India-gating (VPN, IP, phone, BIN checks)
 
@@ -54,17 +60,17 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with a comprehensi
 - [x] Pending: Domain verification for custom sender
 
 ## Key API Endpoints
-- `GET/POST/PUT/DELETE /api/promotions` — Promotions CRUD
-- `POST /api/promotions/validate` — Validate coupon code
-- `GET /api/promotions/active` — Active promotions (with program filter)
-- `GET/PUT /api/settings` — All site settings
-- `GET/POST/PUT/DELETE /api/programs` — Programs with duration_tiers, session_mode, is_flagship
-- `POST /api/enrollment/start` — Multi-person enrollment
-- `POST /api/enrollment/{id}/checkout` — Stripe checkout
+- `GET/POST/PUT/DELETE /api/programs` - Programs CRUD with duration_tiers
+- `GET/POST/PUT/DELETE /api/promotions` - Promotions CRUD
+- `POST /api/promotions/validate` - Validate coupon code
+- `GET/PUT /api/settings` - Site settings
+- `POST /api/enrollment/start` - Multi-person enrollment
+- `POST /api/enrollment/{id}/checkout` - Stripe checkout
+- `GET /api/payments/status/{session_id}` - Payment verification
 
 ## Prioritized Backlog
 
-### P0 - High Priority (Phase 2)
+### P0 - High Priority
 - [ ] User login/registration system
 - [ ] Annual Subscriber dashboard (enrolled programs, upcoming sessions, availed vs remaining, payment history, next due, reminders, progress tracking)
 - [ ] Annual Subscriber special discount tier
@@ -84,6 +90,6 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with a comprehensi
 - URL: /admin | Username: admin | Password: divineadmin2024
 
 ## Test Data
-- AWRP (Program 1): Flagship, 3 tiers (1mo/3mo/1yr), session_mode: both
-- NY2026: 15% coupon, all programs, 100 uses
-- EARLY50: Fixed AED 50/INR 1000/USD 15, early bird
+- All 6 programs: Flagship with 3 tiers (1 Month/3 Months/Annual)
+- Annual tier: price=0 -> triggers "Contact for Pricing"
+- Phone OTP: MOCKED (test code displayed on screen)
