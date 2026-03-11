@@ -1,7 +1,7 @@
 # Divine Iris Healing - Product Requirements Document
 
 ## Original Problem Statement
-Build a pixel-perfect clone of https://divineirishealing.com/ with a comprehensive admin panel, robust enrollment system with anti-fraud India-gating, custom duration tiers, and a promotions/coupon system.
+Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive admin panel, robust enrollment system with anti-fraud India-gating, custom duration tiers, promotions/coupon system, and geo-based currency detection.
 
 ## Architecture
 - **Frontend**: React + TailwindCSS + shadcn/ui
@@ -12,60 +12,57 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with a comprehensi
 
 ## What's Been Implemented
 
-### Program UI/UX Simplification Refactor (COMPLETED - Mar 2026)
-- [x] **Interactive Duration Selector**: 1 Month / 3 Months / Annual buttons on all program cards (Upcoming + Flagship sections)
-- [x] **Contact for Pricing**: Annual tier with price=0 shows "Contact for Pricing" button instead of price
-- [x] **Excel-like Pricing Table**: Admin panel has spreadsheet-style table for managing Duration/AED/INR/USD/Offer columns
-- [x] **All 6 Programs Flagship**: Every program has 3 duration tiers seeded with proper pricing
-- [x] **Merged Mode Field**: Session mode and program type merged into single "Mode" dropdown (Online / Remote)
-- [x] **Simplified Admin Hints**: Helper text "Leave Annual at 0 = Contact for Pricing"
+### Geo-Currency Auto-Detection (COMPLETED - Mar 11, 2026)
+- [x] **IP-based country detection** via ip-api.com
+- [x] **Single currency display** - Users see only their local currency (UAE→AED, India→INR, US→USD)
+- [x] **Non-primary currencies** converted from AED using admin-managed fixed exchange rates
+- [x] **CurrencyContext** provides getPrice/getOfferPrice/formatPrice across all pages
+- [x] **Exchange Rates admin tab** with 38+ currencies, editable table with Save/Reload
+- [x] **No more currency switcher** - auto-detected, fraud-proof
 
-### Programs Enhancement (COMPLETED - Mar 2026)
-- [x] **Session Mode**: Each program has Online (Zoom) / Remote Healing / Both
-- [x] **Start & End Dates**: Displayed on program detail and upcoming sections
-- [x] **Flagship Programs**: Toggle to enable custom duration tiers
-- [x] **Custom Duration Tiers**: Admin defines tiers (label, per-tier pricing in AED/INR/USD)
-- [x] **Duration Tier Cards**: Program detail page shows tier cards with Select buttons
-- [x] **Upcoming Programs**: Shows session mode badges, dates, countdown timers, duration selectors
+### Revamped Enrollment Flow (COMPLETED - Mar 11, 2026)
+- [x] **4-step flow**: Participants → Review Cart + Promo → Billing + OTP → Pay
+- [x] **Promo code input** at Review step with real-time validation
+- [x] **Cart summary** showing program, tier, price per person, participants, subtotal, discounts, total
+- [x] **Booker & billing last** - participants first, then billing details
+- [x] **Tier passed via URL** (?tier=0/1/2) from homepage cards
 
-### Promotions & Coupons System (COMPLETED - Mar 2026)
-- [x] **3 Promo Types**: Coupon Code, Early Bird, Limited Time Offer
-- [x] **2 Discount Types**: Percentage (%) or Fixed Amount
-- [x] **Multi-Currency Fixed Discounts**: AED (base), INR, USD
-- [x] **Applicability**: All programs or specific programs (checkboxes)
-- [x] **Usage Limits**: Max uses, used count tracking
-- [x] **Validation API**: POST /api/promotions/validate
+### Homepage Program Cards Fix (COMPLETED - Mar 11, 2026)
+- [x] **Explicit "Enroll Now" button** on every priced card
+- [x] **Duration selector** works without navigating away
+- [x] **Annual tier** shows "Contact for Pricing" → navigates to quote form
+- [x] **Single currency** pricing on all cards
 
-### Comprehensive Admin Panel (12 Tabs)
-1. Hero Banner
-2. About
-3. Programs (with Excel-like pricing)
-4. Sessions
-5. Testimonials
-6. Stats
-7. Newsletter
-8. Header & Footer
-9. Enrollments
-10. Promotions
-11. Subscribers
-12. Global Styles
+### Request Quote System (COMPLETED - Mar 11, 2026)
+- [x] **Contact page** accepts ?program=X&title=Y&tier=Z params
+- [x] **Pre-fills message** with program/tier context
+- [x] **Backend endpoint** POST /api/enrollment/quote-request saves to DB
+- [x] **"Request a Quote" heading** when accessed from Annual tier
 
-### Multi-Person Enrollment v2
-- [x] 3-step flow: Participants -> Verify -> Pay
-- [x] Per-participant: country, attendance mode, notification toggle
-- [x] Anti-fraud India-gating (VPN, IP, phone, BIN checks)
+### Program UI/UX Simplification (COMPLETED - Mar 11, 2026)
+- [x] Interactive duration selectors on all program cards
+- [x] Excel-like pricing table in admin
+- [x] All 6 programs as flagship with 3 tiers
+- [x] "Contact for Pricing" for Annual tier (price=0)
 
-### Email Notifications (Resend)
-- [x] Booker confirmation + participant notifications
-- [x] Pending: Domain verification for custom sender
+### Previous Features (All COMPLETED)
+- Multi-Person Enrollment with anti-fraud India-gating
+- Promotions & Coupons (percentage/fixed, multi-currency)
+- 12-tab Admin Panel (Hero, About, Programs, Sessions, Testimonials, Stats, Newsletter, Header/Footer, Enrollments, Promotions, Exchange Rates, Subscribers, Global Styles)
+- Stripe payment integration
+- Resend email integration (pending domain verification)
 
 ## Key API Endpoints
+- `GET /api/currency/detect` - IP-based currency detection
+- `GET/PUT /api/currency/exchange-rates` - Admin exchange rates
 - `GET/POST/PUT/DELETE /api/programs` - Programs CRUD with duration_tiers
 - `GET/POST/PUT/DELETE /api/promotions` - Promotions CRUD
 - `POST /api/promotions/validate` - Validate coupon code
-- `GET/PUT /api/settings` - Site settings
-- `POST /api/enrollment/start` - Multi-person enrollment
+- `POST /api/enrollment/start` - Create enrollment
+- `POST /api/enrollment/{id}/send-otp` - Send OTP
+- `POST /api/enrollment/{id}/verify-otp` - Verify OTP
 - `POST /api/enrollment/{id}/checkout` - Stripe checkout
+- `POST /api/enrollment/quote-request` - Save quote request
 - `GET /api/payments/status/{session_id}` - Payment verification
 
 ## Prioritized Backlog
@@ -74,22 +71,24 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with a comprehensi
 - [ ] User login/registration system
 - [ ] Annual Subscriber dashboard (enrolled programs, upcoming sessions, availed vs remaining, payment history, next due, reminders, progress tracking)
 - [ ] Annual Subscriber special discount tier
-- [ ] Apply coupon codes in enrollment checkout flow
 
 ### P1 - Medium Priority
 - [ ] Verify Resend domain for live email
-- [ ] Replace mock phone OTP with real provider
+- [ ] Replace mock phone OTP with real provider (Twilio/Firebase)
 - [ ] Mobile responsiveness audit
+- [ ] PPP enforcement: Block INR pricing if billing country ≠ India
 
 ### P2 - Low Priority
 - [ ] SEO meta tags
 - [ ] Admin analytics dashboard
 - [ ] Bulk export enrollments (CSV)
+- [ ] Quote request management in admin panel
 
 ## Admin Credentials
 - URL: /admin | Username: admin | Password: divineadmin2024
 
 ## Test Data
-- All 6 programs: Flagship with 3 tiers (1 Month/3 Months/Annual)
-- Annual tier: price=0 -> triggers "Contact for Pricing"
+- 6 programs: All flagship with 3 tiers (1 Month/3 Months/Annual)
+- Annual tier: price=0 → triggers "Contact for Pricing"
+- Promo codes: EARLY50 (fixed AED50/INR1000/USD15), NY2026 (15% off)
 - Phone OTP: MOCKED (test code displayed on screen)
