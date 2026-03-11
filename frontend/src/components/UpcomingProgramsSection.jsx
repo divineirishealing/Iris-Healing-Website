@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { resolveImageUrl } from '../lib/imageUtils';
 import { useCurrency } from '../context/CurrencyContext';
-import { Monitor, Calendar, Clock, AlertTriangle, Wifi } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../hooks/use-toast';
+import { Monitor, Calendar, Clock, AlertTriangle, Wifi, ShoppingCart, Check } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -55,7 +57,10 @@ const CountdownTimer = ({ deadline }) => {
 const UpcomingCard = ({ program }) => {
   const navigate = useNavigate();
   const { getPrice, getOfferPrice, symbol } = useCurrency();
+  const { addItem, items } = useCart();
+  const { toast } = useToast();
   const [selectedTier, setSelectedTier] = useState(0);
+  const [justAdded, setJustAdded] = useState(false);
   const tiers = program.duration_tiers || [];
   const hasTiers = program.is_flagship && tiers.length > 0;
   const tier = hasTiers ? tiers[selectedTier] : null;
@@ -64,6 +69,18 @@ const UpcomingCard = ({ program }) => {
   const price = getPrice(program, hasTiers ? selectedTier : null);
   const offerPrice = getOfferPrice(program, hasTiers ? selectedTier : null);
   const showContact = isAnnual && price === 0;
+  const inCart = items.some(i => i.programId === program.id && i.tierIndex === selectedTier);
+
+  const handleAddToCart = () => {
+    const added = addItem(program, selectedTier);
+    if (added) {
+      setJustAdded(true);
+      toast({ title: `${program.title} added to cart`, description: `${tier?.label || 'Standard'} plan` });
+      setTimeout(() => setJustAdded(false), 2000);
+    } else {
+      toast({ title: 'Already in cart', variant: 'destructive' });
+    }
+  };
 
   const deadline = program.deadline_date || program.start_date;
   const expired = (() => {
@@ -171,11 +188,20 @@ const UpcomingCard = ({ program }) => {
                   Know More
                 </button>
                 {!expired && price > 0 ? (
-                  <button onClick={() => navigate(`/enroll/program/${program.id}?tier=${selectedTier}`)}
-                    data-testid={`upcoming-enroll-${program.id}`}
-                    className="flex-1 bg-[#D4AF37] hover:bg-[#b8962e] text-white py-2.5 rounded-full text-xs tracking-wider transition-all duration-300 uppercase font-medium">
-                    Enroll Now
-                  </button>
+                  <>
+                    <button onClick={handleAddToCart} data-testid={`upcoming-add-cart-${program.id}`}
+                      disabled={inCart || justAdded}
+                      className={`flex items-center justify-center gap-1 px-3 py-2.5 rounded-full text-xs tracking-wider transition-all uppercase font-medium border ${
+                        inCart || justAdded ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37] hover:text-[#D4AF37]'
+                      }`}>
+                      {inCart || justAdded ? <Check size={12} /> : <ShoppingCart size={12} />}
+                    </button>
+                    <button onClick={() => navigate(`/enroll/program/${program.id}?tier=${selectedTier}`)}
+                      data-testid={`upcoming-enroll-${program.id}`}
+                      className="flex-1 bg-[#D4AF37] hover:bg-[#b8962e] text-white py-2.5 rounded-full text-xs tracking-wider transition-all duration-300 uppercase font-medium">
+                      Enroll Now
+                    </button>
+                  </>
                 ) : expired ? (
                   <button disabled data-testid={`upcoming-enroll-disabled-${program.id}`}
                     className="flex-1 bg-gray-300 text-gray-500 py-2.5 rounded-full text-xs tracking-wider uppercase font-medium cursor-not-allowed">

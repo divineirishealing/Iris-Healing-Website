@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Facebook, Instagram, Youtube, Linkedin, ChevronDown } from 'lucide-react';
+import { Menu, X, Facebook, Instagram, Youtube, Linkedin, ChevronDown, ShoppingCart } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -9,6 +10,7 @@ const API = `${BACKEND_URL}/api`;
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { itemCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProgramsOpen, setIsProgramsOpen] = useState(false);
   const [settings, setSettings] = useState(null);
@@ -45,11 +47,22 @@ const Header = () => {
             {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
             <span className="text-xs font-medium tracking-[0.2em]">MENU</span>
           </button>
-          <div className="hidden md:flex items-center gap-5">
-            <a href={social.facebook} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-[#D4AF37] transition-colors"><Facebook size={18} /></a>
-            <a href={social.instagram} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-[#D4AF37] transition-colors"><Instagram size={18} /></a>
-            <a href={social.youtube} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-[#D4AF37] transition-colors"><Youtube size={18} /></a>
-            <a href={social.linkedin} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-[#D4AF37] transition-colors"><Linkedin size={18} /></a>
+          <div className="flex items-center gap-5">
+            {/* Cart Icon */}
+            <button data-testid="cart-icon-btn" onClick={() => navigate('/cart')} className="relative text-white/80 hover:text-[#D4AF37] transition-colors">
+              <ShoppingCart size={20} />
+              {itemCount > 0 && (
+                <span data-testid="cart-count-badge" className="absolute -top-2 -right-2 bg-[#D4AF37] text-white text-[9px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full min-w-[18px] px-1">
+                  {itemCount}
+                </span>
+              )}
+            </button>
+            <div className="hidden md:flex items-center gap-5">
+              <a href={social.facebook} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-[#D4AF37] transition-colors"><Facebook size={18} /></a>
+              <a href={social.instagram} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-[#D4AF37] transition-colors"><Instagram size={18} /></a>
+              <a href={social.youtube} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-[#D4AF37] transition-colors"><Youtube size={18} /></a>
+              <a href={social.linkedin} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-[#D4AF37] transition-colors"><Linkedin size={18} /></a>
+            </div>
           </div>
         </div>
       </header>
@@ -61,6 +74,12 @@ const Header = () => {
             <X size={22} /><span className="text-xs font-medium tracking-[0.2em]">CLOSE</span>
           </button>
           <div className="absolute top-6 right-6 flex items-center gap-5">
+            <button data-testid="cart-icon-menu" onClick={() => { setIsMenuOpen(false); navigate('/cart'); }} className="relative text-white/80 hover:text-white transition-colors">
+              <ShoppingCart size={20} />
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-white text-[#D4AF37] text-[9px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full min-w-[18px] px-1">{itemCount}</span>
+              )}
+            </button>
             <a href={social.facebook} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-white transition-colors"><Facebook size={18} /></a>
             <a href={social.instagram} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-white transition-colors"><Instagram size={18} /></a>
             <a href={social.youtube} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-white transition-colors"><Youtube size={18} /></a>

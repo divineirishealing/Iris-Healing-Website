@@ -3,14 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { resolveImageUrl } from '../lib/imageUtils';
 import { useCurrency } from '../context/CurrencyContext';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../hooks/use-toast';
+import { ShoppingCart, Check } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const ProgramCard = ({ program }) => {
   const navigate = useNavigate();
-  const { getPrice, getOfferPrice, formatPrice, symbol } = useCurrency();
+  const { getPrice, getOfferPrice, symbol } = useCurrency();
+  const { addItem, items } = useCart();
+  const { toast } = useToast();
   const [selectedTier, setSelectedTier] = useState(0);
+  const [justAdded, setJustAdded] = useState(false);
   const tiers = program.duration_tiers || [];
   const hasTiers = program.is_flagship && tiers.length > 0;
   const tier = hasTiers ? tiers[selectedTier] : null;
@@ -23,6 +29,18 @@ const ProgramCard = ({ program }) => {
   const price = getPrice(program, hasTiers ? selectedTier : null);
   const offerPrice = getOfferPrice(program, hasTiers ? selectedTier : null);
   const showContact = isAnnual && price === 0;
+  const inCart = items.some(i => i.programId === program.id && i.tierIndex === selectedTier);
+
+  const handleAddToCart = () => {
+    const added = addItem(program, selectedTier);
+    if (added) {
+      setJustAdded(true);
+      toast({ title: `${program.title} added to cart`, description: `${tier?.label || 'Standard'} plan` });
+      setTimeout(() => setJustAdded(false), 2000);
+    } else {
+      toast({ title: 'Already in cart', description: 'This program + tier is already in your cart', variant: 'destructive' });
+    }
+  };
 
   return (
     <div data-testid={`program-card-${program.id}`}
@@ -85,16 +103,21 @@ const ProgramCard = ({ program }) => {
               )}
             </div>
             <div className="flex gap-2">
-              <button onClick={() => navigate(`/program/${program.id}`)} data-testid={`know-more-${program.id}`}
-                className="flex-1 bg-[#1a1a1a] hover:bg-[#333] text-white py-2 rounded-full text-[10px] tracking-wider transition-all uppercase font-medium">
-                Know More
-              </button>
               {price > 0 && (
-                <button onClick={() => navigate(`/enroll/program/${program.id}?tier=${selectedTier}`)} data-testid={`enroll-btn-${program.id}`}
-                  className="flex-1 bg-[#D4AF37] hover:bg-[#b8962e] text-white py-2 rounded-full text-[10px] tracking-wider transition-all uppercase font-medium">
-                  Enroll Now
+                <button onClick={handleAddToCart} data-testid={`add-to-cart-${program.id}`}
+                  disabled={inCart || justAdded}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-full text-[10px] tracking-wider transition-all uppercase font-medium border ${
+                    inCart || justAdded
+                      ? 'bg-green-50 text-green-600 border-green-200'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-[#D4AF37] hover:text-[#D4AF37]'
+                  }`}>
+                  {inCart || justAdded ? <><Check size={12} /> In Cart</> : <><ShoppingCart size={12} /> Cart</>}
                 </button>
               )}
+              <button onClick={() => navigate(`/enroll/program/${program.id}?tier=${selectedTier}`)} data-testid={`enroll-btn-${program.id}`}
+                className="flex-1 bg-[#D4AF37] hover:bg-[#b8962e] text-white py-2 rounded-full text-[10px] tracking-wider transition-all uppercase font-medium">
+                Enroll Now
+              </button>
             </div>
           </div>
         )}

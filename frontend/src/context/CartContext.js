@@ -1,0 +1,75 @@
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+
+const CartContext = createContext(null);
+export const useCart = () => useContext(CartContext);
+
+const STORAGE_KEY = 'divine_iris_cart';
+
+const loadCart = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+};
+
+const saveCart = (items) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+};
+
+export const CartProvider = ({ children }) => {
+  const [items, setItems] = useState(loadCart);
+
+  useEffect(() => { saveCart(items); }, [items]);
+
+  const addItem = useCallback((program, tierIndex) => {
+    const tiers = program.duration_tiers || [];
+    const tier = tiers[tierIndex] || null;
+    const exists = items.find(i => i.programId === program.id && i.tierIndex === tierIndex);
+    if (exists) return false;
+
+    const newItem = {
+      id: `${program.id}-${tierIndex}-${Date.now()}`,
+      programId: program.id,
+      programTitle: program.title,
+      programImage: program.image,
+      programCategory: program.category,
+      sessionMode: program.session_mode,
+      tierIndex,
+      tierLabel: tier?.label || 'Standard',
+      isFlagship: program.is_flagship,
+      durationTiers: tiers,
+      participants: [{
+        name: '', relationship: 'Myself', age: '', gender: '',
+        country: 'AE', attendance_mode: program.session_mode === 'remote' ? 'offline' : 'online',
+        notify: false, email: '', phone: '',
+      }],
+    };
+    setItems(prev => [...prev, newItem]);
+    return true;
+  }, [items]);
+
+  const removeItem = useCallback((itemId) => {
+    setItems(prev => prev.filter(i => i.id !== itemId));
+  }, []);
+
+  const updateItemParticipants = useCallback((itemId, participants) => {
+    setItems(prev => prev.map(i => i.id === itemId ? { ...i, participants } : i));
+  }, []);
+
+  const clearCart = useCallback(() => {
+    setItems([]);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  const itemCount = items.length;
+  const totalParticipants = items.reduce((sum, i) => sum + i.participants.length, 0);
+
+  return (
+    <CartContext.Provider value={{
+      items, itemCount, totalParticipants,
+      addItem, removeItem, updateItemParticipants, clearCart,
+    }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
