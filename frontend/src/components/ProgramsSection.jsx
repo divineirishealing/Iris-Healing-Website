@@ -96,9 +96,9 @@ const ProgramCard = ({ program }) => {
           </div>
         ) : program.enrollment_open === false ? (
           <div className="mt-auto">
-            <button onClick={() => navigate(`/contact?program=${program.id}&title=${encodeURIComponent(program.title)}`)} data-testid={`interest-btn-${program.id}`}
+            <button onClick={() => navigate(`/program/${program.id}`)} data-testid={`know-more-btn-${program.id}`}
               className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white text-xs py-2.5 rounded-full transition-all tracking-wider uppercase font-medium shadow-sm">
-              Express Your Interest
+              Know More
             </button>
           </div>
         ) : (

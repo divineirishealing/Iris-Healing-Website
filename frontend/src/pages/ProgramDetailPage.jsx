@@ -273,7 +273,7 @@ function ProgramDetailPage() {
                 <button data-testid="enroll-btn" onClick={() => navigate(`/enroll/program/${program.id}`)}
                   className="text-white px-10 py-3 text-xs tracking-[0.2em] uppercase transition-colors hover:opacity-90" style={{ background: GOLD }}>Enroll Now</button>
               ) : (
-                <button data-testid="express-interest-btn" onClick={() => navigate('/contact')}
+                <button data-testid="express-interest-btn" onClick={() => navigate(`/contact?program=${program.id}&title=${encodeURIComponent(program.title)}`)}
                   className="text-white px-10 py-3 text-xs tracking-[0.2em] uppercase transition-colors hover:opacity-90" style={{ background: GOLD }}>Express Your Interest</button>
               )}
             </div>
