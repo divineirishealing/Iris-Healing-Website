@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useToast } from '../../hooks/use-toast';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
@@ -32,6 +33,7 @@ const API = `${BACKEND_URL}/api`;
 
 const AdminPanel = () => {
   const { toast } = useToast();
+  const { refreshSettings } = useSiteSettings();
   const [activeTab, setActiveTab] = useState('hero');
 
   const [programs, setPrograms] = useState([]);
@@ -143,6 +145,7 @@ const AdminPanel = () => {
     try {
       await axios.put(`${API}/settings`, siteSettings);
       toast({ title: 'Settings saved!' });
+      refreshSettings();
     } catch (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); }
   };
 
