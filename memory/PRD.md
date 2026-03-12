@@ -17,6 +17,14 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive
 - [x] **Duration tier pricing** flows correctly through enrollment → OTP → Stripe checkout
 - [x] **Multi-currency support** — Stripe receives correct amount in detected currency (USD/AED/INR)
 
+### Per-Program Mode Toggles (COMPLETED - Mar 12, 2026)
+- [x] **3 mode toggles per program**: Online (via Zoom), Offline (Remote, no in-person), In Person (default OFF, future)
+- [x] **Admin Panel**: 3 styled checkboxes with descriptions replace old mode dropdown; badges in program list
+- [x] **Homepage**: Cards show only enabled mode badges (blue=Online, purple=Offline, green=In Person). Disclaimer when In Person is OFF
+- [x] **Enrollment Page**: Only enabled modes appear as attendance options with descriptions (e.g., "via Zoom", "Remote, no in-person")
+- [x] **Cart Page**: Same conditional mode buttons from CartContext data
+- [x] **Backend**: enable_online, enable_offline, enable_in_person fields on Program model
+
 ### Discounts Frontend Display Fix (COMPLETED - Mar 12, 2026)
 - [x] **Cart Page** — Shows Combo Discount (green line) when 2+ programs, Group Discount when 3+ participants
 - [x] **Cart Checkout Page** — Full discount breakdown (group, combo, loyalty, promo) in order summary with reduced total
