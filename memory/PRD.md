@@ -108,6 +108,14 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive
 | Privacy | `/privacy` |
 | Admin | `/admin` |
 
+### Sessions Admin Font Controls & Calendar (Mar 12, 2026)
+- [x] Inline font controls (color, family, size, bold, italic) for Title and Description — always visible, not hidden
+- [x] Interactive calendar in admin for toggling available dates — click to toggle, visual feedback
+- [x] Quick-fill buttons: "Fill 30 Days (Mon-Fri)" and "Fill 60 Days" + "Clear All"
+- [x] Min 7 days advance booking enforced on all calendars (admin, homepage, detail page)
+- [x] Sat/Sun auto-disabled with red visual indicators on all calendars
+- [x] Date count and time slot count shown in session list rows
+
 ### Sessions Section Redesign (Mar 12, 2026)
 - [x] Iris purple gradient background (vibrant, inviting design)
 - [x] Session list on left with mode badges (Online/Offline/Both) and duration
