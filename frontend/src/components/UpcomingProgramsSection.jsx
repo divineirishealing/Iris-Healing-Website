@@ -240,7 +240,6 @@ const UpcomingProgramsSection = ({ sectionConfig }) => {
     <section id="upcoming" data-testid="upcoming-programs-section" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
-          <p className="text-[#D4AF37] text-xs tracking-[0.25em] uppercase mb-3">Upcoming</p>
           <h2 className="text-3xl md:text-4xl text-gray-900" style={sectionConfig?.title_style ? { ...(sectionConfig.title_style.font_family && { fontFamily: sectionConfig.title_style.font_family }), ...(sectionConfig.title_style.font_size && { fontSize: sectionConfig.title_style.font_size }), ...(sectionConfig.title_style.font_color && { color: sectionConfig.title_style.font_color }), ...(sectionConfig.title_style.font_weight && { fontWeight: sectionConfig.title_style.font_weight }), ...(sectionConfig.title_style.font_style && { fontStyle: sectionConfig.title_style.font_style }) } : {}}>{sectionConfig?.title || 'Upcoming Programs'}</h2>
           {!programs.some(p => p.enable_in_person) && (
             <p className="text-xs text-gray-400 mt-3">All sessions are conducted online via Zoom or through remote distance healing — no in-person sessions at this time.</p>
