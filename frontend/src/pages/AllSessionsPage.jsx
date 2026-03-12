@@ -7,12 +7,18 @@ import Footer from '../components/Footer';
 import FloatingButtons from '../components/FloatingButtons';
 import { useCurrency } from '../context/CurrencyContext';
 import { renderMarkdown } from '../lib/renderMarkdown';
+import { useSiteSettings } from '../context/SiteSettingsContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 function AllSessionsPage() {
   const navigate = useNavigate();
+  const { settings } = useSiteSettings();
+
+  useEffect(() => {
+    if (settings && settings.sessions_page_visible === false) navigate('/', { replace: true });
+  }, [settings, navigate]);
   const { getPrice, formatPrice } = useCurrency();
   const [sessions, setSessions] = useState([]);
 

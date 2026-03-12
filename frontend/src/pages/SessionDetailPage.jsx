@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import FloatingButtons from '../components/FloatingButtons';
 import { useCurrency } from '../context/CurrencyContext';
 import { renderMarkdown } from '../lib/renderMarkdown';
+import { useSiteSettings } from '../context/SiteSettingsContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -96,9 +97,14 @@ function SessionDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getPrice, formatPrice } = useCurrency();
+  const { settings } = useSiteSettings();
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
+
+  useEffect(() => {
+    if (settings && settings.sessions_page_visible === false) navigate('/', { replace: true });
+  }, [settings, navigate]);
 
   useEffect(() => { loadSession(); }, [id]);
 

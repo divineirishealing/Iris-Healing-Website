@@ -121,7 +121,7 @@ const Header = () => {
               {label:'HOME',path:'/'},
               {label:'ABOUT',path:'/about'},
               {label:'SERVICES',path:'/services'},
-              {label:'UPCOMING SESSIONS',path:'/sessions'},
+              ...(settings?.sessions_page_visible !== false ? [{label:'UPCOMING SESSIONS',path:'/sessions'}] : []),
               {label:'MEDIA',path:'/media'},
               {label:'TRANSFORMATIONS',path:'/transformations'},
               ...(settings?.blog_page_visible ? [{label:'BLOG',path:'/blog'}] : []),

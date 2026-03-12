@@ -314,6 +314,7 @@ class SiteSettings(BaseModel):
     page_heroes: Optional[Dict] = None
     media_page_visible: bool = False
     blog_page_visible: bool = False
+    sessions_page_visible: bool = True
     # Sponsor section content & styles
     sponsor_home: Optional[Dict] = None
     sponsor_page: Optional[Dict] = None
@@ -425,6 +426,7 @@ class SiteSettingsUpdate(BaseModel):
     page_heroes: Optional[Dict] = None
     media_page_visible: Optional[bool] = None
     blog_page_visible: Optional[bool] = None
+    sessions_page_visible: Optional[bool] = None
     sponsor_home: Optional[Dict] = None
     sponsor_page: Optional[Dict] = None
     homepage_sections: Optional[list] = None
