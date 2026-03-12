@@ -108,6 +108,19 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive
 | Privacy | `/privacy` |
 | Admin | `/admin` |
 
+### Sessions Section Redesign (Mar 12, 2026)
+- [x] Iris purple gradient background (vibrant, inviting design)
+- [x] Session list on left with mode badges (Online/Offline/Both) and duration
+- [x] Click session → detail panel: title, description, mode, pricing, calendar, testimonial, Book button
+- [x] Interactive mini calendar with available dates highlighting
+- [x] Testimonial snippet (2-5 lines) per session, rendered with markdown
+- [x] Session mode: online / offline / both with admin radio controls
+- [x] Time slots management in admin (add/remove)
+- [x] Font controls for session title & description in admin
+- [x] Removed images from sessions (no longer required)
+- [x] Session Detail Page: purple gradient hero, calendar, time slots, book button
+- [x] All Sessions Page: purple gradient, cards without images, mode badges
+
 ### Homepage UI/UX Refinements (Mar 12, 2026)
 - [x] Reduced vertical spacing between all homepage sections (py-20 → py-12)
 - [x] Enhanced Custom Sections: image upload, body text with markdown, body font controls
