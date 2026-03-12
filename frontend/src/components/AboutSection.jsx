@@ -34,7 +34,7 @@ const AboutSection = ({ sectionConfig }) => {
   const aboutImage = s.about_image ? resolveUrl(s.about_image) : '';
 
   return (
-    <section id="about" data-testid="about-section" className="py-20 bg-white">
+    <section id="about" data-testid="about-section" className="py-12 bg-white">
       <div className={CONTAINER}>
         {logoUrl && (
           <div className="flex items-center justify-center mb-12">

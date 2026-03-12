@@ -33,7 +33,7 @@ const SessionsSection = ({ sectionConfig }) => {
   };
 
   return (
-    <section id="sessions" data-testid="sessions-section" className="py-20 bg-white">
+    <section id="sessions" data-testid="sessions-section" className="py-12 bg-white">
       <div className={CONTAINER}>
         {/* Section Title */}
         <div className="text-center mb-12">

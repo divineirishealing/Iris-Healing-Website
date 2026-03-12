@@ -50,7 +50,7 @@ const TestimonialsSection = ({ sectionConfig }) => {
   if (testimonials.length === 0) return null;
 
   return (
-    <section id="media" data-testid="testimonials-section" className="py-20 bg-white">
+    <section id="media" data-testid="testimonials-section" className="py-12 bg-white">
       <div className={CONTAINER}>
         <h2 className="text-center mb-8" style={applySectionStyle(sectionConfig?.title_style, { ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2rem)' })}>
           {sectionConfig?.title || 'Testimonials'}

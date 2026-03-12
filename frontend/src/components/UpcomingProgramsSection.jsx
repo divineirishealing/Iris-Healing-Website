@@ -237,7 +237,7 @@ const UpcomingProgramsSection = ({ sectionConfig }) => {
   if (programs.length === 0) return null;
 
   return (
-    <section id="upcoming" data-testid="upcoming-programs-section" className="py-20 bg-white">
+    <section id="upcoming" data-testid="upcoming-programs-section" className="py-12 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-4xl text-gray-900" style={sectionConfig?.title_style ? { ...(sectionConfig.title_style.font_family && { fontFamily: sectionConfig.title_style.font_family }), ...(sectionConfig.title_style.font_size && { fontSize: sectionConfig.title_style.font_size }), ...(sectionConfig.title_style.font_color && { color: sectionConfig.title_style.font_color }), ...(sectionConfig.title_style.font_weight && { fontWeight: sectionConfig.title_style.font_weight }), ...(sectionConfig.title_style.font_style && { fontStyle: sectionConfig.title_style.font_style }) } : {}}>{sectionConfig?.title || 'Upcoming Programs'}</h2>

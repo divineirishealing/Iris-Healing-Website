@@ -145,7 +145,7 @@ const ProgramsSection = ({ sectionConfig }) => {
   if (programs.length === 0) return null;
 
   return (
-    <section id="programs" data-testid="programs-section" className="py-20 bg-white">
+    <section id="programs" data-testid="programs-section" className="py-12 bg-white">
       <div className={CONTAINER}>
         <h2 className="text-center mb-4" style={applySectionStyle(sectionConfig?.title_style, { ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2rem)' })}>{sectionConfig?.title || 'Flagship Programs'}</h2>
         {(sectionConfig?.subtitle || (!programs.some(p => p.enable_in_person) && !sectionConfig)) && (

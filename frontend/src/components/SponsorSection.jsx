@@ -28,7 +28,7 @@ const SponsorSection = ({ sectionConfig }) => {
   const imgUrl = h.image ? resolveImageUrl(h.image) : '';
 
   return (
-    <section id="sponsor" data-testid="sponsor-section" className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
+    <section id="sponsor" data-testid="sponsor-section" className="py-12 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className={CONTAINER}>
         <div className="grid md:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
           <div style={h.align ? { textAlign: h.align } : {}}>

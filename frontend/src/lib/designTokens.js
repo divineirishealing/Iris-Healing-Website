@@ -47,7 +47,7 @@ export const NARROW = 'max-w-4xl mx-auto';
 export const WIDE = 'max-w-5xl mx-auto';
 
 /* Section spacing */
-export const SECTION_PY = 'py-20';
+export const SECTION_PY = 'py-12';
 
 
 /** Apply section config style overrides */
