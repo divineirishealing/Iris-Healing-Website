@@ -18,6 +18,7 @@ import HeroSettingsTab from './tabs/HeroSettingsTab';
 import AboutSettingsTab from './tabs/AboutSettingsTab';
 import PageHeadersTab from './tabs/PageHeadersTab';
 import SponsorSettingsTab from './tabs/SponsorSettingsTab';
+import HomepageSectionsTab from './tabs/HomepageSectionsTab';
 import NewsletterSettingsTab from './tabs/NewsletterSettingsTab';
 import HeaderFooterTab from './tabs/HeaderFooterTab';
 import EnrollmentsTab from './tabs/EnrollmentsTab';
@@ -159,6 +160,7 @@ const AdminPanel = () => {
 
   const tabs = [
     { key: 'hero', label: 'Hero Banner', icon: Image },
+    { key: 'homepage_sections', label: 'Homepage', icon: Monitor },
     { key: 'page_headers', label: 'Page Headers', icon: Monitor },
     { key: 'about', label: 'About', icon: Layout },
     { key: 'sponsor', label: 'Sponsor', icon: Gift },
@@ -176,7 +178,7 @@ const AdminPanel = () => {
     { key: 'styles', label: 'Global Styles', icon: Palette },
   ];
 
-  const settingsTabKeys = ['hero', 'page_headers', 'about', 'sponsor', 'newsletter', 'header_footer', 'styles'];
+  const settingsTabKeys = ['hero', 'homepage_sections', 'page_headers', 'about', 'sponsor', 'newsletter', 'header_footer', 'styles'];
   const needsSave = settingsTabKeys.includes(activeTab);
 
   return (
@@ -217,6 +219,13 @@ const AdminPanel = () => {
             <div>
               <HeroSettingsTab settings={siteSettings} onChange={setSiteSettings} onVideoUpload={handleVideoUpload} />
               <Button data-testid="save-settings-btn" onClick={saveSiteSettings} className="bg-[#D4AF37] hover:bg-[#b8962e] mt-5"><Save size={14} className="mr-1" /> Save Changes</Button>
+            </div>
+          )}
+
+          {activeTab === 'homepage_sections' && siteSettings && (
+            <div>
+              <HomepageSectionsTab settings={siteSettings} onChange={setSiteSettings} />
+              <Button data-testid="save-homepage-sections-btn" onClick={saveSiteSettings} className="bg-[#D4AF37] hover:bg-[#b8962e] mt-5"><Save size={14} className="mr-1" /> Save Changes</Button>
             </div>
           )}
 

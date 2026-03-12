@@ -1,0 +1,132 @@
+import React from 'react';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
+import { Button } from '../../ui/button';
+import { Switch } from '../../ui/switch';
+import { Trash2, Plus, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+
+const FONT_OPTIONS = [
+  { value: '', label: 'Default' },
+  { value: "'Cinzel', serif", label: 'Cinzel' },
+  { value: "'Playfair Display', serif", label: 'Playfair' },
+  { value: "'Lato', sans-serif", label: 'Lato' },
+  { value: "'Montserrat', sans-serif", label: 'Montserrat' },
+];
+const SIZE_OPTIONS = ['12px','14px','16px','18px','20px','24px','28px','32px','36px','42px'];
+
+const StyleCell = ({ style = {}, onStyleChange }) => {
+  const update = (prop, val) => onStyleChange({ ...style, [prop]: val });
+  return (
+    <div className="flex gap-1 items-center flex-wrap mt-1">
+      <input type="color" value={style.font_color || '#000000'} onChange={e => update('font_color', e.target.value)} className="w-5 h-5 rounded cursor-pointer border-0" />
+      <select value={style.font_family || ''} onChange={e => update('font_family', e.target.value)} className="text-[9px] border rounded px-1 py-0.5 w-16">
+        {FONT_OPTIONS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+      </select>
+      <select value={style.font_size || ''} onChange={e => update('font_size', e.target.value)} className="text-[9px] border rounded px-1 py-0.5 w-12">
+        <option value="">Size</option>
+        {SIZE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+      </select>
+      <button onClick={() => update('font_weight', style.font_weight === 'bold' ? '400' : 'bold')} className={`text-[9px] px-1 py-0.5 rounded border ${style.font_weight === 'bold' ? 'bg-gray-800 text-white' : 'bg-white'}`}><b>B</b></button>
+      <button onClick={() => update('font_style', style.font_style === 'italic' ? 'normal' : 'italic')} className={`text-[9px] px-1 py-0.5 rounded border ${style.font_style === 'italic' ? 'bg-gray-800 text-white' : 'bg-white'}`}><i>I</i></button>
+    </div>
+  );
+};
+
+const DEFAULT_SECTIONS = [
+  { id: 'hero', title: 'Divine Iris Healing', subtitle: 'ETERNAL HAPPINESS', component: 'HeroSection', removable: false },
+  { id: 'about', title: 'Meet the Healer', subtitle: 'Dimple Ranawat', component: 'AboutSection', removable: false },
+  { id: 'upcoming', title: 'Upcoming Programs', subtitle: '', component: 'UpcomingProgramsSection', removable: false },
+  { id: 'sponsor', title: 'Shine a Light in a Life', subtitle: 'Healing flows when we support each other.', component: 'SponsorSection', removable: false },
+  { id: 'programs', title: 'Flagship Programs', subtitle: 'Our signature healing journeys', component: 'ProgramsSection', removable: false },
+  { id: 'sessions', title: 'Upcoming Sessions', subtitle: '', component: 'SessionsSection', removable: false },
+  { id: 'stats', title: '', subtitle: '', component: 'StatsSection', removable: true },
+  { id: 'testimonials', title: 'Transformations', subtitle: '', component: 'TestimonialsSection', removable: false },
+  { id: 'newsletter', title: 'Join Our Community', subtitle: '', component: 'NewsletterSection', removable: false },
+];
+
+const HomepageSectionsTab = ({ settings, onChange }) => {
+  const sections = settings.homepage_sections || DEFAULT_SECTIONS.map(s => ({ ...s, visible: true, title_style: {}, subtitle_style: {} }));
+
+  const update = (newSections) => {
+    onChange({ ...settings, homepage_sections: newSections });
+  };
+
+  const updateSection = (idx, field, value) => {
+    const updated = [...sections];
+    updated[idx] = { ...updated[idx], [field]: value };
+    update(updated);
+  };
+
+  const moveUp = (idx) => {
+    if (idx === 0) return;
+    const updated = [...sections];
+    [updated[idx - 1], updated[idx]] = [updated[idx], updated[idx - 1]];
+    update(updated);
+  };
+
+  const moveDown = (idx) => {
+    if (idx >= sections.length - 1) return;
+    const updated = [...sections];
+    [updated[idx], updated[idx + 1]] = [updated[idx + 1], updated[idx]];
+    update(updated);
+  };
+
+  const removeSection = (idx) => {
+    update(sections.filter((_, i) => i !== idx));
+  };
+
+  const addSection = () => {
+    const newId = `custom_${Date.now()}`;
+    update([...sections, { id: newId, title: 'New Section', subtitle: '', component: 'custom', visible: true, removable: true, title_style: {}, subtitle_style: {} }]);
+  };
+
+  return (
+    <div data-testid="homepage-sections-tab">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Homepage Sections</h2>
+          <p className="text-[10px] text-gray-400">Edit titles, fonts, reorder, show/hide sections. Changes apply to homepage.</p>
+        </div>
+        <Button onClick={addSection} variant="outline" size="sm" className="text-[10px] gap-1">
+          <Plus size={12} /> Add Section
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        {sections.map((sec, idx) => (
+          <div key={sec.id} className="bg-white rounded-lg border p-3" data-testid={`section-row-${sec.id}`}>
+            <div className="flex items-center gap-2 mb-2">
+              <GripVertical size={14} className="text-gray-300 flex-shrink-0" />
+              <div className="flex gap-0.5 flex-shrink-0">
+                <button onClick={() => moveUp(idx)} className="p-0.5 hover:bg-gray-100 rounded" disabled={idx === 0}><ChevronUp size={12} className={idx === 0 ? 'text-gray-200' : 'text-gray-500'} /></button>
+                <button onClick={() => moveDown(idx)} className="p-0.5 hover:bg-gray-100 rounded" disabled={idx === sections.length - 1}><ChevronDown size={12} className={idx === sections.length - 1 ? 'text-gray-200' : 'text-gray-500'} /></button>
+              </div>
+              <span className="text-[9px] text-gray-400 bg-gray-50 rounded px-1.5 py-0.5 flex-shrink-0">{sec.component || sec.id}</span>
+              <div className="flex items-center gap-1 ml-auto">
+                <Label className="text-[9px] text-gray-400">Show</Label>
+                <Switch checked={sec.visible !== false} onCheckedChange={v => updateSection(idx, 'visible', v)} />
+                {sec.removable && (
+                  <button onClick={() => removeSection(idx)} className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 size={12} /></button>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-[9px] text-gray-400">Title</Label>
+                <Input value={sec.title || ''} onChange={e => updateSection(idx, 'title', e.target.value)} className="text-[10px] h-7" placeholder="Section title" />
+                <StyleCell style={sec.title_style || {}} onStyleChange={v => updateSection(idx, 'title_style', v)} />
+              </div>
+              <div>
+                <Label className="text-[9px] text-gray-400">Subtitle</Label>
+                <Input value={sec.subtitle || ''} onChange={e => updateSection(idx, 'subtitle', e.target.value)} className="text-[10px] h-7" placeholder="Subtitle (optional)" />
+                <StyleCell style={sec.subtitle_style || {}} onStyleChange={v => updateSection(idx, 'subtitle_style', v)} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default HomepageSectionsTab;
