@@ -57,6 +57,17 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive
 - [x] Testimonials lightbox — graphic testimonials zoom on click (image Dialog)
 - [x] Video testimonials still open YouTube embed modal
 
+### Bug Fixes & Enhancements (Mar 12, 2026)
+- [x] About page image constrained to max-height 450px (was too big)
+- [x] Full font controls (family, size, color, bold, italic) on About admin tab for: Name, Title, Bio, Philosophy, Impact, Mission, Vision
+- [x] Philosophy card icon: replaced dull SVG with lucide Heart icon
+- [x] Impact card icon: replaced dull SVG with lucide Sun icon
+- [x] Mission & Vision subtitle now editable in admin (about_mission_vision_subtitle field)
+- [x] Footer background standardized to #1a1a1a (was Tailwind gray-900 with blue tint)
+- [x] Markdown support: **bold** and *italic* in all body text fields (renderMarkdown.js)
+- [x] Program page testimonials now clickable with lightbox modal
+- [x] Homepage AboutSection also applies objectFit/objectPosition + markdown rendering
+
 ### Previous Features (All COMPLETED)
 - Per-program mode toggles, Discounts & Loyalty, UID system
 - Multi-program cart + checkout, Geo-currency detection
