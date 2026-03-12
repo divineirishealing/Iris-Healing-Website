@@ -11,6 +11,7 @@ const API = `${BACKEND_URL}/api`;
 const TestimonialsSection = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [activeTab, setActiveTab] = useState('video');
   const scrollRef = useRef(null);
 
@@ -108,6 +109,8 @@ const TestimonialsSection = () => {
                 onClick={() => {
                   if (testimonial.type === 'video') {
                     setSelectedVideo(testimonial.videoId);
+                  } else if (testimonial.type === 'graphic') {
+                    setSelectedImage(getThumbnail(testimonial));
                   }
                 }}
               >
@@ -161,6 +164,19 @@ const TestimonialsSection = () => {
                 allowFullScreen
               ></iframe>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Lightbox */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent data-testid="testimonial-lightbox" className="max-w-4xl p-1 bg-white">
+          {selectedImage && (
+            <img
+              src={selectedImage}
+              alt="Testimonial"
+              className="w-full h-auto max-h-[85vh] object-contain rounded"
+            />
           )}
         </DialogContent>
       </Dialog>

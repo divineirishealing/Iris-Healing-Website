@@ -37,8 +37,28 @@ const AboutSettingsTab = ({ settings, onChange }) => {
         <p className="text-xs font-semibold text-gray-800 mb-1">Your Photo</p>
         <p className="text-[10px] text-gray-400 mb-3">Your image on the homepage About section AND the full /about page.</p>
         {s.about_image && (
-          <div className="mb-3">
-            <img src={resolveImageUrl(s.about_image)} alt="About" className="w-32 h-40 object-cover rounded border" />
+          <div className="mb-3 flex gap-4 items-start">
+            <img src={resolveImageUrl(s.about_image)} alt="About" className="w-28 h-36 rounded border" style={{ objectFit: s.about_image_fit || 'contain', objectPosition: s.about_image_position || 'center top' }} />
+            <div className="space-y-2 flex-1">
+              <div>
+                <Label className="text-[10px] text-gray-500">Image Fit</Label>
+                <select value={s.about_image_fit || 'contain'} onChange={e => set('about_image_fit', e.target.value)} className="w-full text-[10px] border rounded px-2 py-1">
+                  <option value="contain">Contain (show full image)</option>
+                  <option value="cover">Cover (fill area, may crop)</option>
+                  <option value="fill">Fill (stretch to fit)</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-[10px] text-gray-500">Image Position</Label>
+                <select value={s.about_image_position || 'center top'} onChange={e => set('about_image_position', e.target.value)} className="w-full text-[10px] border rounded px-2 py-1">
+                  <option value="center top">Top (show head/face)</option>
+                  <option value="center">Center</option>
+                  <option value="center bottom">Bottom</option>
+                  <option value="top left">Top Left</option>
+                  <option value="top right">Top Right</option>
+                </select>
+              </div>
+            </div>
           </div>
         )}
         <ImageUploader value={s.about_image || ''} onChange={url => set('about_image', url)} />

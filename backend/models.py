@@ -18,6 +18,8 @@ class ContentSection(BaseModel):
     subtitle: str = ""
     body: str = ""
     image_url: str = ""
+    image_fit: str = "cover"  # cover, contain, fill
+    image_position: str = "center"  # center, top, bottom, left, right
     is_enabled: bool = True
     order: int = 0
     title_style: Optional[Dict] = None  # FontStyle dict
@@ -272,6 +274,8 @@ class SiteSettings(BaseModel):
     about_image: str = ""
     about_button_text: str = "Read Full Bio"
     about_button_link: str = "/about"
+    about_image_fit: str = "contain"  # cover, contain, fill
+    about_image_position: str = "center top"  # center, top, bottom
     about_philosophy: str = ""
     about_impact: str = ""
     about_mission: str = ""
@@ -359,6 +363,8 @@ class SiteSettingsUpdate(BaseModel):
     about_image: Optional[str] = None
     about_button_text: Optional[str] = None
     about_button_link: Optional[str] = None
+    about_image_fit: Optional[str] = None
+    about_image_position: Optional[str] = None
     about_philosophy: Optional[str] = None
     about_impact: Optional[str] = None
     about_mission: Optional[str] = None

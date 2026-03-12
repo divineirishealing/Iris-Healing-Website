@@ -49,6 +49,14 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive
 - [x] Sender email config per purpose
 - [x] Gold icons for email/phone in footer
 
+### Admin Panel UX Overhaul (Mar 12, 2026)
+- [x] Image adjustment controls (object-fit/object-position) in About tab with live preview
+- [x] Image adjustment controls in program content section editor with visual preview
+- [x] About page image cropping fixed — applies admin settings (objectFit, objectPosition)
+- [x] ProgramDetailPage section images apply image_fit/image_position from content sections
+- [x] Testimonials lightbox — graphic testimonials zoom on click (image Dialog)
+- [x] Video testimonials still open YouTube embed modal
+
 ### Previous Features (All COMPLETED)
 - Per-program mode toggles, Discounts & Loyalty, UID system
 - Multi-program cart + checkout, Geo-currency detection
@@ -70,16 +78,17 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive
 | Admin | `/admin` |
 
 ## Backlog
-### P0
-- [ ] Testimonials: text-based, program-specific, searchable
-- [ ] Global Site Search
-
 ### P1
+- [ ] Global Site Search
+- [ ] Testimonial keyword search
+- [ ] Video testimonial support (YouTube embed management)
+
+### P2
 - [ ] User login & subscriber dashboard
 - [ ] Replace mock phone OTP
 - [ ] Mobile responsiveness audit
 
-### P2
+### P3
 - [ ] Anti-fraud geo-pricing, SEO, Admin analytics, Bulk export
 
 ## Admin: admin / divineadmin2024

@@ -140,7 +140,7 @@ function ProgramDetailPage() {
             <div className="w-12 h-0.5 mx-auto mb-12" style={{ background: GOLD }} />
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="overflow-hidden rounded-lg">
-                {sectionImg && <img src={sectionImg} alt="Experience" className="w-full h-80 object-cover" onError={(e) => { e.target.style.display = 'none'; }} />}
+                {sectionImg && <img src={sectionImg} alt="Experience" className="w-full h-80" style={{ objectFit: section.image_fit || 'cover', objectPosition: section.image_position || 'center' }} onError={(e) => { e.target.style.display = 'none'; }} />}
               </div>
               <div>
                 {section.body && (
@@ -164,7 +164,7 @@ function ProgramDetailPage() {
             {section.body && <BodyText style={section.body_style} className="text-justify">{section.body}</BodyText>}
             {section.image_url && (
               <div className="mt-10 rounded-lg overflow-hidden">
-                <img src={resolveImageUrl(section.image_url)} alt={section.title} className="w-full max-h-96 object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                <img src={resolveImageUrl(section.image_url)} alt={section.title} className="w-full max-h-96" style={{ objectFit: section.image_fit || 'cover', objectPosition: section.image_position || 'center' }} onError={(e) => { e.target.style.display = 'none'; }} />
               </div>
             )}
           </div></div>
@@ -181,7 +181,7 @@ function ProgramDetailPage() {
             {section.subtitle && <SubtitleText style={section.subtitle_style}>{section.subtitle}</SubtitleText>}
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className={imgLeft ? 'order-1' : 'order-1 md:order-2'}>
-                <img src={resolveImageUrl(section.image_url)} alt={section.title} className="w-full rounded-lg" onError={(e) => { e.target.style.display = 'none'; }} />
+                <img src={resolveImageUrl(section.image_url)} alt={section.title} className="w-full rounded-lg" style={{ objectFit: section.image_fit || 'cover', objectPosition: section.image_position || 'center' }} onError={(e) => { e.target.style.display = 'none'; }} />
               </div>
               <div className={imgLeft ? 'order-2' : 'order-2 md:order-1'}>
                 <BodyText style={section.body_style}>{section.body}</BodyText>

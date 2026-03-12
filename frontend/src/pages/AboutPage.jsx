@@ -51,7 +51,7 @@ export default function AboutPage() {
             <div>
               {aboutImage && (
                 <div className="rounded-lg overflow-hidden">
-                  <img src={aboutImage} alt={s.about_name || ''} data-testid="about-image" className="w-full h-auto object-cover" />
+                  <img src={aboutImage} alt={s.about_name || ''} data-testid="about-image" className="w-full" style={{ objectFit: s.about_image_fit || 'contain', objectPosition: s.about_image_position || 'center top', maxHeight: '520px' }} />
                 </div>
               )}
             </div>
