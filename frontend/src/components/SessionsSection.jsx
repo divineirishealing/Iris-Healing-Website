@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ChevronRight } from 'lucide-react';
 import { sessions as mockSessions } from '../mockData';
+import { HEADING, SUBTITLE, BODY, GOLD, CONTAINER } from '../lib/designTokens';
 import { useCurrency } from '../context/CurrencyContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -33,16 +34,13 @@ const SessionsSection = () => {
 
   return (
     <section id="sessions" data-testid="sessions-section" className="py-20 bg-white">
-      <div className="container mx-auto px-4">
+      <div className={CONTAINER}>
         {/* Section Title */}
         <div className="text-center mb-12">
-          <h2
-            className="italic"
-            style={{ color: '#D4AF37', fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 400, fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}
-          >
+          <h2 style={{ ...HEADING, color: GOLD, fontStyle: 'italic', fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
             Book Personal Session
           </h2>
-          <div className="h-[3px] w-10 bg-[#D4AF37] mx-auto mt-4"></div>
+          <div className="h-[3px] w-10 mx-auto mt-4" style={{ background: GOLD }}></div>
         </div>
 
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row">

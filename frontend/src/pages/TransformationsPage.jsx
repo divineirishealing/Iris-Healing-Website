@@ -6,6 +6,7 @@ import FloatingButtons from '../components/FloatingButtons';
 import { Search, Play, X } from 'lucide-react';
 import { resolveImageUrl } from '../lib/imageUtils';
 import { Dialog, DialogContent } from '../components/ui/dialog';
+import { HEADING, SUBTITLE, BODY, GOLD, LABEL, CONTAINER, SECTION_PY } from '../lib/designTokens';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -47,10 +48,10 @@ function TransformationsPage() {
       {/* Hero */}
       <section
         data-testid="transformations-hero"
-        className="min-h-[45vh] flex flex-col items-center justify-center text-center px-4 pt-24"
-        style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #1a1a2e 75%, #0d1b2a 100%)' }}
+        className="min-h-[45vh] flex flex-col items-center justify-center text-center px-6 pt-24"
+        style={{ background: 'linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)' }}
       >
-        <h1 className="text-5xl md:text-7xl mb-6 tracking-wider" style={{ color: '#D4AF37', fontWeight: 400 }}>
+        <h1 className="mb-6" style={{ ...HEADING, color: GOLD, fontSize: 'clamp(2rem, 5vw, 3rem)', fontVariant: 'small-caps', letterSpacing: '0.1em' }}>
           TRANSFORMATIONS
         </h1>
         <p className="text-gray-400 text-sm tracking-[0.2em]">

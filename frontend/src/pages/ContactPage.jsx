@@ -9,6 +9,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButtons from '../components/FloatingButtons';
 import { Loader2, Send } from 'lucide-react';
+import { HEADING, SUBTITLE, BODY, GOLD, CONTAINER } from '../lib/designTokens';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -61,13 +62,13 @@ function ContactPage() {
     <>
       <Header />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-20">
-        <div className="container mx-auto px-4 py-12">
+        <div className={`${CONTAINER} py-12`}>
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
+              <h1 className="mb-4" style={{ ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2.2rem)' }}>
                 {isQuote ? 'Request a Quote' : 'Express Your Interest'}
               </h1>
-              <p className="text-lg text-gray-600">
+              <p style={{ ...SUBTITLE, fontSize: '0.9rem' }}>
                 {isQuote
                   ? `Get custom pricing for ${programTitle || 'this program'}`
                   : 'Ready to begin your healing journey? Let us know how we can help.'}

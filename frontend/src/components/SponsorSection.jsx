@@ -1,16 +1,16 @@
 import React from 'react';
+import { HEADING, BODY, GOLD, CONTAINER } from '../lib/designTokens';
 
 const SponsorSection = () => {
   return (
     <section data-testid="sponsor-section" className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="container mx-auto px-4">
+      <div className={CONTAINER}>
         <div className="grid md:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
-          {/* Content */}
           <div>
-            <h2 className="text-gray-900 mb-6 leading-tight" style={{ fontFamily: "'Cinzel', serif", fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 400 }}>
+            <h2 className="mb-6 leading-tight" style={{ ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
               Shine a Light in a Life
             </h2>
-            <p className="text-gray-700 mb-4 leading-relaxed" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem' }}>
+            <p className="mb-4 leading-relaxed" style={BODY}>
               Healing flows when we support each other.
             </p>
             <div className="text-gray-600 mb-6 leading-relaxed text-sm space-y-1">

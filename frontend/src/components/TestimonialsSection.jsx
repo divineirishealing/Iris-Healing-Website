@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent } from './ui/dialog';
 import { resolveImageUrl } from '../lib/imageUtils';
+import { HEADING, CONTAINER } from '../lib/designTokens';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -49,8 +50,8 @@ const TestimonialsSection = () => {
 
   return (
     <section id="media" data-testid="testimonials-section" className="py-20 bg-white">
-      <div className="container mx-auto px-4">
-        <h2 className="text-center text-gray-900 mb-8" style={{ fontFamily: "'Cinzel', serif", fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 400 }}>
+      <div className={CONTAINER}>
+        <h2 className="text-center mb-8" style={{ ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
           Testimonials
         </h2>
 

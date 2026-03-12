@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Facebook, Instagram, Youtube, Linkedin, Mail, Phone, Music, Pin } from 'lucide-react';
+import { BODY, GOLD, CONTAINER } from '../lib/designTokens';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -64,7 +65,7 @@ const Footer = () => {
 
   return (
     <footer id="contact" data-testid="site-footer" className="bg-gray-900 text-white py-14">
-      <div className="container mx-auto px-4">
+      <div className={CONTAINER}>
         <div className="grid md:grid-cols-4 gap-10 mb-10">
           {/* Brand */}
           <div>
