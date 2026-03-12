@@ -277,9 +277,9 @@ const AdminPanel = () => {
                           <input type="checkbox" checked={programForm.enable_online} onChange={e => setProgramForm({...programForm, enable_online: e.target.checked})} className="w-4 h-4 rounded text-blue-600" />
                           <div><p className="text-xs font-medium text-blue-700">Online</p><p className="text-[9px] text-blue-500">Live session via Zoom</p></div>
                         </label>
-                        <label className="flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-lg px-3 py-2 cursor-pointer" data-testid="toggle-mode-offline">
-                          <input type="checkbox" checked={programForm.enable_offline} onChange={e => setProgramForm({...programForm, enable_offline: e.target.checked})} className="w-4 h-4 rounded text-purple-600" />
-                          <div><p className="text-xs font-medium text-purple-700">Offline</p><p className="text-[9px] text-purple-500">Remote healing, no in-person</p></div>
+                        <label className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-lg px-3 py-2 cursor-pointer" data-testid="toggle-mode-offline">
+                          <input type="checkbox" checked={programForm.enable_offline} onChange={e => setProgramForm({...programForm, enable_offline: e.target.checked})} className="w-4 h-4 rounded text-teal-600" />
+                          <div><p className="text-xs font-medium text-teal-700">Offline</p><p className="text-[9px] text-teal-500">Remote, Not In-Person</p></div>
                         </label>
                         <label className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer" data-testid="toggle-mode-in-person">
                           <input type="checkbox" checked={programForm.enable_in_person} onChange={e => setProgramForm({...programForm, enable_in_person: e.target.checked})} className="w-4 h-4 rounded text-gray-600" />
@@ -405,7 +405,7 @@ const AdminPanel = () => {
                         {p.is_upcoming && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded">Upcoming</span>}
                         <span className="text-[10px] space-x-1">
                           {p.enable_online !== false && <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-600">Online</span>}
-                          {p.enable_offline !== false && <span className="px-1.5 py-0.5 rounded bg-purple-50 text-purple-600">Offline</span>}
+                          {p.enable_offline !== false && <span className="px-1.5 py-0.5 rounded bg-teal-50 text-teal-600">Offline</span>}
                           {p.enable_in_person && <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">In Person</span>}
                         </span>
                         {p.duration_tiers && p.duration_tiers.length > 0 && <span className="text-[10px] text-gray-400">{p.duration_tiers.length} tier{p.duration_tiers.length>1?'s':''}</span>}

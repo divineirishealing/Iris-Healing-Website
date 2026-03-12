@@ -178,9 +178,9 @@ const CartItemCard = ({ item, onRemove, onUpdateParticipants, symbol, getItemPri
                     {item.enable_offline !== false && (
                       <button type="button" onClick={() => updateParticipant(idx, 'attendance_mode', 'offline')}
                         className={`flex-1 flex flex-col items-center gap-0.5 py-1 rounded border text-[10px] transition-all ${
-                          p.attendance_mode === 'offline' ? 'bg-purple-50 border-purple-400 text-purple-600' : 'bg-white border-gray-200 text-gray-500'}`}>
+                          p.attendance_mode === 'offline' ? 'bg-teal-50 border-teal-400 text-teal-700' : 'bg-white border-gray-200 text-gray-500'}`}>
                         <span className="flex items-center gap-0.5"><Wifi size={10} /> Offline</span>
-                        <span className="text-[8px] opacity-70">Remote</span>
+                        <span className="text-[8px] opacity-70">Remote, Not In-Person</span>
                       </button>
                     )}
                     {item.enable_in_person && (

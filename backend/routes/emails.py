@@ -35,7 +35,7 @@ def enrollment_confirmation_email(booker_name, item_title, participants, total, 
     for p in participants:
         mode = p.get("attendance_mode", "online")
         mode_label = "Online (Zoom)" if mode == "online" else "Remote Healing (Distance)"
-        mode_color = "#2563eb" if mode == "online" else "#7c3aed"
+        mode_color = "#2563eb" if mode == "online" else "#0d9488"
         first_time = "Yes" if p.get("is_first_time") else "No"
         uid = p.get("uid", "")
         uid_html = f'<br><span style="font-size:10px;color:#D4AF37;font-weight:600">UID: {uid}</span>' if uid else ""

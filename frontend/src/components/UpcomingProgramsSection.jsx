@@ -103,8 +103,8 @@ const UpcomingCard = ({ program }) => {
             </span>
           )}
           {program.enable_offline !== false && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium shadow-sm bg-purple-500 text-white">
-              <Wifi size={12} /> Offline (Remote)
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium shadow-sm bg-teal-600 text-white">
+              <Wifi size={12} /> Offline (Remote, Not In-Person)
             </span>
           )}
           {program.enable_in_person && (

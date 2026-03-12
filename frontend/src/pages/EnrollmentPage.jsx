@@ -106,9 +106,9 @@ const ParticipantRow = ({ index, data, onChange, onRemove, canRemove, showReferr
         {showOffline && (
           <button type="button" onClick={() => update('attendance_mode', 'offline')}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded border text-[10px] transition-all ${
-              data.attendance_mode === 'offline' ? 'bg-purple-50 border-purple-400 text-purple-600' : 'bg-white border-gray-200 text-gray-500'}`}>
+              data.attendance_mode === 'offline' ? 'bg-teal-50 border-teal-400 text-teal-700' : 'bg-white border-gray-200 text-gray-500'}`}>
             <span className="flex items-center gap-1"><Wifi size={10} /> Offline</span>
-            <span className="text-[8px] opacity-70">Remote, no in-person</span>
+            <span className="text-[8px] opacity-70">Remote, Not In-Person</span>
           </button>
         )}
         {showInPerson && (

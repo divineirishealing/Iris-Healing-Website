@@ -55,7 +55,7 @@ const ProgramCard = ({ program }) => {
             <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-500/90 text-white backdrop-blur-sm">Online (Zoom)</span>
           )}
           {program.enable_offline !== false && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-purple-500/90 text-white backdrop-blur-sm">Offline (Remote)</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-teal-600/90 text-white backdrop-blur-sm">Offline (Remote, Not In-Person)</span>
           )}
           {program.enable_in_person && (
             <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-emerald-500/90 text-white backdrop-blur-sm">In Person</span>
