@@ -5,6 +5,31 @@ import { Label } from '../../ui/label';
 import ImageUploader from '../ImageUploader';
 import { resolveImageUrl } from '../../../lib/imageUtils';
 
+const FontControls = ({ label, style = {}, onStyleChange }) => {
+  const update = (prop, val) => onStyleChange({ ...style, [prop]: val });
+  return (
+    <details className="mt-1">
+      <summary className="text-[9px] text-gray-400 cursor-pointer hover:text-gray-600">{label} font styling</summary>
+      <div className="mt-1 flex gap-1 flex-wrap items-center bg-gray-50 rounded p-1.5">
+        <input type="color" value={style.font_color || '#000000'} onChange={e => update('font_color', e.target.value)} className="w-5 h-5 rounded cursor-pointer" title="Color" />
+        <select value={style.font_family || ''} onChange={e => update('font_family', e.target.value)} className="text-[8px] border rounded px-1 py-0.5">
+          <option value="">Font</option>
+          <option value="'Cinzel', serif">Cinzel</option>
+          <option value="'Playfair Display', serif">Playfair</option>
+          <option value="'Lato', sans-serif">Lato</option>
+          <option value="'Montserrat', sans-serif">Montserrat</option>
+        </select>
+        <select value={style.font_size || ''} onChange={e => update('font_size', e.target.value)} className="text-[8px] border rounded px-1 py-0.5">
+          <option value="">Size</option>
+          {['12px','14px','16px','18px','20px','24px','28px','32px','36px','42px'].map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <button onClick={() => update('font_weight', style.font_weight === 'bold' ? '400' : 'bold')} className={`text-[8px] px-1.5 py-0.5 rounded border ${style.font_weight === 'bold' ? 'bg-gray-800 text-white' : 'bg-white'}`}><b>B</b></button>
+        <button onClick={() => update('font_style', style.font_style === 'italic' ? 'normal' : 'italic')} className={`text-[8px] px-1.5 py-0.5 rounded border ${style.font_style === 'italic' ? 'bg-gray-800 text-white' : 'bg-white'}`}><i>I</i></button>
+      </div>
+    </details>
+  );
+};
+
 const AboutSettingsTab = ({ settings, onChange }) => {
   const s = settings;
   const set = (key, val) => onChange({ ...s, [key]: val });
@@ -12,7 +37,7 @@ const AboutSettingsTab = ({ settings, onChange }) => {
   return (
     <div data-testid="about-settings-tab">
       <h2 className="text-lg font-semibold text-gray-900 mb-1">About Section</h2>
-      <p className="text-[10px] text-gray-400 mb-5">The "Meet the Healer" section + full About page content.</p>
+      <p className="text-[10px] text-gray-400 mb-5">The "Meet the Healer" section + full About page content. Use **bold** and *italic* in text fields.</p>
 
       {/* Logo */}
       <div className="bg-white rounded-lg p-5 shadow-sm border mb-4">
@@ -67,7 +92,7 @@ const AboutSettingsTab = ({ settings, onChange }) => {
       {/* Text Content */}
       <div className="bg-white rounded-lg p-5 shadow-sm border mb-4">
         <p className="text-xs font-semibold text-gray-800 mb-1">Bio Content</p>
-        <p className="text-[10px] text-gray-400 mb-3">Shown on homepage and /about page.</p>
+        <p className="text-[10px] text-gray-400 mb-3">Shown on homepage and /about page. Use **bold** and *italic* for formatting.</p>
         <div className="space-y-3">
           <div>
             <Label className="text-[10px] text-gray-500">Small Label Above Name</Label>
@@ -76,14 +101,17 @@ const AboutSettingsTab = ({ settings, onChange }) => {
           <div>
             <Label className="text-[10px] text-gray-500">Your Name</Label>
             <Input value={s.about_name || ''} onChange={e => set('about_name', e.target.value)} placeholder="Dimple Ranawat" className="text-sm" />
+            <FontControls label="Name" style={s.about_name_style || {}} onStyleChange={v => set('about_name_style', v)} />
           </div>
           <div>
             <Label className="text-[10px] text-gray-500">Your Title (gold text)</Label>
             <Input value={s.about_title || ''} onChange={e => set('about_title', e.target.value)} placeholder="Founder, Divine Iris..." className="text-xs" />
+            <FontControls label="Title" style={s.about_title_style || {}} onStyleChange={v => set('about_title_style', v)} />
           </div>
           <div>
             <Label className="text-[10px] text-gray-500">Bio - Paragraph 1</Label>
             <Textarea value={s.about_bio || ''} onChange={e => set('about_bio', e.target.value)} rows={3} placeholder="Write your main bio here..." className="text-xs" />
+            <FontControls label="Bio" style={s.about_bio_style || {}} onStyleChange={v => set('about_bio_style', v)} />
           </div>
           <div>
             <Label className="text-[10px] text-gray-500">Bio - Paragraph 2 (Personal Journey)</Label>
@@ -110,10 +138,12 @@ const AboutSettingsTab = ({ settings, onChange }) => {
           <div>
             <Label className="text-[10px] text-gray-500">Our Philosophy</Label>
             <Textarea data-testid="about-philosophy" value={s.about_philosophy || ''} onChange={e => set('about_philosophy', e.target.value)} rows={3} placeholder="Dimple believes in 'living limitless effortlessly'..." className="text-xs" />
+            <FontControls label="Philosophy" style={s.about_philosophy_style || {}} onStyleChange={v => set('about_philosophy_style', v)} />
           </div>
           <div>
             <Label className="text-[10px] text-gray-500">Work & Impact</Label>
             <Textarea data-testid="about-impact" value={s.about_impact || ''} onChange={e => set('about_impact', e.target.value)} rows={3} placeholder="As the creator of the Atomic Weight Release Program..." className="text-xs" />
+            <FontControls label="Impact" style={s.about_impact_style || {}} onStyleChange={v => set('about_impact_style', v)} />
           </div>
         </div>
       </div>
@@ -124,12 +154,18 @@ const AboutSettingsTab = ({ settings, onChange }) => {
         <p className="text-[10px] text-gray-400 mb-3">The dark section on /about page.</p>
         <div className="space-y-3">
           <div>
+            <Label className="text-[10px] text-gray-500">Section Subtitle</Label>
+            <Input data-testid="about-mv-subtitle" value={s.about_mission_vision_subtitle || ''} onChange={e => set('about_mission_vision_subtitle', e.target.value)} placeholder="Where healing meets awareness..." className="text-xs" />
+          </div>
+          <div>
             <Label className="text-[10px] text-gray-500">Our Mission</Label>
             <Textarea data-testid="about-mission" value={s.about_mission || ''} onChange={e => set('about_mission', e.target.value)} rows={3} placeholder="To alleviate suffering at its root..." className="text-xs" />
+            <FontControls label="Mission" style={s.about_mission_style || {}} onStyleChange={v => set('about_mission_style', v)} />
           </div>
           <div>
             <Label className="text-[10px] text-gray-500">Our Vision</Label>
             <Textarea data-testid="about-vision" value={s.about_vision || ''} onChange={e => set('about_vision', e.target.value)} rows={3} placeholder="To build a world where healing is humane..." className="text-xs" />
+            <FontControls label="Vision" style={s.about_vision_style || {}} onStyleChange={v => set('about_vision_style', v)} />
           </div>
         </div>
       </div>

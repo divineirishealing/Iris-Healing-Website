@@ -64,7 +64,7 @@ const Footer = () => {
   ].filter(l => l.show && l.url);
 
   return (
-    <footer id="contact" data-testid="site-footer" className="bg-gray-900 text-white py-14">
+    <footer id="contact" data-testid="site-footer" className="text-white py-14" style={{ background: '#1a1a1a' }}>
       <div className={CONTAINER}>
         <div className="grid md:grid-cols-4 gap-10 mb-10">
           {/* Brand */}

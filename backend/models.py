@@ -280,6 +280,15 @@ class SiteSettings(BaseModel):
     about_impact: str = ""
     about_mission: str = ""
     about_vision: str = ""
+    about_mission_vision_subtitle: str = "Where healing meets awareness, and transformation begins from within."
+    # About page font styles
+    about_name_style: Optional[Dict] = None
+    about_title_style: Optional[Dict] = None
+    about_bio_style: Optional[Dict] = None
+    about_philosophy_style: Optional[Dict] = None
+    about_impact_style: Optional[Dict] = None
+    about_mission_style: Optional[Dict] = None
+    about_vision_style: Optional[Dict] = None
     # Newsletter section
     newsletter_heading: str = "Join Our Community"
     newsletter_description: str = "Sign up to receive updates on upcoming workshops, new courses and more information"
@@ -369,6 +378,14 @@ class SiteSettingsUpdate(BaseModel):
     about_impact: Optional[str] = None
     about_mission: Optional[str] = None
     about_vision: Optional[str] = None
+    about_mission_vision_subtitle: Optional[str] = None
+    about_name_style: Optional[Dict] = None
+    about_title_style: Optional[Dict] = None
+    about_bio_style: Optional[Dict] = None
+    about_philosophy_style: Optional[Dict] = None
+    about_impact_style: Optional[Dict] = None
+    about_mission_style: Optional[Dict] = None
+    about_vision_style: Optional[Dict] = None
     newsletter_heading: Optional[str] = None
     newsletter_description: Optional[str] = None
     newsletter_button_text: Optional[str] = None

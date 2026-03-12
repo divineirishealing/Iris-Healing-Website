@@ -5,7 +5,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButtons from '../components/FloatingButtons';
+import { Dialog, DialogContent } from '../components/ui/dialog';
 import { resolveImageUrl } from '../lib/imageUtils';
+import { renderMarkdown } from '../lib/renderMarkdown';
 import { useCurrency } from '../context/CurrencyContext';
 import { HEADING, SUBTITLE, BODY, GOLD, LABEL, CONTAINER, NARROW, WIDE, SECTION_PY } from '../lib/designTokens';
 
@@ -41,6 +43,7 @@ function ProgramDetailPage() {
   const [settings, setSettings] = useState(null);
   const [testimonials, setTestimonials] = useState([]);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [lightboxImg, setLightboxImg] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -88,7 +91,7 @@ function ProgramDetailPage() {
     <p className="text-center mb-8" style={applyStyle(extra, { ...SUBTITLE })}>{children}</p>
   );
   const BodyText = ({ children, style: extra, className: cls = '' }) => (
-    <p className={`whitespace-pre-wrap ${cls}`} style={applyStyle(extra, { ...BODY })}>{children}</p>
+    <p className={`whitespace-pre-wrap ${cls}`} style={applyStyle(extra, { ...BODY })} dangerouslySetInnerHTML={{ __html: renderMarkdown(children || '') }} />
   );
 
   const renderSection = (section, idx) => {
@@ -119,7 +122,7 @@ function ProgramDetailPage() {
                 {lines.map((line, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <span className="mt-0.5 text-lg flex-shrink-0" style={{ color: GOLD }}>&#10038;</span>
-                    <p style={{ ...BODY }}>{line.replace(/^[-•*]\s*/, '')}</p>
+                    <p style={{ ...BODY }} dangerouslySetInnerHTML={{ __html: renderMarkdown(line.replace(/^[-•*]\s*/, '')) }} />
                   </div>
                 ))}
               </div>
@@ -282,7 +285,7 @@ function ProgramDetailPage() {
                   const t = testimonials[(currentTestimonial + offset) % testimonials.length];
                   if (!t) return null;
                   const imgSrc = t.type === 'graphic' ? resolveImageUrl(t.image) : `https://img.youtube.com/vi/${t.videoId}/hqdefault.jpg`;
-                  return <img key={offset} src={imgSrc} alt={t.name || ''} className="w-36 h-36 object-cover rounded-lg shadow flex-shrink-0" onError={(e) => { e.target.style.display='none'; }} />;
+                  return <img key={offset} src={imgSrc} alt={t.name || ''} className="w-36 h-36 object-cover rounded-lg shadow flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setLightboxImg(imgSrc)} onError={(e) => { e.target.style.display='none'; }} />;
                 })}
               </div>
               <button onClick={nextT} data-testid="next-testimonial" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex-shrink-0"><ChevronRight size={18} /></button>
@@ -290,6 +293,13 @@ function ProgramDetailPage() {
           </div>
         </section>
       )}
+
+      {/* Testimonial Lightbox */}
+      <Dialog open={!!lightboxImg} onOpenChange={() => setLightboxImg(null)}>
+        <DialogContent data-testid="program-testimonial-lightbox" className="max-w-4xl p-1 bg-white">
+          {lightboxImg && <img src={lightboxImg} alt="Testimonial" className="w-full h-auto max-h-[85vh] object-contain rounded" />}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
       <FloatingButtons />

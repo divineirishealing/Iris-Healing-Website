@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { HEADING, SUBTITLE, BODY, GOLD, LABEL, CONTAINER } from '../lib/designTokens';
+import { renderMarkdown } from '../lib/renderMarkdown';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -33,7 +34,7 @@ const AboutSection = () => {
           <div className="order-2 md:order-1">
             {aboutImage && (
               <div className="rounded-lg overflow-hidden">
-                <img src={aboutImage} alt={s.about_name || 'Healer'} className="w-full h-auto object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                <img src={aboutImage} alt={s.about_name || 'Healer'} className="w-full max-h-[450px]" style={{ objectFit: s.about_image_fit || 'contain', objectPosition: s.about_image_position || 'center top' }} onError={(e) => { e.target.style.display = 'none'; }} />
               </div>
             )}
           </div>
@@ -44,11 +45,11 @@ const AboutSection = () => {
             <h3 className="mb-6" style={{ ...SUBTITLE, color: GOLD, fontSize: '0.9rem' }}>{s.about_title || 'Founder, Divine Iris – Soulful Healing Studio'}</h3>
 
             <div className="space-y-4">
-              <p style={BODY}>{s.about_bio || 'Dimple Ranawat is an internationally recognised healer, accountability coach, and life transformation mentor whose work is reshaping how the world understands healing, growth, and well-being.'}</p>
+              <p style={BODY} dangerouslySetInnerHTML={{ __html: renderMarkdown(s.about_bio || 'Dimple Ranawat is an internationally recognised healer, accountability coach, and life transformation mentor whose work is reshaping how the world understands healing, growth, and well-being.') }} />
               {s.about_bio_2 && (
                 <>
                   <h4 className="font-semibold text-sm mt-4 mb-2" style={{ ...BODY, fontWeight: 600, color: '#1a1a1a' }}>Personal Journey</h4>
-                  <p style={BODY}>{s.about_bio_2}</p>
+                  <p style={BODY} dangerouslySetInnerHTML={{ __html: renderMarkdown(s.about_bio_2) }} />
                 </>
               )}
             </div>
