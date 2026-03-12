@@ -20,7 +20,7 @@ const applyStyle = (styleObj, defaults = {}) => {
   };
 };
 
-const SponsorSection = () => {
+const SponsorSection = ({ sectionConfig }) => {
   const [settings, setSettings] = useState(null);
   useEffect(() => { axios.get(`${API}/settings`).then(r => setSettings(r.data)).catch(() => {}); }, []);
 

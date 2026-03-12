@@ -92,7 +92,7 @@ const ParticleCanvas = () => {
   return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }} />;
 };
 
-const StatsSection = () => {
+const StatsSection = ({ sectionConfig }) => {
   const [stats, setStats] = useState(mockStats);
 
   useEffect(() => {

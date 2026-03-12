@@ -6,7 +6,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../hooks/use-toast';
 import { ShoppingCart, Check } from 'lucide-react';
-import { HEADING, BODY, GOLD, CONTAINER } from '../lib/designTokens';
+import { HEADING, BODY, GOLD, CONTAINER, applySectionStyle } from '../lib/designTokens';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -132,7 +132,7 @@ const ProgramCard = ({ program }) => {
   );
 };
 
-const ProgramsSection = () => {
+const ProgramsSection = ({ sectionConfig }) => {
   const navigate = useNavigate();
   const [programs, setPrograms] = useState([]);
 
@@ -147,7 +147,7 @@ const ProgramsSection = () => {
   return (
     <section id="programs" data-testid="programs-section" className="py-20 bg-white">
       <div className={CONTAINER}>
-        <h2 className="text-center mb-4" style={{ ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>Flagship Programs</h2>
+        <h2 className="text-center mb-4" style={applySectionStyle(sectionConfig?.title_style, { ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2rem)' })}>{sectionConfig?.title || 'Flagship Programs'}</h2>
         {!programs.some(p => p.enable_in_person) && (
           <p className="text-center text-xs text-gray-400 mb-16">All sessions are conducted online via Zoom or through remote distance healing — no in-person sessions at this time.</p>
         )}

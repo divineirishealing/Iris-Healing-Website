@@ -48,3 +48,17 @@ export const WIDE = 'max-w-5xl mx-auto';
 
 /* Section spacing */
 export const SECTION_PY = 'py-20';
+
+
+/** Apply section config style overrides */
+export const applySectionStyle = (styleObj, defaults = {}) => {
+  if (!styleObj || Object.keys(styleObj).length === 0) return defaults;
+  return {
+    ...defaults,
+    ...(styleObj.font_family && { fontFamily: styleObj.font_family }),
+    ...(styleObj.font_size && { fontSize: styleObj.font_size }),
+    ...(styleObj.font_color && { color: styleObj.font_color }),
+    ...(styleObj.font_weight && { fontWeight: styleObj.font_weight }),
+    ...(styleObj.font_style && { fontStyle: styleObj.font_style }),
+  };
+};

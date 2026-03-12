@@ -3,12 +3,12 @@ import axios from 'axios';
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent } from './ui/dialog';
 import { resolveImageUrl } from '../lib/imageUtils';
-import { HEADING, CONTAINER } from '../lib/designTokens';
+import { HEADING, CONTAINER, applySectionStyle } from '../lib/designTokens';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const TestimonialsSection = () => {
+const TestimonialsSection = ({ sectionConfig }) => {
   const [testimonials, setTestimonials] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -52,8 +52,8 @@ const TestimonialsSection = () => {
   return (
     <section id="media" data-testid="testimonials-section" className="py-20 bg-white">
       <div className={CONTAINER}>
-        <h2 className="text-center mb-8" style={{ ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
-          Testimonials
+        <h2 className="text-center mb-8" style={applySectionStyle(sectionConfig?.title_style, { ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2rem)' })}>
+          {sectionConfig?.title || 'Testimonials'}
         </h2>
 
         {/* Tab Switcher */}

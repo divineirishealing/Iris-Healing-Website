@@ -64,7 +64,7 @@ function HomePage() {
       {sections.filter(s => s.visible !== false).map(sec => {
         const Component = COMPONENT_MAP[sec.component];
         if (!Component) return null;
-        return <Component key={sec.id} />;
+        return <Component key={sec.id} sectionConfig={sec} />;
       })}
       <Footer />
       <FloatingButtons />

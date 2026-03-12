@@ -24,7 +24,7 @@ const applyStyle = (styleObj, defaults = {}) => {
   };
 };
 
-const AboutSection = () => {
+const AboutSection = ({ sectionConfig }) => {
   const [settings, setSettings] = useState(null);
   useEffect(() => { axios.get(`${API}/settings`).then(r => setSettings(r.data)).catch(() => {}); }, []);
 

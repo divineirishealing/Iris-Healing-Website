@@ -10,7 +10,7 @@ function resolveUrl(url) {
   return url;
 }
 
-const HeroSection = () => {
+const HeroSection = ({ sectionConfig }) => {
   const [settings, setSettings] = useState(null);
 
   useEffect(() => {

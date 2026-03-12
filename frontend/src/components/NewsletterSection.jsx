@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useToast } from '../hooks/use-toast';
-import { HEADING, BODY, GOLD, CONTAINER } from '../lib/designTokens';
+import { HEADING, BODY, GOLD, CONTAINER, applySectionStyle } from '../lib/designTokens';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const NewsletterSection = () => {
+const NewsletterSection = ({ sectionConfig }) => {
   const [email, setEmail] = useState('');
   const [settings, setSettings] = useState(null);
   const { toast } = useToast();
@@ -38,8 +38,8 @@ const NewsletterSection = () => {
     <section data-testid="newsletter-section" className="py-20 bg-white">
       <div className={CONTAINER}>
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="mb-6" style={{ ...HEADING, color: '#8B6914', fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
-            {s.newsletter_heading || 'Join Our Community'}
+          <h2 className="mb-6" style={applySectionStyle(sectionConfig?.title_style, { ...HEADING, color: '#8B6914', fontSize: 'clamp(1.5rem, 3vw, 2rem)' })}>
+            {sectionConfig?.title || s.newsletter_heading || 'Join Our Community'}
           </h2>
           <p className="mb-8 leading-relaxed" style={BODY}>
             {s.newsletter_description || 'Sign up to receive updates on upcoming workshops, new courses and more information'}

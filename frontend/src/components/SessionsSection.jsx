@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ChevronRight } from 'lucide-react';
 import { sessions as mockSessions } from '../mockData';
-import { HEADING, SUBTITLE, BODY, GOLD, CONTAINER } from '../lib/designTokens';
+import { HEADING, SUBTITLE, BODY, GOLD, CONTAINER, applySectionStyle } from '../lib/designTokens';
 import { useCurrency } from '../context/CurrencyContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -11,7 +11,7 @@ const API = `${BACKEND_URL}/api`;
 
 const IRIS_IMAGE = 'https://divineirishealing.com/assets/images/personal_sessions/1772606496_19c12e333a98b4e53349.png';
 
-const SessionsSection = () => {
+const SessionsSection = ({ sectionConfig }) => {
   const navigate = useNavigate();
   const { getPrice, formatPrice } = useCurrency();
   const [sessions, setSessions] = useState([]);
@@ -37,8 +37,8 @@ const SessionsSection = () => {
       <div className={CONTAINER}>
         {/* Section Title */}
         <div className="text-center mb-12">
-          <h2 style={{ ...HEADING, color: GOLD, fontStyle: 'italic', fontSize: 'clamp(1.5rem, 3vw, 2rem)' }}>
-            Book Personal Session
+          <h2 style={applySectionStyle(sectionConfig?.title_style, { ...HEADING, color: GOLD, fontStyle: 'italic', fontSize: 'clamp(1.5rem, 3vw, 2rem)' })}>
+            {sectionConfig?.title || 'Book Personal Session'}
           </h2>
           <div className="h-[3px] w-10 mx-auto mt-4" style={{ background: GOLD }}></div>
         </div>
