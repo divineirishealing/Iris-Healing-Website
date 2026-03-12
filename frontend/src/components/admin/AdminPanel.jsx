@@ -11,7 +11,7 @@ import { resolveImageUrl } from '../../lib/imageUtils';
 import {
   Settings, Package, Calendar, MessageSquare, BarChart3, Mail,
   Trash2, Edit, Plus, X, Eye, EyeOff, Save, ArrowUp, ArrowDown,
-  Globe, Layout, Image, Users, Palette, Gift, Monitor, Wifi, Tag
+  Globe, Layout, Image, Users, Palette, Gift, Monitor, Wifi, Tag, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 import HeroSettingsTab from './tabs/HeroSettingsTab';
@@ -94,8 +94,9 @@ const AdminPanel = () => {
   // ===== SESSIONS =====
   const saveSession = async () => {
     try {
-      if (editingId) { await axios.put(`${API}/sessions/${editingId}`, sessionForm); toast({ title: 'Session updated!' }); }
-      else { await axios.post(`${API}/sessions`, sessionForm); toast({ title: 'Session created!' }); }
+      const { _calMonth, ...payload } = sessionForm;
+      if (editingId) { await axios.put(`${API}/sessions/${editingId}`, payload); toast({ title: 'Session updated!' }); }
+      else { await axios.post(`${API}/sessions`, payload); toast({ title: 'Session created!' }); }
       resetSessionForm(); loadAll();
     } catch (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); }
   };
@@ -612,12 +613,47 @@ const AdminPanel = () => {
                     <button onClick={resetSessionForm}><X size={18} /></button>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2"><Label>Title</Label><Input data-testid="session-title-input" value={sessionForm.title} onChange={e => setSessionForm({...sessionForm, title: e.target.value})} /></div>
-                    <div className="md:col-span-2"><Label>Description</Label><Textarea value={sessionForm.description} onChange={e => setSessionForm({...sessionForm, description: e.target.value})} rows={4} placeholder="Describe this session in detail..." /></div>
+                    {/* Title + Font */}
+                    <div className="md:col-span-2">
+                      <Label>Title</Label>
+                      <Input data-testid="session-title-input" value={sessionForm.title} onChange={e => setSessionForm({...sessionForm, title: e.target.value})} />
+                      <div className="mt-1 flex gap-1 items-center flex-wrap">
+                        <span className="text-[8px] text-gray-400 mr-1">Style:</span>
+                        <input type="color" value={(sessionForm.title_style||{}).font_color || '#000000'} onChange={e => setSessionForm({...sessionForm, title_style: {...(sessionForm.title_style||{}), font_color: e.target.value}})} className="w-5 h-5 rounded cursor-pointer border-0" />
+                        <select value={(sessionForm.title_style||{}).font_family || ''} onChange={e => setSessionForm({...sessionForm, title_style: {...(sessionForm.title_style||{}), font_family: e.target.value}})} className="text-[8px] border rounded px-1 py-0.5 w-16">
+                          <option value="">Default</option><option value="'Cinzel', serif">Cinzel</option><option value="'Playfair Display', serif">Playfair</option><option value="'Lato', sans-serif">Lato</option><option value="'Montserrat', sans-serif">Montserrat</option>
+                        </select>
+                        <select value={(sessionForm.title_style||{}).font_size || ''} onChange={e => setSessionForm({...sessionForm, title_style: {...(sessionForm.title_style||{}), font_size: e.target.value}})} className="text-[8px] border rounded px-1 py-0.5 w-12">
+                          <option value="">Size</option>{['14px','16px','18px','20px','24px','28px','32px'].map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <button onClick={() => setSessionForm({...sessionForm, title_style: {...(sessionForm.title_style||{}), font_weight: (sessionForm.title_style||{}).font_weight === 'bold' ? '400' : 'bold'}})} className={`text-[8px] px-1.5 py-0.5 rounded border ${(sessionForm.title_style||{}).font_weight === 'bold' ? 'bg-gray-800 text-white' : ''}`}><b>B</b></button>
+                        <button onClick={() => setSessionForm({...sessionForm, title_style: {...(sessionForm.title_style||{}), font_style: (sessionForm.title_style||{}).font_style === 'italic' ? 'normal' : 'italic'}})} className={`text-[8px] px-1.5 py-0.5 rounded border ${(sessionForm.title_style||{}).font_style === 'italic' ? 'bg-gray-800 text-white' : ''}`}><i>I</i></button>
+                      </div>
+                    </div>
+
+                    {/* Description + Font */}
+                    <div className="md:col-span-2">
+                      <Label>Description</Label>
+                      <Textarea value={sessionForm.description} onChange={e => setSessionForm({...sessionForm, description: e.target.value})} rows={4} placeholder="Describe this session in detail... Use **bold** and *italic*" />
+                      <div className="mt-1 flex gap-1 items-center flex-wrap">
+                        <span className="text-[8px] text-gray-400 mr-1">Style:</span>
+                        <input type="color" value={(sessionForm.description_style||{}).font_color || '#555555'} onChange={e => setSessionForm({...sessionForm, description_style: {...(sessionForm.description_style||{}), font_color: e.target.value}})} className="w-5 h-5 rounded cursor-pointer border-0" />
+                        <select value={(sessionForm.description_style||{}).font_family || ''} onChange={e => setSessionForm({...sessionForm, description_style: {...(sessionForm.description_style||{}), font_family: e.target.value}})} className="text-[8px] border rounded px-1 py-0.5 w-16">
+                          <option value="">Default</option><option value="'Cinzel', serif">Cinzel</option><option value="'Playfair Display', serif">Playfair</option><option value="'Lato', sans-serif">Lato</option><option value="'Montserrat', sans-serif">Montserrat</option>
+                        </select>
+                        <select value={(sessionForm.description_style||{}).font_size || ''} onChange={e => setSessionForm({...sessionForm, description_style: {...(sessionForm.description_style||{}), font_size: e.target.value}})} className="text-[8px] border rounded px-1 py-0.5 w-12">
+                          <option value="">Size</option>{['12px','14px','16px','18px','20px','24px'].map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <button onClick={() => setSessionForm({...sessionForm, description_style: {...(sessionForm.description_style||{}), font_weight: (sessionForm.description_style||{}).font_weight === 'bold' ? '400' : 'bold'}})} className={`text-[8px] px-1.5 py-0.5 rounded border ${(sessionForm.description_style||{}).font_weight === 'bold' ? 'bg-gray-800 text-white' : ''}`}><b>B</b></button>
+                        <button onClick={() => setSessionForm({...sessionForm, description_style: {...(sessionForm.description_style||{}), font_style: (sessionForm.description_style||{}).font_style === 'italic' ? 'normal' : 'italic'}})} className={`text-[8px] px-1.5 py-0.5 rounded border ${(sessionForm.description_style||{}).font_style === 'italic' ? 'bg-gray-800 text-white' : ''}`}><i>I</i></button>
+                      </div>
+                    </div>
+
+                    {/* Testimonial */}
                     <div className="md:col-span-2">
                       <Label>Testimonial Snippet (2-5 lines)</Label>
-                      <Textarea data-testid="session-testimonial-input" value={sessionForm.testimonial_text} onChange={e => setSessionForm({...sessionForm, testimonial_text: e.target.value})} rows={3} placeholder="e.g., 'This session changed my life. I felt lighter and more connected to my inner self...' — Client Name" />
-                      <p className="text-[9px] text-gray-400 mt-0.5">A short client testimonial shown alongside this session</p>
+                      <Textarea data-testid="session-testimonial-input" value={sessionForm.testimonial_text} onChange={e => setSessionForm({...sessionForm, testimonial_text: e.target.value})} rows={3} placeholder="e.g., 'This session changed my life...' — Client Name" />
+                      <p className="text-[9px] text-gray-400 mt-0.5">Supports **bold** and *italic* markdown</p>
                     </div>
 
                     {/* Session Mode */}
@@ -666,37 +702,105 @@ const AdminPanel = () => {
                       </div>
                     </div>
 
-                    {/* Font Styling */}
-                    <div className="md:col-span-2 border-t pt-3">
-                      <details>
-                        <summary className="text-[10px] text-gray-500 cursor-pointer hover:text-gray-700">Font & Style Overrides</summary>
-                        <div className="mt-2 grid grid-cols-2 gap-3">
-                          {[{key: 'title_style', label: 'Title'}, {key: 'description_style', label: 'Description'}].map(({key, label}) => {
-                            const style = sessionForm[key] || {};
-                            const updateStyle = (prop, val) => setSessionForm({...sessionForm, [key]: {...style, [prop]: val}});
-                            return (
-                              <div key={key} className="border rounded p-2">
-                                <p className="text-[9px] font-medium text-gray-500 mb-1">{label} Style</p>
-                                <div className="flex gap-1 flex-wrap">
-                                  <input type="color" value={style.font_color || '#000000'} onChange={e => updateStyle('font_color', e.target.value)} className="w-5 h-5 rounded cursor-pointer" />
-                                  <select value={style.font_family || ''} onChange={e => updateStyle('font_family', e.target.value)} className="text-[8px] border rounded px-1 flex-1">
-                                    <option value="">Default</option>
-                                    <option value="'Cinzel', serif">Cinzel</option>
-                                    <option value="'Playfair Display', serif">Playfair</option>
-                                    <option value="'Lato', sans-serif">Lato</option>
-                                  </select>
-                                  <select value={style.font_size || ''} onChange={e => updateStyle('font_size', e.target.value)} className="text-[8px] border rounded px-1">
-                                    <option value="">Size</option>
-                                    {['12px','14px','16px','18px','20px','24px','28px','32px'].map(s => <option key={s} value={s}>{s}</option>)}
-                                  </select>
-                                  <button onClick={() => updateStyle('font_weight', style.font_weight === 'bold' ? '400' : 'bold')} className={`text-[8px] px-1.5 py-0.5 rounded border ${style.font_weight === 'bold' ? 'bg-gray-800 text-white' : ''}`}><b>B</b></button>
-                                  <button onClick={() => updateStyle('font_style', style.font_style === 'italic' ? 'normal' : 'italic')} className={`text-[8px] px-1.5 py-0.5 rounded border ${style.font_style === 'italic' ? 'bg-gray-800 text-white' : ''}`}><i>I</i></button>
-                                </div>
-                              </div>
-                            );
-                          })}
+                    {/* Available Dates — Calendar Picker */}
+                    <div className="md:col-span-2 border-t pt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <Label className="block">Available Dates</Label>
+                          <p className="text-[9px] text-gray-400">Min 7 days in advance. Sat & Sun auto-off. Click dates to toggle.</p>
                         </div>
-                      </details>
+                        <div className="flex gap-2">
+                          <Button type="button" variant="outline" size="sm" className="text-[10px]" data-testid="fill-30-days-btn" onClick={() => {
+                            const dates = [...(sessionForm.available_dates || [])];
+                            const existing = new Set(dates);
+                            const today = new Date(); today.setHours(0,0,0,0);
+                            for (let i = 7; i <= 37; i++) {
+                              const d = new Date(today); d.setDate(d.getDate() + i);
+                              const dow = d.getDay();
+                              if (dow === 0 || dow === 6) continue;
+                              const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                              if (!existing.has(ds)) dates.push(ds);
+                            }
+                            setSessionForm({...sessionForm, available_dates: dates});
+                          }}>Fill 30 Days (Mon-Fri)</Button>
+                          <Button type="button" variant="outline" size="sm" className="text-[10px]" onClick={() => {
+                            const dates = [...(sessionForm.available_dates || [])];
+                            const existing = new Set(dates);
+                            const today = new Date(); today.setHours(0,0,0,0);
+                            for (let i = 7; i <= 67; i++) {
+                              const d = new Date(today); d.setDate(d.getDate() + i);
+                              const dow = d.getDay();
+                              if (dow === 0 || dow === 6) continue;
+                              const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                              if (!existing.has(ds)) dates.push(ds);
+                            }
+                            setSessionForm({...sessionForm, available_dates: dates});
+                          }}>Fill 60 Days</Button>
+                          <Button type="button" variant="ghost" size="sm" className="text-[10px] text-red-500" onClick={() => setSessionForm({...sessionForm, available_dates: []})}>Clear All</Button>
+                        </div>
+                      </div>
+                      {/* Mini calendar for toggling dates */}
+                      {(() => {
+                        const calMonth = sessionForm._calMonth || new Date(new Date().getFullYear(), new Date().getMonth());
+                        const cy = calMonth.getFullYear(); const cm = calMonth.getMonth();
+                        const fd = new Date(cy, cm, 1).getDay();
+                        const dim = new Date(cy, cm + 1, 0).getDate();
+                        const mn = calMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+                        const dateSet = new Set(sessionForm.available_dates || []);
+                        const calDays = [];
+                        for (let i = 0; i < fd; i++) calDays.push(null);
+                        for (let d = 1; d <= dim; d++) calDays.push(d);
+                        const today = new Date(); today.setHours(0,0,0,0);
+                        const minDate = new Date(today); minDate.setDate(minDate.getDate() + 7);
+
+                        const toggleDate = (day) => {
+                          const ds = `${cy}-${String(cm+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                          const dates = [...(sessionForm.available_dates || [])];
+                          const idx = dates.indexOf(ds);
+                          if (idx >= 0) dates.splice(idx, 1); else dates.push(ds);
+                          setSessionForm({...sessionForm, available_dates: dates});
+                        };
+
+                        return (
+                          <div className="bg-gray-50 rounded-lg p-3 border" data-testid="admin-date-calendar">
+                            <div className="flex items-center justify-between mb-2">
+                              <button type="button" onClick={() => setSessionForm({...sessionForm, _calMonth: new Date(cy, cm - 1)})} className="p-1 rounded hover:bg-gray-200 text-gray-500"><ChevronLeft size={14} /></button>
+                              <span className="text-xs font-semibold text-gray-700">{mn}</span>
+                              <button type="button" onClick={() => setSessionForm({...sessionForm, _calMonth: new Date(cy, cm + 1)})} className="p-1 rounded hover:bg-gray-200 text-gray-500"><ChevronRight size={14} /></button>
+                            </div>
+                            <div className="grid grid-cols-7 gap-0.5 text-center mb-1">
+                              {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+                                <div key={d} className={`text-[9px] font-medium py-0.5 ${d === 'Su' || d === 'Sa' ? 'text-red-300' : 'text-gray-400'}`}>{d}</div>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-7 gap-0.5">
+                              {calDays.map((day, i) => {
+                                if (!day) return <div key={i} />;
+                                const date = new Date(cy, cm, day);
+                                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                                const tooSoon = date < minDate;
+                                const ds = `${cy}-${String(cm+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                                const isOn = dateSet.has(ds);
+                                const disabled = isWeekend || tooSoon;
+                                return (
+                                  <button key={i} type="button" disabled={disabled}
+                                    onClick={() => toggleDate(day)}
+                                    className={`h-7 w-full rounded text-[10px] transition-all ${
+                                      disabled ? (isWeekend ? 'text-red-200 bg-red-50/50 cursor-not-allowed' : 'text-gray-200 cursor-not-allowed') :
+                                      isOn ? 'bg-purple-500 text-white font-bold' : 'text-gray-600 hover:bg-purple-50'
+                                    }`}
+                                  >{day}</button>
+                                );
+                              })}
+                            </div>
+                            <div className="flex items-center gap-3 mt-2 text-[9px] text-gray-400">
+                              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-purple-500" /> Available</span>
+                              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-50 border border-red-200" /> Weekend (off)</span>
+                              <span>Selected: {(sessionForm.available_dates||[]).length} dates</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="flex items-center gap-2"><Switch checked={sessionForm.visible} onCheckedChange={v => setSessionForm({...sessionForm, visible: v})} /><Label>Visible on Site</Label></div>
@@ -718,10 +822,12 @@ const AdminPanel = () => {
                     <div className="w-2 h-10 rounded-full" style={{ background: 'linear-gradient(to bottom, #7c3aed, #a855f7)' }} />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm text-gray-900 truncate">{s.title}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${s.session_mode === 'offline' ? 'bg-teal-50 text-teal-600' : s.session_mode === 'both' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'}`}>{s.session_mode === 'both' ? 'Online & Offline' : (s.session_mode || 'online')}</span>
                         {s.duration && <span className="text-[10px] text-gray-400">{s.duration}</span>}
                         {s.testimonial_text && <span className="text-[10px] text-amber-500">Has testimonial</span>}
+                        {(s.available_dates||[]).length > 0 && <span className="text-[10px] text-purple-500">{s.available_dates.length} dates</span>}
+                        {(s.time_slots||[]).length > 0 && <span className="text-[10px] text-gray-400">{s.time_slots.length} slots</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

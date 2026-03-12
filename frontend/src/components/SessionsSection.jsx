@@ -33,8 +33,13 @@ const MiniCalendar = ({ availableDates = [], onSelectDate, selectedDate }) => {
   };
   const isPast = (day) => {
     if (!day) return false;
-    const today = new Date(); today.setHours(0,0,0,0);
-    return new Date(year, month, day) < today;
+    const minDate = new Date(); minDate.setHours(0,0,0,0); minDate.setDate(minDate.getDate() + 7);
+    return new Date(year, month, day) < minDate;
+  };
+  const isWeekend = (day) => {
+    if (!day) return false;
+    const dow = new Date(year, month, day).getDay();
+    return dow === 0 || dow === 6;
   };
 
   return (
@@ -46,7 +51,7 @@ const MiniCalendar = ({ availableDates = [], onSelectDate, selectedDate }) => {
       </div>
       <div className="grid grid-cols-7 gap-0.5 text-center mb-1">
         {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-          <div key={d} className="text-[9px] text-gray-400 font-medium py-1">{d}</div>
+          <div key={d} className={`text-[9px] font-medium py-1 ${d === 'Su' || d === 'Sa' ? 'text-red-300' : 'text-gray-400'}`}>{d}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-0.5">
@@ -54,13 +59,16 @@ const MiniCalendar = ({ availableDates = [], onSelectDate, selectedDate }) => {
           const available = isAvailable(day);
           const selected = isSelected(day);
           const past = isPast(day);
+          const weekend = isWeekend(day);
+          const disabled = !day || past || weekend || !available;
           return (
-            <button key={i} disabled={!day || past || !available}
+            <button key={i} disabled={disabled}
               onClick={() => {
-                if (day && available) onSelectDate(`${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+                if (day && available && !weekend && !past) onSelectDate(`${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
               }}
               className={`h-8 w-full rounded-md text-[11px] transition-all ${
                 !day ? '' :
+                weekend ? 'text-red-200 cursor-not-allowed' :
                 selected ? 'bg-purple-600 text-white font-bold shadow-md' :
                 available && !past ? 'bg-purple-50 text-purple-700 hover:bg-purple-100 cursor-pointer font-medium' :
                 past ? 'text-gray-200' : 'text-gray-300'
@@ -69,11 +77,11 @@ const MiniCalendar = ({ availableDates = [], onSelectDate, selectedDate }) => {
           );
         })}
       </div>
-      {availableDates.length > 0 && (
-        <div className="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-          <div className="w-3 h-3 rounded bg-purple-50 border border-purple-200" /> Available
-        </div>
-      )}
+      <div className="mt-2 flex items-center gap-3 text-[9px] text-gray-400">
+        {availableDates.length > 0 && <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-purple-50 border border-purple-200" /> Available</span>}
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-50" /> Weekend</span>
+        <span>Min 7 days advance</span>
+      </div>
     </div>
   );
 };
