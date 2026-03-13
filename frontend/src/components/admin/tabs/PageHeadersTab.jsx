@@ -38,7 +38,6 @@ const StyleCell = ({ style = {}, onStyleChange, label }) => {
 };
 
 const STATIC_PAGES = [
-  { key: 'home', label: 'Homepage', defaultTitle: 'Divine Iris Healing', defaultSubtitle: 'ETERNAL HAPPINESS', alwaysVisible: true },
   { key: 'services', label: 'Services', defaultTitle: 'Our Services', defaultSubtitle: 'Claim your personal space', alwaysVisible: true },
   { key: 'contact', label: 'Contact', defaultTitle: 'Express Your Interest', defaultSubtitle: 'Ready to begin your healing journey?', alwaysVisible: true },
   { key: 'about', label: 'About', defaultTitle: 'Dimple Ranawat', defaultSubtitle: 'Founder, Divine Iris – Soulful Healing Studio', alwaysVisible: true },

@@ -99,7 +99,9 @@ const HomepageSectionsTab = ({ settings, onChange }) => {
       </div>
 
       <div className="space-y-2">
-        {sections.map((sec, idx) => (
+        {sections.map((sec, idx) => {
+          const isHero = sec.id === 'hero';
+          return (
           <div key={sec.id} className="bg-white rounded-lg border p-3" data-testid={`section-row-${sec.id}`}>
             <div className="flex items-center gap-2 mb-2">
               <GripVertical size={14} className="text-gray-300 flex-shrink-0" />
@@ -108,6 +110,7 @@ const HomepageSectionsTab = ({ settings, onChange }) => {
                 <button onClick={() => moveDown(idx)} className="p-0.5 hover:bg-gray-100 rounded" disabled={idx === sections.length - 1}><ChevronDown size={12} className={idx === sections.length - 1 ? 'text-gray-200' : 'text-gray-500'} /></button>
               </div>
               <span className="text-[9px] text-gray-400 bg-gray-50 rounded px-1.5 py-0.5 flex-shrink-0">{isCustom(sec) ? 'Custom' : sec.component || sec.id}</span>
+              {isHero && <span className="text-[8px] text-amber-600 bg-amber-50 rounded px-1.5 py-0.5">Edit in Hero Banner tab</span>}
               <div className="flex items-center gap-1 ml-auto">
                 <Label className="text-[9px] text-gray-400">Show</Label>
                 <Switch checked={sec.visible !== false} onCheckedChange={v => updateSection(idx, 'visible', v)} />
@@ -117,7 +120,8 @@ const HomepageSectionsTab = ({ settings, onChange }) => {
               </div>
             </div>
 
-            {/* Title & Subtitle */}
+            {/* Title & Subtitle — skip for hero (managed in Hero Banner tab) */}
+            {!isHero && (
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-[9px] text-gray-400">Title</Label>
@@ -130,6 +134,7 @@ const HomepageSectionsTab = ({ settings, onChange }) => {
                 <StyleCell style={sec.subtitle_style || {}} onStyleChange={v => updateSection(idx, 'subtitle_style', v)} />
               </div>
             </div>
+            )}
 
             {/* Custom section extra controls: image, body, body style */}
             {isCustom(sec) && (
@@ -157,7 +162,8 @@ const HomepageSectionsTab = ({ settings, onChange }) => {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
