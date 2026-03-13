@@ -41,8 +41,6 @@ const DEFAULT_ORDER = [
   { id: 'newsletter', component: 'NewsletterSection', visible: true },
 ];
 
-const PAIRED_IDS = new Set(['upcoming', 'testimonials']);
-
 function HomePage() {
   const [sections, setSections] = useState(DEFAULT_ORDER);
 
@@ -62,47 +60,14 @@ function HomePage() {
     });
   }, []);
 
-  const visible = sections.filter(s => s.visible !== false);
-
-  const renderSections = () => {
-    const result = [];
-    let pairedInserted = false;
-
-    const upcomingSec = visible.find(s => s.id === 'upcoming');
-    const testimonialsSec = visible.find(s => s.id === 'testimonials');
-
-    for (const sec of visible) {
-      if (PAIRED_IDS.has(sec.id)) {
-        if (!pairedInserted && upcomingSec && testimonialsSec) {
-          pairedInserted = true;
-          result.push(
-            <section key="paired-row" data-testid="upcoming-testimonials-row" className="py-12 bg-white">
-              <div className="container mx-auto px-6 md:px-8 lg:px-12">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                  <div className="min-w-0">
-                    <UpcomingProgramsSection sectionConfig={upcomingSec} inline />
-                  </div>
-                  <div className="min-w-0">
-                    <TestimonialsSection sectionConfig={testimonialsSec} inline />
-                  </div>
-                </div>
-              </div>
-            </section>
-          );
-        }
-        continue;
-      }
-      const Component = COMPONENT_MAP[sec.component];
-      if (!Component) continue;
-      result.push(<Component key={sec.id} sectionConfig={sec} />);
-    }
-    return result;
-  };
-
   return (
     <>
       <Header />
-      {renderSections()}
+      {sections.filter(s => s.visible !== false).map(sec => {
+        const Component = COMPONENT_MAP[sec.component];
+        if (!Component) return null;
+        return <Component key={sec.id} sectionConfig={sec} />;
+      })}
       <Footer />
       <FloatingButtons />
     </>
