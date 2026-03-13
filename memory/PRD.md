@@ -191,6 +191,19 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive
 - [x] Save Visibility Settings button in admin Sessions tab
 - [x] 25/25 frontend tests passing, 100% verification
 
+### Session Style Control Panel Overhaul (Mar 13, 2026)
+- [x] Added Titillium Web font to Google Fonts and all admin font dropdowns
+- [x] Redesigned admin "Personal Sessions — Style Control" with 5 clear visual sections:
+  - Hero Section (dark purple bg): title font, price text, badge BG/text colors, hero BG color, purple intensity, accent/line color, star color
+  - Body Content (white bg): section title, description, testimonial fonts
+  - Buttons: primary color, text color, quick presets (Gold, Coal Black, Purple, Deep Iris)
+  - Calendar & Booking: accent color, BG color, homepage purple intensity
+  - Homepage Session List: session name font, price style
+- [x] Preview labels on each section ("Preview: Top banner of every session page" etc.)
+- [x] Fixed invisible badges — now use admin-controlled colors with proper contrast
+- [x] Session detail page, homepage buttons, calendar all consume admin color settings
+- [x] 28/28 frontend tests passing, 100% verification
+
 ## Backlog
 ### P1
 - [ ] Global Site Search
