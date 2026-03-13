@@ -263,12 +263,12 @@ function ProgramDetailPage() {
           {program.title}
         </h1>
         <p className="mb-6" style={applyStyle(template.subtitle_style, { ...LABEL, color: heroAccent })}>{program.category || 'FLAGSHIP PROGRAM'}</p>
-        {(program.duration || program.timing || program.start_date) && (
+        {((program.show_duration_on_page && program.duration) || (program.show_timing_on_page && program.timing) || (program.show_start_date_on_page && program.start_date)) && (
           <div className="flex flex-wrap items-center justify-center gap-4 mb-4 text-white/70 text-xs">
-            {program.duration && <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: heroAccent }} /> {program.duration}</span>}
-            {program.start_date && <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: heroAccent }} /> Starts: {program.start_date}</span>}
-            {program.timing && <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: heroAccent }} /> {program.timing}{program.time_zone ? ` ${program.time_zone}` : ''}</span>}
-            {program.timing && program.time_zone && (() => {
+            {program.show_duration_on_page && program.duration && <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: heroAccent }} /> {program.duration}</span>}
+            {program.show_start_date_on_page && program.start_date && <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: heroAccent }} /> Starts: {program.start_date}</span>}
+            {program.show_timing_on_page && program.timing && <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full" style={{ background: heroAccent }} /> {program.timing}{program.time_zone ? ` ${program.time_zone}` : ''}</span>}
+            {program.show_timing_on_page && program.timing && program.time_zone && (() => {
               try {
                 const tzShort = new Date().toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
                 const programTz = program.time_zone;

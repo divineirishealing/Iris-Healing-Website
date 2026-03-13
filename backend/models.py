@@ -75,6 +75,9 @@ class Program(BaseModel):
     show_custom_link: bool = True
     timing: str = ""  # e.g. "7:00 PM - 8:30 PM"
     time_zone: str = ""  # e.g. "GST Dubai", "IST", "EST"
+    show_duration_on_page: bool = False
+    show_start_date_on_page: bool = False
+    show_timing_on_page: bool = False
     content_sections: List[Dict] = []  # List of ContentSection dicts
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -117,6 +120,9 @@ class ProgramCreate(BaseModel):
     show_custom_link: Optional[bool] = True
     timing: Optional[str] = ""
     time_zone: Optional[str] = ""
+    show_duration_on_page: Optional[bool] = False
+    show_start_date_on_page: Optional[bool] = False
+    show_timing_on_page: Optional[bool] = False
     content_sections: Optional[List[Dict]] = []
 
 
