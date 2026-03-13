@@ -186,23 +186,6 @@ function EnrollmentPage() {
   const tierParam = searchParams.get('tier');
   const selectedTier = tierParam !== null ? parseInt(tierParam) : null;
 
-  // Country → currency mapping for real-time pricing updates
-  const CURRENCY_MAP = {
-    AE: { currency: 'aed', symbol: 'AED' }, SA: { currency: 'aed', symbol: 'AED' },
-    QA: { currency: 'aed', symbol: 'AED' }, KW: { currency: 'aed', symbol: 'AED' },
-    OM: { currency: 'aed', symbol: 'AED' }, BH: { currency: 'aed', symbol: 'AED' },
-    IN: { currency: 'inr', symbol: 'INR' },
-    US: { currency: 'usd', symbol: 'USD' }, GB: { currency: 'usd', symbol: 'USD' },
-    AU: { currency: 'usd', symbol: 'USD' }, NZ: { currency: 'usd', symbol: 'USD' },
-    CA: { currency: 'usd', symbol: 'USD' }, SG: { currency: 'usd', symbol: 'USD' },
-    DE: { currency: 'usd', symbol: 'USD' }, FR: { currency: 'usd', symbol: 'USD' },
-  };
-
-  // Use bookerCountry to determine displayed currency (overrides IP detection)
-  const activeCurrencyInfo = CURRENCY_MAP[bookerCountry] || { currency: detectedCurrency, symbol: detectedSymbol };
-  const currency = activeCurrencyInfo.currency;
-  const symbol = activeCurrencyInfo.symbol;
-
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [item, setItem] = useState(null);
@@ -223,6 +206,21 @@ function EnrollmentPage() {
   const [processing, setProcessing] = useState(false);
   const [discountSettings, setDiscountSettings] = useState({ enable_referral: true });
   const [paymentSettings, setPaymentSettings] = useState({ disclaimer: '', india_links: [] });
+
+  // Country → currency mapping for real-time pricing updates
+  const CURRENCY_MAP = {
+    AE: { currency: 'aed', symbol: 'AED' }, SA: { currency: 'aed', symbol: 'AED' },
+    QA: { currency: 'aed', symbol: 'AED' }, KW: { currency: 'aed', symbol: 'AED' },
+    OM: { currency: 'aed', symbol: 'AED' }, BH: { currency: 'aed', symbol: 'AED' },
+    IN: { currency: 'inr', symbol: 'INR' },
+    US: { currency: 'usd', symbol: 'USD' }, GB: { currency: 'usd', symbol: 'USD' },
+    AU: { currency: 'usd', symbol: 'USD' }, NZ: { currency: 'usd', symbol: 'USD' },
+    CA: { currency: 'usd', symbol: 'USD' }, SG: { currency: 'usd', symbol: 'USD' },
+    DE: { currency: 'usd', symbol: 'USD' }, FR: { currency: 'usd', symbol: 'USD' },
+  };
+  const activeCurrencyInfo = CURRENCY_MAP[bookerCountry] || { currency: detectedCurrency, symbol: detectedSymbol };
+  const currency = activeCurrencyInfo.currency;
+  const symbol = activeCurrencyInfo.symbol;
 
   useEffect(() => {
     const ep = type === 'program' ? 'programs' : 'sessions';
