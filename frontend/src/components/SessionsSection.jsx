@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronRight, ChevronLeft, Clock, Wifi, MapPin, Quote, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Clock, Wifi, MapPin, Quote, Calendar as CalendarIcon, ShoppingCart } from 'lucide-react';
 import { HEADING, BODY, GOLD, CONTAINER, applySectionStyle } from '../lib/designTokens';
 import { useCurrency } from '../context/CurrencyContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../hooks/use-toast';
 import { renderMarkdown } from '../lib/renderMarkdown';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -97,9 +99,12 @@ const SessionsSection = ({ sectionConfig }) => {
   const navigate = useNavigate();
   const { getPrice, formatPrice } = useCurrency();
   const { settings } = useSiteSettings();
+  const { addSessionItem } = useCart();
+  const { toast } = useToast();
   const [sessions, setSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
 
   const sessionTpl = settings?.page_heroes?.session_template || {};
   const purpleIntensity = sessionTpl.homepage_purple || 'medium';
@@ -297,10 +302,13 @@ const SessionsSection = ({ sectionConfig }) => {
                   );
                   if (key === 'time_slots' && selectedSession.time_slots?.length > 0) return (
                     <div key="slots">
-                      <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Available Times</p>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Select a Time</p>
                       <div className="flex flex-wrap gap-2">
                         {selectedSession.time_slots.map((slot, i) => (
-                          <span key={i} className="px-3 py-1.5 rounded-full text-xs bg-purple-50 text-purple-600 border border-purple-100 hover:bg-purple-100 cursor-pointer transition-all" data-testid={`time-slot-${i}`}>
+                          <span key={i} onClick={() => setSelectedTimeSlot(slot)}
+                            className={`px-3 py-1.5 rounded-full text-xs border cursor-pointer transition-all ${
+                              selectedTimeSlot === slot ? 'bg-purple-600 text-white border-purple-600' : 'bg-purple-50 text-purple-600 border-purple-100 hover:bg-purple-100'
+                            }`} data-testid={`time-slot-${i}`}>
                             {slot}
                           </span>
                         ))}
@@ -308,11 +316,23 @@ const SessionsSection = ({ sectionConfig }) => {
                     </div>
                   );
                   if (key === 'book_button') return (
-                    <button key="book" onClick={() => navigate(`/session/${selectedSession.id}`)} data-testid="book-session-btn"
-                      className="w-full py-3.5 rounded-full text-[11px] tracking-[0.2em] uppercase font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02]"
-                      style={{ background: `linear-gradient(135deg, ${buttonBg}, ${buttonBg}dd)`, color: buttonText }}>
-                      View Details & Book
-                    </button>
+                    <div key="book-actions" className="space-y-2">
+                      <button onClick={() => navigate(`/session/${selectedSession.id}`)} data-testid="book-session-btn"
+                        className="w-full py-3.5 rounded-full text-[11px] tracking-[0.2em] uppercase font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                        style={{ background: `linear-gradient(135deg, ${buttonBg}, ${buttonBg}dd)`, color: buttonText }}>
+                        View Details & Book
+                      </button>
+                      <button onClick={() => {
+                          const added = addSessionItem(selectedSession, selectedDate, selectedTimeSlot);
+                          if (added) toast({ title: `${selectedSession.title} added to cart` });
+                          else toast({ title: 'Already in cart', variant: 'destructive' });
+                        }}
+                        data-testid="add-session-cart-btn"
+                        className="w-full py-3 rounded-full text-[11px] tracking-[0.15em] uppercase font-medium transition-all duration-300 border-2 flex items-center justify-center gap-2 hover:scale-[1.02]"
+                        style={{ borderColor: buttonBg, color: buttonBg, background: 'transparent' }}>
+                        <ShoppingCart size={14} /> Add to Cart
+                      </button>
+                    </div>
                   );
                   return null;
                 })}

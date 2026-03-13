@@ -62,6 +62,7 @@ const CartItemCard = ({ item, onRemove, onUpdateParticipants, symbol, getItemPri
   const offerPrice = getItemOfferPrice(item);
   const effectivePrice = offerPrice > 0 ? offerPrice : price;
   const pCount = item.participants.length;
+  const isSession = item.type === 'session';
 
   const updateParticipant = (idx, field, value) => {
     const updated = [...item.participants];
@@ -87,8 +88,17 @@ const CartItemCard = ({ item, onRemove, onUpdateParticipants, symbol, getItemPri
           onError={e => { e.target.src = 'https://images.unsplash.com/photo-1545389336-cf090694435e?w=100&h=100&fit=crop'; }} />
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-gray-900 truncate">{item.programTitle}</h3>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-[10px] bg-[#D4AF37]/10 text-[#D4AF37] px-2 py-0.5 rounded-full font-medium">{tier?.label || 'Standard'}</span>
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            {isSession ? (
+              <>
+                <span className="text-[10px] bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-medium">Personal Session</span>
+                {item.duration && <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{item.duration}</span>}
+                {item.selectedDate && <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{item.selectedDate}</span>}
+                {item.selectedTime && <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full">{item.selectedTime}</span>}
+              </>
+            ) : (
+              <span className="text-[10px] bg-[#D4AF37]/10 text-[#D4AF37] px-2 py-0.5 rounded-full font-medium">{tier?.label || 'Standard'}</span>
+            )}
             {offerPrice > 0 ? (
               <span className="text-[10px] text-gray-400"><span className="text-[#D4AF37] font-medium">{symbol} {offerPrice.toLocaleString()}</span> <span className="line-through">{symbol} {price.toLocaleString()}</span> / person</span>
             ) : (
@@ -269,12 +279,20 @@ function CartPage() {
   }, []);
 
   const getItemPrice = (item) => {
+    if (item.type === 'session') {
+      const fakeProgram = { is_flagship: false, duration_tiers: [], price_aed: item.price_aed, price_inr: item.price_inr, price_usd: item.price_usd };
+      return getPrice(fakeProgram);
+    }
     const tiers = item.durationTiers || [];
     const fakeProgram = { is_flagship: item.isFlagship, duration_tiers: tiers, price_aed: item.price_aed, price_inr: item.price_inr, price_usd: item.price_usd };
     return getPrice(fakeProgram, item.tierIndex);
   };
 
   const getItemOfferPrice = (item) => {
+    if (item.type === 'session') {
+      const fakeProgram = { is_flagship: false, duration_tiers: [], offer_price_aed: item.offer_price_aed, offer_price_inr: item.offer_price_inr, offer_price_usd: item.offer_price_usd };
+      return getOfferPrice(fakeProgram);
+    }
     const tiers = item.durationTiers || [];
     const fakeProgram = { is_flagship: item.isFlagship, duration_tiers: tiers, offer_price_aed: item.offer_price_aed, offer_price_inr: item.offer_price_inr, offer_price_usd: item.offer_price_usd };
     return getOfferPrice(fakeProgram, item.tierIndex);
@@ -345,7 +363,7 @@ function CartPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 data-testid="cart-title" className="text-2xl md:text-3xl text-gray-900">Your Cart</h1>
-              <p className="text-sm text-gray-500 mt-1">{items.length} program{items.length > 1 ? 's' : ''} &middot; {totalParticipants} participant{totalParticipants > 1 ? 's' : ''}</p>
+              <p className="text-sm text-gray-500 mt-1">{items.length} item{items.length > 1 ? 's' : ''} &middot; {totalParticipants} participant{totalParticipants > 1 ? 's' : ''}</p>
             </div>
             <button onClick={() => { clearCart(); toast({ title: 'Cart cleared' }); }} data-testid="clear-cart-btn"
               className="text-xs text-red-500 hover:text-red-700 transition-colors">Clear All</button>

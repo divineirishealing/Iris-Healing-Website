@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Clock, Wifi, MapPin, Quote, ChevronLeft, ChevronRight, Send, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Wifi, MapPin, Quote, ChevronLeft, ChevronRight, Send, MessageCircle, ShoppingCart } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButtons from '../components/FloatingButtons';
 import { useCurrency } from '../context/CurrencyContext';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../hooks/use-toast';
 import { renderMarkdown } from '../lib/renderMarkdown';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import { HEADING, SUBTITLE } from '../lib/designTokens';
@@ -165,9 +167,12 @@ function SessionDetailPage() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [calendar, setCalendar] = useState({});
   const [testimonials, setTestimonials] = useState([]);
   const [currentT, setCurrentT] = useState(0);
+  const { addSessionItem } = useCart();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (settings && settings.sessions_page_visible === false) navigate('/', { replace: true });
@@ -374,11 +379,13 @@ function SessionDetailPage() {
           <BookingCalendar calendar={calendar} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
           {timeSlots.length > 0 && (
             <div className="mt-4">
-              <p className="text-[10px] text-white/50 font-medium mb-2 uppercase tracking-wider">Available Times</p>
+              <p className="text-[10px] text-white/50 font-medium mb-2 uppercase tracking-wider">Select a Time</p>
               <div className="flex flex-wrap gap-2">
                 {timeSlots.map((slot, i) => (
-                  <span key={i} className="px-3 py-1.5 rounded-full text-[10px] bg-white/10 text-white/70 border border-white/15 cursor-pointer transition-all"
-                    style={{ '--hover-bg': `${calendarAccent}33`, '--hover-color': calendarAccent }}
+                  <span key={i} onClick={() => setSelectedTimeSlot(slot)}
+                    className={`px-3 py-1.5 rounded-full text-[10px] border cursor-pointer transition-all ${
+                      selectedTimeSlot === slot ? 'bg-white/25 text-white border-white/50 font-semibold' : 'bg-white/10 text-white/70 border-white/15 hover:bg-white/15'
+                    }`}
                     data-testid={`detail-time-slot-${i}`}>
                     {slot}
                   </span>
@@ -386,11 +393,23 @@ function SessionDetailPage() {
               </div>
             </div>
           )}
-          <button onClick={() => navigate(`/enroll/session/${session.id}`)} data-testid="book-now-btn"
-            className="w-full mt-5 py-3.5 rounded-full text-sm tracking-widest uppercase font-medium transition-all duration-300 shadow-lg hover:scale-[1.02]"
-            style={{ background: `linear-gradient(135deg, ${buttonBg}, ${buttonBg}dd)`, color: buttonText }}>
-            Book Now
-          </button>
+          <div className="space-y-2 mt-5">
+            <button onClick={() => navigate(`/enroll/session/${session.id}`)} data-testid="book-now-btn"
+              className="w-full py-3.5 rounded-full text-sm tracking-widest uppercase font-medium transition-all duration-300 shadow-lg hover:scale-[1.02]"
+              style={{ background: `linear-gradient(135deg, ${buttonBg}, ${buttonBg}dd)`, color: buttonText }}>
+              Book Now
+            </button>
+            <button onClick={() => {
+                const added = addSessionItem(session, selectedDate, selectedTimeSlot);
+                if (added) toast({ title: `${session.title} added to cart` });
+                else toast({ title: 'Already in cart', variant: 'destructive' });
+              }}
+              data-testid="add-session-cart-detail-btn"
+              className="w-full py-3 rounded-full text-[11px] tracking-[0.15em] uppercase font-medium transition-all duration-300 border-2 flex items-center justify-center gap-2 hover:scale-[1.02]"
+              style={{ borderColor: `${buttonBg}80`, color: buttonBg, background: 'transparent' }}>
+              <ShoppingCart size={14} /> Add to Cart
+            </button>
+          </div>
         </div>
       </div>
     ),
