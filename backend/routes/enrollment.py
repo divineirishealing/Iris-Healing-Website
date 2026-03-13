@@ -76,14 +76,11 @@ class EmailValidation(BaseModel):
     email: str
 
 
-class PhoneOTPRequest(BaseModel):
-    phone: str
-    country_code: str = "+91"
+class EmailOTPRequest(BaseModel):
+    email: str
 
-
-class PhoneOTPVerify(BaseModel):
-    phone: str
-    country_code: str = "+91"
+class EmailOTPVerify(BaseModel):
+    email: str
     otp: str
 
 
@@ -205,23 +202,23 @@ async def start_enrollment(profile: ProfileData, request: Request):
 
 
 @router.post("/{enrollment_id}/send-otp")
-async def send_phone_otp(enrollment_id: str, data: PhoneOTPRequest):
-    """Step 3b: Send OTP to phone (MOCK - logs to console, ready for Firebase swap)"""
+async def send_email_otp(enrollment_id: str, data: EmailOTPRequest):
+    """Send OTP to email for verification"""
     enrollment = await db.enrollments.find_one({"id": enrollment_id})
     if not enrollment:
         raise HTTPException(status_code=404, detail="Enrollment not found")
 
-    phone = data.phone.strip()
-    if not re.match(r'^\d{7,15}$', phone):
-        raise HTTPException(status_code=400, detail="Invalid phone number format")
+    email = data.email.strip().lower()
+    if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+        raise HTTPException(status_code=400, detail="Invalid email address")
 
     # Generate 6-digit OTP
     otp = str(random.randint(100000, 999999))
     expires = datetime.now(timezone.utc) + timedelta(minutes=5)
 
     # Store OTP in DB
-    await db.phone_otps.update_one(
-        {"phone": f"{data.country_code}{phone}"},
+    await db.email_otps.update_one(
+        {"email": email, "enrollment_id": enrollment_id},
         {"$set": {
             "otp": otp,
             "expires": expires.isoformat(),
@@ -231,63 +228,63 @@ async def send_phone_otp(enrollment_id: str, data: PhoneOTPRequest):
         upsert=True,
     )
 
-    # MOCK: Log OTP (replace with Firebase/Twilio in production)
-    full_phone = f"{data.country_code}{phone}"
-    logger.info(f"[MOCK OTP] Phone: {full_phone} → OTP: {otp}")
-    print(f"\n{'='*50}")
-    print(f"  MOCK OTP for {full_phone}: {otp}")
-    print(f"{'='*50}\n")
+    # Send OTP email via SMTP
+    from routes.emails import send_otp_email
+    booker_name = enrollment.get("booker_name", "")
+    result = await send_otp_email(email, otp, booker_name)
+
+    logger.info(f"[EMAIL OTP] Email: {email} → OTP: {otp} (sent: {result is not None})")
 
     await db.enrollments.update_one(
         {"id": enrollment_id},
         {"$set": {
-            "phone": full_phone,
+            "email": email,
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }}
     )
 
+    masked_email = email[:2] + '***' + email[email.index('@'):]
     return {
         "sent": True,
-        "phone": f"{data.country_code}{'*' * (len(phone)-3)}{phone[-3:]}",
-        "message": "OTP sent to your phone. Valid for 5 minutes.",
-        # MOCK ONLY: Include OTP in response for testing. Remove in production.
-        "mock_otp": otp,
+        "email": masked_email,
+        "message": "Verification code sent to your email. Valid for 5 minutes.",
     }
 
 
 @router.post("/{enrollment_id}/verify-otp")
-async def verify_phone_otp(enrollment_id: str, data: PhoneOTPVerify):
-    """Step 3b: Verify phone OTP"""
-    full_phone = f"{data.country_code}{data.phone.strip()}"
+async def verify_email_otp(enrollment_id: str, data: EmailOTPVerify):
+    """Verify email OTP"""
+    email = data.email.strip().lower()
 
-    otp_record = await db.phone_otps.find_one({"phone": full_phone, "enrollment_id": enrollment_id})
+    otp_record = await db.email_otps.find_one({"email": email, "enrollment_id": enrollment_id})
     if not otp_record:
-        raise HTTPException(status_code=400, detail="No OTP sent for this number. Please request a new one.")
+        raise HTTPException(status_code=400, detail="No verification code sent for this email. Please request a new one.")
 
     # Check attempts
     if otp_record.get("attempts", 0) >= 5:
-        raise HTTPException(status_code=429, detail="Too many attempts. Please request a new OTP.")
+        raise HTTPException(status_code=429, detail="Too many attempts. Please request a new code.")
 
     # Increment attempts
-    await db.phone_otps.update_one(
-        {"phone": full_phone, "enrollment_id": enrollment_id},
+    await db.email_otps.update_one(
+        {"email": email, "enrollment_id": enrollment_id},
         {"$inc": {"attempts": 1}}
     )
 
     # Check expiry
     expires = datetime.fromisoformat(otp_record["expires"])
     if datetime.now(timezone.utc) > expires:
-        raise HTTPException(status_code=400, detail="OTP expired. Please request a new one.")
+        raise HTTPException(status_code=400, detail="Code expired. Please request a new one.")
 
     # Verify
     if data.otp != otp_record["otp"]:
         remaining = 5 - otp_record.get("attempts", 0) - 1
-        raise HTTPException(status_code=400, detail=f"Incorrect OTP. {remaining} attempts remaining.")
+        raise HTTPException(status_code=400, detail=f"Incorrect code. {remaining} attempts remaining.")
 
     # Mark verified
     await db.enrollments.update_one(
         {"id": enrollment_id},
         {"$set": {
+            "email_verified": True,
             "phone_verified": True,
             "step": 3,
             "status": "contact_verified",
@@ -296,9 +293,9 @@ async def verify_phone_otp(enrollment_id: str, data: PhoneOTPVerify):
     )
 
     # Cleanup OTP
-    await db.phone_otps.delete_one({"phone": full_phone, "enrollment_id": enrollment_id})
+    await db.email_otps.delete_one({"email": email, "enrollment_id": enrollment_id})
 
-    return {"verified": True, "message": "Phone verified successfully."}
+    return {"verified": True, "message": "Email verified successfully."}
 
 
 @router.get("/{enrollment_id}/pricing")

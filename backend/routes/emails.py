@@ -1,7 +1,8 @@
 import os
-import asyncio
 import logging
-import resend
+import aiosmtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -10,24 +11,66 @@ load_dotenv(ROOT_DIR / '.env')
 
 logger = logging.getLogger(__name__)
 
-resend.api_key = os.environ.get('RESEND_API_KEY')
-SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
+SMTP_HOST = os.environ.get('SMTP_HOST')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+SMTP_USER = os.environ.get('SMTP_USER')
+SMTP_PASS = os.environ.get('SMTP_PASS')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'noreply@divineirishealing.com')
+RECEIPT_EMAIL = os.environ.get('RECEIPT_EMAIL', 'receipt@divineirishealing.com')
 
 
-async def send_email(to: str, subject: str, html: str):
-    params = {
-        "from": SENDER_EMAIL,
-        "to": [to],
-        "subject": subject,
-        "html": html,
-    }
+async def send_email(to: str, subject: str, html: str, from_email: str = None):
+    sender = from_email or SENDER_EMAIL
+    msg = MIMEMultipart("alternative")
+    msg["From"] = sender
+    msg["To"] = to
+    msg["Subject"] = subject
+    msg.attach(MIMEText(html, "html"))
+
     try:
-        result = await asyncio.to_thread(resend.Emails.send, params)
-        logger.info(f"Email sent to {to}: {result.get('id', 'OK')}")
-        return result
+        await aiosmtplib.send(
+            msg,
+            hostname=SMTP_HOST,
+            port=SMTP_PORT,
+            start_tls=True,
+            username=SMTP_USER,
+            password=SMTP_PASS,
+        )
+        logger.info(f"Email sent to {to} via SMTP")
+        return {"id": "smtp_ok"}
     except Exception as e:
         logger.error(f"Failed to send email to {to}: {e}")
         return None
+
+
+async def send_otp_email(to: str, otp: str, name: str = ""):
+    """Send email OTP for verification"""
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0;padding:0;font-family:Georgia,'Times New Roman',serif;background:#f8f8f8">
+      <div style="max-width:500px;margin:0 auto;background:#ffffff">
+        <div style="background:#1a1a1a;padding:28px 24px;text-align:center">
+          <h1 style="color:#D4AF37;margin:0;font-size:22px;font-weight:400;letter-spacing:3px">DIVINE IRIS HEALING</h1>
+        </div>
+        <div style="padding:40px 32px;text-align:center">
+          <h2 style="color:#1a1a1a;font-size:20px;margin:0 0 8px;font-weight:400">Email Verification</h2>
+          <p style="color:#888;font-size:14px;margin:0 0 24px">Hi{' ' + name if name else ''}, use this code to verify your email:</p>
+          <div style="background:#faf8f0;border:2px solid #D4AF37;border-radius:12px;padding:20px;display:inline-block">
+            <span style="font-size:36px;font-weight:700;letter-spacing:8px;color:#1a1a1a;font-family:monospace">{otp}</span>
+          </div>
+          <p style="color:#aaa;font-size:12px;margin:20px 0 0">This code expires in 5 minutes. Do not share it with anyone.</p>
+        </div>
+        <div style="background:#1a1a1a;padding:20px;text-align:center">
+          <p style="color:#D4AF37;font-size:11px;margin:0;letter-spacing:2px">DIVINE IRIS HEALING</p>
+          <p style="color:#666;font-size:10px;margin:4px 0 0">This is an automated message. Please do not reply.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+    return await send_email(to, "Your Verification Code - Divine Iris Healing", html, from_email=SENDER_EMAIL)
 
 
 def enrollment_confirmation_email(booker_name, item_title, participants, total, currency_symbol, attendance_modes, booker_email, phone, program_links=None):
@@ -51,7 +94,6 @@ def enrollment_confirmation_email(booker_name, item_title, participants, total, 
           <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;font-size:13px;color:#555">{first_time}</td>
         </tr>"""
 
-    # Build links section
     links_html = ""
     if program_links:
         link_items = ""

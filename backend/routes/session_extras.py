@@ -128,11 +128,11 @@ async def reply_to_question(qid: str, data: dict):
     }})
     if send_email and existing.get("email"):
         try:
-            from routes.emails import send_email_via_resend
-            await send_email_via_resend(
-                to_email=existing["email"],
+            from routes.emails import send_email
+            await send_email(
+                to=existing["email"],
                 subject=f"Re: Your Question about {existing.get('session_id', 'our sessions')}",
-                html_content=f"<p>Dear {existing.get('name', 'Seeker')},</p><p>Thank you for your question.</p><p><strong>Your question:</strong> {existing['question']}</p><p><strong>Our response:</strong> {reply_text}</p><p>With love and light,<br>Divine Iris Healing</p>"
+                html=f"<p>Dear {existing.get('name', 'Seeker')},</p><p>Thank you for your question.</p><p><strong>Your question:</strong> {existing['question']}</p><p><strong>Our response:</strong> {reply_text}</p><p>With love and light,<br>Divine Iris Healing</p>"
             )
         except Exception as e:
             print(f"Email send failed: {e}")

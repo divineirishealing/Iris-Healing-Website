@@ -15,7 +15,7 @@ import os
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://purple-gold-design.preview.emergentagent.com"
+    BASE_URL = "https://divine-healing-admin.preview.emergentagent.com"
 
 
 class TestSettingsAboutFields:

@@ -202,8 +202,7 @@ function EnrollmentPage() {
   const [countryCode, setCountryCode] = useState('+971');
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [mockOtp, setMockOtp] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [discountSettings, setDiscountSettings] = useState({ enable_referral: true });
 
@@ -277,7 +276,6 @@ function EnrollmentPage() {
   const submitAndSendOtp = async () => {
     if (!bookerName.trim()) return toast({ title: 'Enter name', variant: 'destructive' });
     if (!bookerEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bookerEmail)) return toast({ title: 'Enter valid email', variant: 'destructive' });
-    if (!phone.trim() || phone.length < 7) return toast({ title: 'Enter valid phone', variant: 'destructive' });
     setLoading(true);
     try {
       const enrollRes = await axios.post(`${API}/enrollment/start`, {
@@ -286,21 +284,20 @@ function EnrollmentPage() {
       });
       setEnrollmentId(enrollRes.data.enrollment_id);
       setVpnDetected(enrollRes.data.vpn_detected);
-      const otpRes = await axios.post(`${API}/enrollment/${enrollRes.data.enrollment_id}/send-otp`, { phone, country_code: countryCode });
+      await axios.post(`${API}/enrollment/${enrollRes.data.enrollment_id}/send-otp`, { email: bookerEmail });
       setOtpSent(true);
-      if (otpRes.data.mock_otp) setMockOtp(otpRes.data.mock_otp);
-      toast({ title: 'OTP Sent!' });
+      toast({ title: 'Verification code sent to your email!' });
     } catch (err) { toast({ title: 'Error', description: err.response?.data?.detail || 'Failed', variant: 'destructive' }); }
     finally { setLoading(false); }
   };
 
   const verifyOtp = async () => {
-    if (otp.length !== 6) return toast({ title: 'Enter 6-digit OTP', variant: 'destructive' });
+    if (otp.length !== 6) return toast({ title: 'Enter 6-digit code', variant: 'destructive' });
     setLoading(true);
     try {
-      await axios.post(`${API}/enrollment/${enrollmentId}/verify-otp`, { phone, country_code: countryCode, otp });
-      setPhoneVerified(true); toast({ title: 'Phone verified!' }); setStep(3);
-    } catch { toast({ title: 'Wrong OTP', variant: 'destructive' }); }
+      await axios.post(`${API}/enrollment/${enrollmentId}/verify-otp`, { email: bookerEmail, otp });
+      setEmailVerified(true); toast({ title: 'Email verified!' }); setStep(3);
+    } catch (err) { toast({ title: err.response?.data?.detail || 'Wrong code', variant: 'destructive' }); }
     finally { setLoading(false); }
   };
 
@@ -455,28 +452,28 @@ function EnrollmentPage() {
                       <div><label className="text-[9px] text-gray-500">Country *</label>
                         <select data-testid="booker-country" value={bookerCountry} onChange={e => setBookerCountry(e.target.value)} className="w-full border rounded-md px-2 py-2 text-sm bg-white">
                           {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
-                      <div><label className="text-[9px] text-gray-500">Phone *</label>
+                      <div><label className="text-[9px] text-gray-500">Phone (optional)</label>
                         <div className="flex gap-1">
                           <select value={countryCode} onChange={e => setCountryCode(e.target.value)} className="border rounded-md px-1 py-2 text-xs w-20 bg-white">
                             {COUNTRIES.map(c => <option key={c.code} value={c.phone}>{c.phone}</option>)}</select>
-                          <Input data-testid="enroll-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, ''))} placeholder="Phone" className="text-sm flex-1" disabled={otpSent} />
+                          <Input data-testid="enroll-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, ''))} placeholder="Phone" className="text-sm flex-1" />
                         </div></div>
                     </div>
 
-                    {!otpSent && !phoneVerified && (
+                    {!otpSent && !emailVerified && (
                       <Button data-testid="send-otp-btn" onClick={submitAndSendOtp} disabled={loading} className="w-full bg-[#D4AF37] hover:bg-[#b8962e] text-white py-3 rounded-full mb-3">
-                        {loading ? <Loader2 className="animate-spin" size={16} /> : <><Phone size={14} className="mr-2" /> Verify & Continue</>}
+                        {loading ? <Loader2 className="animate-spin" size={16} /> : <><Mail size={14} className="mr-2" /> Verify Email & Continue</>}
                       </Button>
                     )}
-                    {otpSent && !phoneVerified && (
+                    {otpSent && !emailVerified && (
                       <div className="border rounded-lg p-4 bg-gray-50 mb-3">
-                        <p className="text-xs text-gray-600 mb-2">Enter OTP sent to {countryCode}{phone}</p>
+                        <p className="text-xs text-gray-600 mb-2">Enter the verification code sent to <strong>{bookerEmail}</strong></p>
                         <div className="flex gap-2">
-                          <Input data-testid="enroll-otp" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="OTP" maxLength={6} className="flex-1 text-center tracking-[0.5em] font-mono text-lg" />
+                          <Input data-testid="enroll-otp" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="000000" maxLength={6} className="flex-1 text-center tracking-[0.5em] font-mono text-lg" />
                           <Button data-testid="verify-otp-btn" onClick={verifyOtp} disabled={loading || otp.length !== 6} className="bg-[#D4AF37] hover:bg-[#b8962e] text-white">
                             {loading ? <Loader2 className="animate-spin" size={14} /> : 'Verify'}</Button>
                         </div>
-                        {mockOtp && <p data-testid="mock-otp-display" className="text-xs text-orange-500 mt-2 bg-orange-50 p-2 rounded text-center">Test OTP: <strong className="font-mono">{mockOtp}</strong></p>}
+                        <button onClick={() => { setOtpSent(false); setOtp(''); }} className="text-[10px] text-purple-600 mt-2 hover:underline">Resend code / change email</button>
                       </div>
                     )}
                     <Button variant="outline" onClick={() => setStep(1)} className="rounded-full"><ChevronLeft size={16} /> Back</Button>
