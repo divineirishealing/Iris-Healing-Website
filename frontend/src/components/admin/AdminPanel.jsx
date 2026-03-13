@@ -567,7 +567,7 @@ const AdminPanel = () => {
                         setSessions(sess.data);
                       } catch (err) {
                         console.error('Upload error:', err);
-                        toast({ title: err.response?.data?.detail || 'Upload failed. Check file format.', variant: 'destructive' });
+                        toast({ title: err.response?.data?.detail || 'Upload failed. Check file format.', variant: 'destructive', duration: 10000 });
                       }
                       setExcelUploading(false);
                     }}

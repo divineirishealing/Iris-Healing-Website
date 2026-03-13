@@ -40,24 +40,30 @@ async def upload_sessions_excel(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Excel file has no data rows")
 
     raw_headers = [str(h).strip().lower() if h else '' for h in rows[0]]
-    COL_MAP = {
-        'personal session title': 'title',
-        'description': 'description',
-        'session type': 'session_type',
-        'duration': 'duration',
-        'ee in inr': 'price_inr',
-        'ee in usd': 'price_usd',
-        'ee in aed': 'price_aed',
-    }
+
+    # Flexible column matching — matches partial keywords
     col_indices = {}
     for idx, h in enumerate(raw_headers):
-        for pattern, field in COL_MAP.items():
-            if pattern in h:
-                col_indices[field] = idx
-                break
+        if not h:
+            continue
+        if 'title' in h or 'session name' in h or 'name' in h:
+            if 'title' not in col_indices:  # first match wins
+                col_indices['title'] = idx
+        elif 'description' in h or 'desc' in h:
+            col_indices['description'] = idx
+        elif 'type' in h or 'mode' in h:
+            col_indices['session_type'] = idx
+        elif 'duration' in h or 'time' in h or 'mins' in h or 'minutes' in h:
+            col_indices['duration'] = idx
+        elif 'inr' in h:
+            col_indices['price_inr'] = idx
+        elif 'usd' in h:
+            col_indices['price_usd'] = idx
+        elif 'aed' in h:
+            col_indices['price_aed'] = idx
 
     if 'title' not in col_indices:
-        raise HTTPException(status_code=400, detail="Missing required column: 'Personal Session Title'")
+        raise HTTPException(status_code=400, detail=f"Could not find a title column. Found headers: {[str(h).strip() for h in rows[0] if h]}")
 
     created, updated, skipped = 0, 0, 0
     count = await db.sessions.count_documents({})
