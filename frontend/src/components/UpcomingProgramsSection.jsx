@@ -123,6 +123,12 @@ const UpcomingCard = ({ program }) => {
             <span className="bg-gray-900/80 text-white text-xs font-bold px-4 py-2 rounded-full tracking-wider uppercase">Registration Closed</span>
           </div>
         )}
+        {/* Countdown on bottom of image */}
+        {!expired && deadline && (
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-6">
+            <CountdownTimer deadline={deadline} />
+          </div>
+        )}
       </div>
 
       <div className="p-6 flex-1 flex flex-col">
@@ -130,79 +136,54 @@ const UpcomingCard = ({ program }) => {
         <h3 className="text-lg font-semibold text-gray-900 mb-2 leading-tight">{program.title}</h3>
         <p className="text-gray-500 text-sm leading-relaxed mb-4 line-clamp-3 flex-1">{program.description}</p>
 
-        {program.start_date && (
-          <div className="flex items-center gap-2 text-gray-500 text-xs mb-1"><Calendar size={14} /><span>Starts: {program.start_date}</span></div>
-        )}
-        {program.end_date && (
-          <div className="flex items-center gap-2 text-gray-500 text-xs mb-1"><Calendar size={14} /><span>Ends: {program.end_date}</span></div>
-        )}
-        {program.duration && (
-          <div className="flex items-center gap-2 text-gray-500 text-xs mb-1"><Clock size={14} /><span>Duration: {program.duration}</span></div>
-        )}
-        {program.timing && (
-          <div className="flex flex-col gap-1 text-gray-500 text-xs mb-3">
-            <div className="flex items-center gap-2">
-              <Clock size={14} />
-              <span>
-                {program.timing}
-                {program.time_zone ? ` ${program.time_zone}` : ''}
-              </span>
+        {/* Dates left | Duration & Time right */}
+        {(program.start_date || program.end_date || program.duration || program.timing) && (
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-gray-500 text-xs mb-3">
+            <div className="space-y-1">
+              {program.start_date && <div className="flex items-center gap-1.5"><Calendar size={12} /><span>Starts: {program.start_date}</span></div>}
+              {program.end_date && <div className="flex items-center gap-1.5"><Calendar size={12} /><span>Ends: {program.end_date}</span></div>}
             </div>
-            {program.time_zone && (() => {
-              try {
-                const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                const tzShort = new Date().toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
-                const programTz = program.time_zone;
-                // Only show local time if user's timezone differs from program timezone
-                if (!programTz.toLowerCase().includes(tzShort.toLowerCase()) && 
-                    !tzShort.toLowerCase().includes(programTz.split(' ')[0]?.toLowerCase())) {
-                  // Parse the timing string to extract start time
-                  const timeMatch = program.timing.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-                  if (timeMatch) {
-                    let hours = parseInt(timeMatch[1]);
-                    const minutes = parseInt(timeMatch[2]);
-                    const ampm = timeMatch[3].toUpperCase();
-                    if (ampm === 'PM' && hours !== 12) hours += 12;
-                    if (ampm === 'AM' && hours === 12) hours = 0;
-                    // Create a reference date with the program's time in UTC-ish context
-                    // Use the timezone offset from known abbreviations
-                    const tzOffsets = {
-                      'GST': 4, 'Gulf Standard Time': 4, 'Dubai': 4, 'UAE': 4,
-                      'IST': 5.5, 'India': 5.5,
-                      'EST': -5, 'EDT': -4, 'CST': -6, 'CDT': -5,
-                      'PST': -8, 'PDT': -7, 'MST': -7, 'MDT': -6,
-                      'GMT': 0, 'UTC': 0, 'BST': 1, 'CET': 1, 'CEST': 2,
-                      'AEST': 10, 'AEDT': 11, 'ACST': 9.5, 'AWST': 8,
-                      'JST': 9, 'KST': 9, 'SGT': 8, 'HKT': 8,
-                      'AST': 3, 'Arabia': 3, 'PKT': 5, 'WIB': 7
-                    };
-                    let programOffset = null;
-                    for (const [key, val] of Object.entries(tzOffsets)) {
-                      if (programTz.toUpperCase().includes(key.toUpperCase())) {
-                        programOffset = val;
-                        break;
-                      }
-                    }
-                    if (programOffset !== null) {
-                      const now = new Date();
-                      const utcMinutes = (hours * 60 + minutes) - (programOffset * 60);
-                      const localDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, utcMinutes + now.getTimezoneOffset() * -1);
-                      const localTimeStr = localDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                      return (
-                        <div className="flex items-center gap-2 text-blue-500 pl-5">
-                          <span>{localTimeStr} Your Time ({tzShort})</span>
-                        </div>
-                      );
-                    }
-                  }
-                }
-                return null;
-              } catch { return null; }
-            })()}
+            <div className="space-y-1">
+              {program.duration && <div className="flex items-center gap-1.5"><Clock size={12} /><span>{program.duration}</span></div>}
+              {program.timing && (
+                <div className="flex items-center gap-1.5">
+                  <Clock size={12} />
+                  <span>{program.timing}{program.time_zone ? ` ${program.time_zone}` : ''}</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
-
-        {deadline && <div className="mb-4"><CountdownTimer deadline={deadline} /></div>}
+        {program.timing && program.time_zone && (() => {
+          try {
+            const tzShort = new Date().toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop();
+            const programTz = program.time_zone;
+            if (!programTz.toLowerCase().includes(tzShort.toLowerCase()) && 
+                !tzShort.toLowerCase().includes(programTz.split(' ')[0]?.toLowerCase())) {
+              const timeMatch = program.timing.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+              if (timeMatch) {
+                let hours = parseInt(timeMatch[1]);
+                const minutes = parseInt(timeMatch[2]);
+                const ampm = timeMatch[3].toUpperCase();
+                if (ampm === 'PM' && hours !== 12) hours += 12;
+                if (ampm === 'AM' && hours === 12) hours = 0;
+                const tzOffsets = { 'GST': 4, 'Dubai': 4, 'UAE': 4, 'IST': 5.5, 'India': 5.5, 'EST': -5, 'EDT': -4, 'CST': -6, 'CDT': -5, 'PST': -8, 'PDT': -7, 'GMT': 0, 'UTC': 0, 'BST': 1, 'CET': 1, 'AEST': 10, 'JST': 9, 'SGT': 8, 'AST': 3, 'PKT': 5 };
+                let programOffset = null;
+                for (const [key, val] of Object.entries(tzOffsets)) {
+                  if (programTz.toUpperCase().includes(key.toUpperCase())) { programOffset = val; break; }
+                }
+                if (programOffset !== null) {
+                  const now = new Date();
+                  const utcMinutes = (hours * 60 + minutes) - (programOffset * 60);
+                  const localDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, utcMinutes + now.getTimezoneOffset() * -1);
+                  const localTimeStr = localDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                  return <p className="text-blue-500 text-xs mb-3">{localTimeStr} Your Time ({tzShort})</p>;
+                }
+              }
+            }
+            return null;
+          } catch { return null; }
+        })()}
 
         {!expired && program.offer_text && (
           <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-3 mb-4">
