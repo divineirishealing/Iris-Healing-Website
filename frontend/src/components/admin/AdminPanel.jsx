@@ -24,6 +24,7 @@ import NewsletterSettingsTab from './tabs/NewsletterSettingsTab';
 import HeaderFooterTab from './tabs/HeaderFooterTab';
 import EnrollmentsTab from './tabs/EnrollmentsTab';
 import { SessionCalendarManager, SessionTestimonialsManager, SessionQuestionsManager } from './tabs/SessionManagerTabs';
+import SessionVisibilityPanel from './tabs/SessionVisibilityPanel';
 import GlobalStylesTab from './tabs/GlobalStylesTab';
 import PromotionsTab from './tabs/PromotionsTab';
 import ExchangeRatesTab from './tabs/ExchangeRatesTab';
@@ -585,6 +586,10 @@ const AdminPanel = () => {
                   <Button data-testid="add-session-btn" onClick={() => { resetSessionForm(); setShowSessionForm(true); }} className="bg-[#D4AF37] hover:bg-[#b8962e]"><Plus size={16} className="mr-1" /> Add Session</Button>
                 </div>
               </div>
+
+              {/* Session Element Visibility & Order Control */}
+              <SessionVisibilityPanel settings={siteSettings} onChange={setSiteSettings} />
+              <Button data-testid="save-visibility-btn" onClick={saveSiteSettings} className="bg-[#D4AF37] hover:bg-[#b8962e] mb-4"><Save size={14} className="mr-1" /> Save Visibility Settings</Button>
 
               {/* Unified Calendar Manager */}
               <SessionCalendarManager toast={toast} />

@@ -105,6 +105,24 @@ const SessionsSection = ({ sectionConfig }) => {
   const purpleIntensity = sessionTpl.homepage_purple || 'medium';
   const purpleGradient = PURPLE_GRADIENTS[purpleIntensity] || PURPLE_GRADIENTS.medium;
 
+  // Visibility helpers — defaults match admin panel
+  const HOMEPAGE_LIST_DEFAULTS = { session_name: true, session_type: false, duration: false };
+  const vis = sessionTpl.visibility || {};
+  const getVisible = (section, key) => {
+    const items = vis[section];
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      if (section === 'homepage_list') return HOMEPAGE_LIST_DEFAULTS[key] ?? true;
+      return true;
+    }
+    const item = items.find(i => i.key === key);
+    return item ? item.visible !== false : true;
+  };
+  const getOrder = (section) => {
+    const items = vis[section];
+    if (!items || !Array.isArray(items) || items.length === 0) return null;
+    return items.filter(i => i.visible !== false).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map(i => i.key);
+  };
+
   useEffect(() => { loadSessions(); }, []);
 
   const loadSessions = async () => {
@@ -172,17 +190,25 @@ const SessionsSection = ({ sectionConfig }) => {
                         : 'border-l-[3px] border-l-transparent hover:bg-purple-25 hover:bg-purple-50/30'
                     }`}
                   >
-                    <span className={`block text-[13px] leading-snug mb-1 ${
-                      selectedSession?.id === session.id ? 'text-purple-900 font-semibold' : 'text-gray-700'
-                    }`}
-                      style={sessionTpl.title_style ? applySectionStyle(sessionTpl.title_style, { fontFamily: "'Lato', sans-serif" }) : { fontFamily: "'Lato', sans-serif" }}
-                    >
-                      {session.title}
-                    </span>
-                    <div className="flex items-center gap-2 text-gray-400 text-[10px]">
-                      <span className="flex items-center gap-1">{modeIcon(session.session_mode)} {modeLabel(session.session_mode)}</span>
-                      {session.duration && <span className="flex items-center gap-1"><Clock size={10} /> {session.duration}</span>}
-                    </div>
+                    {getVisible('homepage_list', 'session_name') && (
+                      <span className={`block text-[13px] leading-snug ${(getVisible('homepage_list', 'session_type') || getVisible('homepage_list', 'duration')) ? 'mb-1' : ''} ${
+                        selectedSession?.id === session.id ? 'text-purple-900 font-semibold' : 'text-gray-700'
+                      }`}
+                        style={sessionTpl.title_style ? applySectionStyle(sessionTpl.title_style, { fontFamily: "'Lato', sans-serif" }) : { fontFamily: "'Lato', sans-serif" }}
+                      >
+                        {session.title}
+                      </span>
+                    )}
+                    {(getVisible('homepage_list', 'session_type') || getVisible('homepage_list', 'duration')) && (
+                      <div className="flex items-center gap-2 text-gray-400 text-[10px]">
+                        {getVisible('homepage_list', 'session_type') && (
+                          <span className="flex items-center gap-1">{modeIcon(session.session_mode)} {modeLabel(session.session_mode)}</span>
+                        )}
+                        {getVisible('homepage_list', 'duration') && session.duration && (
+                          <span className="flex items-center gap-1"><Clock size={10} /> {session.duration}</span>
+                        )}
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
@@ -207,84 +233,87 @@ const SessionsSection = ({ sectionConfig }) => {
               </div>
             ) : (
               <div className="animate-fade-in space-y-6" data-testid={`session-detail-${selectedSession.id}`}>
-                {/* Session Header */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className={`text-[10px] px-3 py-1 rounded-full font-medium flex items-center gap-1 ${
-                      selectedSession.session_mode === 'offline' ? 'bg-teal-50 text-teal-600' :
-                      selectedSession.session_mode === 'both' ? 'bg-purple-50 text-purple-600' :
-                      'bg-blue-50 text-blue-600'
-                    }`}>
-                      {modeIcon(selectedSession.session_mode)} {modeLabel(selectedSession.session_mode)}
-                    </span>
-                    {selectedSession.duration && (
-                      <span className="text-[10px] px-3 py-1 rounded-full bg-gray-50 text-gray-500 flex items-center gap-1">
-                        <Clock size={10} /> {selectedSession.duration}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-gray-900 text-xl mb-4" style={sessionTpl.title_style ? applySectionStyle(sessionTpl.title_style, { fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 400, letterSpacing: '0.02em' }) : { fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 400, letterSpacing: '0.02em' }}
-                    data-testid="selected-session-title">
-                    {selectedSession.title}
-                  </h3>
-                  <p className="text-gray-500 text-sm leading-relaxed max-w-[600px]"
-                    style={selectedSession.description_style ? applySectionStyle(selectedSession.description_style, {}) : { fontFamily: "'Lato', sans-serif", lineHeight: '1.85' }}
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(selectedSession.description) }}
-                    data-testid="selected-session-description"
-                  />
-                </div>
-
-                {/* Testimonial */}
-                {selectedSession.testimonial_text && (
-                  <div className="bg-gradient-to-br from-purple-50/60 to-amber-50/30 rounded-xl p-5 border border-purple-100/40 relative" data-testid="session-testimonial">
-                    <Quote size={20} className="text-purple-200 absolute top-3 left-3" />
-                    <p className="text-gray-600 text-[13px] leading-relaxed italic pl-6"
-                      dangerouslySetInnerHTML={{ __html: renderMarkdown(selectedSession.testimonial_text) }} />
-                  </div>
-                )}
-
-                {/* Pricing */}
-                <div>
-                  {formatPrice(getPrice(selectedSession)) ? (
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-purple-700">{formatPrice(getPrice(selectedSession))}</span>
-                      <span className="text-gray-400 text-xs">per session</span>
-                    </div>
-                  ) : (
-                    <span className="text-sm text-gray-400 italic">Contact for pricing</span>
-                  )}
-                </div>
-
-                {/* Calendar + Time Slots */}
-                <div className="grid md:grid-cols-2 gap-5">
-                  <MiniCalendar
-                    availableDates={selectedSession.available_dates || []}
-                    selectedDate={selectedDate}
-                    onSelectDate={setSelectedDate}
-                  />
-                  <div className="space-y-4">
-                    {(selectedSession.time_slots && selectedSession.time_slots.length > 0) && (
-                      <div>
-                        <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Available Times</p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedSession.time_slots.map((slot, i) => (
-                            <span key={i} className="px-3 py-1.5 rounded-full text-xs bg-purple-50 text-purple-600 border border-purple-100 hover:bg-purple-100 cursor-pointer transition-all" data-testid={`time-slot-${i}`}>
-                              {slot}
-                            </span>
-                          ))}
-                        </div>
+                {(getOrder('homepage_detail') || ['session_type_badge','duration_badge','title','description','testimonial','price','calendar','time_slots','book_button']).map(key => {
+                  if (key === 'session_type_badge' || key === 'duration_badge') {
+                    // Render badges together on first encounter
+                    if (key === 'duration_badge') return null; // handled with session_type_badge
+                    const showType = getVisible('homepage_detail', 'session_type_badge');
+                    const showDur = getVisible('homepage_detail', 'duration_badge');
+                    if (!showType && !showDur) return null;
+                    return (
+                      <div key="badges" className="flex items-center gap-2">
+                        {showType && (
+                          <span className={`text-[10px] px-3 py-1 rounded-full font-medium flex items-center gap-1 ${
+                            selectedSession.session_mode === 'offline' ? 'bg-teal-50 text-teal-600' :
+                            selectedSession.session_mode === 'both' ? 'bg-purple-50 text-purple-600' :
+                            'bg-blue-50 text-blue-600'
+                          }`}>
+                            {modeIcon(selectedSession.session_mode)} {modeLabel(selectedSession.session_mode)}
+                          </span>
+                        )}
+                        {showDur && selectedSession.duration && (
+                          <span className="text-[10px] px-3 py-1 rounded-full bg-gray-50 text-gray-500 flex items-center gap-1">
+                            <Clock size={10} /> {selectedSession.duration}
+                          </span>
+                        )}
                       </div>
-                    )}
-                    <button
-                      onClick={() => navigate(`/session/${selectedSession.id}`)}
-                      data-testid="book-session-btn"
+                    );
+                  }
+                  if (key === 'title') return (
+                    <h3 key="title" className="text-gray-900 text-xl" style={sessionTpl.title_style ? applySectionStyle(sessionTpl.title_style, { fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 400, letterSpacing: '0.02em' }) : { fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 400, letterSpacing: '0.02em' }}
+                      data-testid="selected-session-title">
+                      {selectedSession.title}
+                    </h3>
+                  );
+                  if (key === 'description') return (
+                    <p key="desc" className="text-gray-500 text-sm leading-relaxed max-w-[600px]"
+                      style={selectedSession.description_style ? applySectionStyle(selectedSession.description_style, {}) : { fontFamily: "'Lato', sans-serif", lineHeight: '1.85' }}
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(selectedSession.description) }}
+                      data-testid="selected-session-description" />
+                  );
+                  if (key === 'testimonial' && selectedSession.testimonial_text) return (
+                    <div key="test" className="bg-gradient-to-br from-purple-50/60 to-amber-50/30 rounded-xl p-5 border border-purple-100/40 relative" data-testid="session-testimonial">
+                      <Quote size={20} className="text-purple-200 absolute top-3 left-3" />
+                      <p className="text-gray-600 text-[13px] leading-relaxed italic pl-6"
+                        dangerouslySetInnerHTML={{ __html: renderMarkdown(selectedSession.testimonial_text) }} />
+                    </div>
+                  );
+                  if (key === 'price') return (
+                    <div key="price">
+                      {formatPrice(getPrice(selectedSession)) ? (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-bold text-purple-700">{formatPrice(getPrice(selectedSession))}</span>
+                          <span className="text-gray-400 text-xs">per session</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">Contact for pricing</span>
+                      )}
+                    </div>
+                  );
+                  if (key === 'calendar') return (
+                    <MiniCalendar key="cal" availableDates={selectedSession.available_dates || []} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+                  );
+                  if (key === 'time_slots' && selectedSession.time_slots?.length > 0) return (
+                    <div key="slots">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Available Times</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedSession.time_slots.map((slot, i) => (
+                          <span key={i} className="px-3 py-1.5 rounded-full text-xs bg-purple-50 text-purple-600 border border-purple-100 hover:bg-purple-100 cursor-pointer transition-all" data-testid={`time-slot-${i}`}>
+                            {slot}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                  if (key === 'book_button') return (
+                    <button key="book" onClick={() => navigate(`/session/${selectedSession.id}`)} data-testid="book-session-btn"
                       className="w-full py-3.5 rounded-full text-[11px] tracking-[0.2em] uppercase font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] text-white"
-                      style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)' }}
-                    >
+                      style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)' }}>
                       View Details & Book
                     </button>
-                  </div>
-                </div>
+                  );
+                  return null;
+                })}
               </div>
             )}
           </main>

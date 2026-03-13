@@ -214,6 +214,184 @@ function SessionDetailPage() {
   const bodyGradient = LIGHT_PURPLE_GRADIENTS[purpleIntensity] || LIGHT_PURPLE_GRADIENTS.medium;
   const heroStarCount = purpleIntensity === 'strong' ? 100 : purpleIntensity === 'light' ? 50 : 80;
 
+  // Visibility helpers
+  const vis = sessionTpl.visibility || {};
+  const isVisible = (section, key) => {
+    const items = vis[section];
+    if (!items || !Array.isArray(items)) return true;
+    const item = items.find(i => i.key === key);
+    return item ? item.visible !== false : true;
+  };
+  const getOrder = (section) => {
+    const items = vis[section];
+    if (!items || !Array.isArray(items)) return null;
+    return items.filter(i => i.visible !== false).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map(i => i.key);
+  };
+
+  // Hero elements map
+  const heroElements = {
+    back_button: (
+      <button key="back" onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/40 hover:text-white text-xs mb-8 transition-colors" data-testid="back-btn">
+        <ArrowLeft size={16} /> Back
+      </button>
+    ),
+    session_type_badge: (
+      <span key="type" className={`text-[10px] px-3 py-1 rounded-full font-medium flex items-center gap-1 ${
+        session.session_mode === 'offline' ? 'bg-teal-400/15 text-teal-200 border border-teal-400/20' :
+        session.session_mode === 'both' ? 'bg-purple-300/15 text-purple-200 border border-purple-300/20' :
+        'bg-blue-400/15 text-blue-200 border border-blue-400/20'
+      }`}>
+        {session.session_mode === 'offline' ? <MapPin size={12} /> : <Wifi size={12} />}
+        {modeLabel(session.session_mode)}
+      </span>
+    ),
+    duration_badge: session.duration ? (
+      <span key="dur" className="text-[10px] px-3 py-1 rounded-full bg-white/8 text-white/50 flex items-center gap-1 border border-white/10">
+        <Clock size={10} /> {session.duration}
+      </span>
+    ) : null,
+    title: (
+      <h1 key="title" className="mb-3" data-testid="session-detail-title"
+        style={applyStyle(hero.title_style || sessionTpl.title_style, { ...HEADING, color: '#fff', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontVariant: 'small-caps', letterSpacing: '0.08em' })}>
+        {session.title}
+      </h1>
+    ),
+    gold_line: <div key="line" className="w-16 h-0.5 mb-4" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />,
+    price: formatPrice(getPrice(session)) ? <span key="price" className="text-xl font-bold text-[#D4AF37]">{formatPrice(getPrice(session))}</span> : null,
+  };
+
+  const heroOrder = getOrder('detail_hero') || ['back_button','session_type_badge','duration_badge','title','gold_line','price'];
+  // Group badges together
+  const renderHeroItems = () => {
+    const items = [];
+    let badgesRendered = false;
+    heroOrder.forEach(key => {
+      if (key === 'session_type_badge' || key === 'duration_badge') {
+        if (!badgesRendered) {
+          badgesRendered = true;
+          const showType = heroOrder.includes('session_type_badge');
+          const showDur = heroOrder.includes('duration_badge');
+          if (showType || showDur) {
+            items.push(
+              <div key="badges" className="flex items-center gap-3 mb-4">
+                {showType && heroElements.session_type_badge}
+                {showDur && heroElements.duration_badge}
+              </div>
+            );
+          }
+        }
+      } else if (key === 'back_button') {
+        items.push(heroElements.back_button);
+      } else {
+        if (heroElements[key]) items.push(heroElements[key]);
+      }
+    });
+    return items;
+  };
+
+  // Body elements map
+  const bodyLeftElements = {
+    about_section: (
+      <div key="about">
+        <h2 className="text-lg font-semibold mb-4" style={applyStyle(sessionTpl.title_style, { fontFamily: "'Cinzel', serif", color: '#4c1d95' })}>About This Session</h2>
+        <div className="text-sm leading-relaxed" style={applyStyle(sessionTpl.description_style, { color: '#4a4a5a', fontFamily: "'Lato', sans-serif" })}
+          dangerouslySetInnerHTML={{ __html: renderMarkdown(session.description) }} />
+      </div>
+    ),
+    testimonials: testimonials.length > 0 ? (
+      <div key="test" data-testid="session-testimonials">
+        <h2 className="text-lg font-semibold mb-6" style={applyStyle(sessionTpl.testimonial_style, { fontFamily: "'Cinzel', serif", color: '#4c1d95', fontStyle: 'italic' })}>
+          What Clients Say
+        </h2>
+        <div className="space-y-4">
+          {testimonials.slice(0, 6).map((t, idx) => (
+            <div key={t.id} data-testid={`session-testimonial-${idx}`}
+              className="relative bg-purple-50/50 border border-purple-100 rounded-xl p-5">
+              <Quote size={20} className="text-purple-200 absolute top-3 left-3" />
+              <p className="text-gray-600 text-sm leading-relaxed italic pl-6 mb-3"
+                style={applyStyle(sessionTpl.testimonial_style)}>{t.text}</p>
+              <div className="flex items-center gap-3 pl-6">
+                {t.client_photo && <img src={resolveImageUrl(t.client_photo)} alt="" className="w-8 h-8 rounded-full object-cover border border-purple-200" />}
+                <span className="text-xs text-purple-700/80 font-medium">{t.client_name || 'Anonymous'}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ) : null,
+    info_cards: (
+      <div key="cards" className="grid md:grid-cols-2 gap-5">
+        <div className="bg-purple-50/40 border border-purple-100 p-5 rounded-xl">
+          <h3 className="text-sm font-semibold mb-3" style={{ color: '#4c1d95', fontFamily: "'Cinzel', serif" }}>What to Expect</h3>
+          <ul className="space-y-2 text-gray-600 text-xs">
+            <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Personalized healing approach</li>
+            <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Safe and supportive environment</li>
+            <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Immediate energetic shifts</li>
+            <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Practical guidance for integration</li>
+          </ul>
+        </div>
+        <div className="bg-purple-50/40 border border-purple-100 p-5 rounded-xl">
+          <h3 className="text-sm font-semibold mb-3" style={{ color: '#4c1d95', fontFamily: "'Cinzel', serif" }}>Who Is This For</h3>
+          <ul className="space-y-2 text-gray-600 text-xs">
+            <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Anyone seeking deep healing</li>
+            <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Those ready for transformation</li>
+            <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Individuals committed to growth</li>
+            <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Open to energetic work</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  };
+
+  const bodyRightElements = {
+    booking_sidebar: (
+      <div key="booking" className="rounded-2xl overflow-hidden relative" data-testid="booking-section"
+        style={{ background: heroGradient }}>
+        <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 400 50" preserveAspectRatio="none" style={{ height: '40px', opacity: 0.12 }}>
+          <path d="M0,25 C100,50 200,0 300,25 C350,37 380,15 400,25 L400,50 L0,50 Z" fill="#D4AF37">
+            <animate attributeName="d" dur="8s" repeatCount="indefinite" values="M0,25 C100,50 200,0 300,25 C350,37 380,15 400,25 L400,50 L0,50 Z;M0,30 C100,10 200,40 300,20 C350,10 380,35 400,30 L400,50 L0,50 Z;M0,25 C100,50 200,0 300,25 C350,37 380,15 400,25 L400,50 L0,50 Z" />
+          </path>
+        </svg>
+        <StarField count={15} color="#D4AF37" />
+        <div className="relative z-10 p-5">
+          <p className="text-[10px] text-[#D4AF37] font-medium uppercase tracking-widest mb-4">Book Your Session</p>
+          <BookingCalendar calendar={calendar} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+          {timeSlots.length > 0 && (
+            <div className="mt-4">
+              <p className="text-[10px] text-white/50 font-medium mb-2 uppercase tracking-wider">Available Times</p>
+              <div className="flex flex-wrap gap-2">
+                {timeSlots.map((slot, i) => (
+                  <span key={i} className="px-3 py-1.5 rounded-full text-[10px] bg-white/10 text-white/70 border border-white/15 hover:bg-[#D4AF37]/20 hover:text-[#D4AF37] hover:border-[#D4AF37]/30 cursor-pointer transition-all" data-testid={`detail-time-slot-${i}`}>
+                    {slot}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <button onClick={() => navigate(`/enroll/session/${session.id}`)} data-testid="book-now-btn"
+            className="w-full mt-5 py-3.5 rounded-full text-sm tracking-widest uppercase font-medium transition-all duration-300 shadow-lg hover:shadow-[#D4AF37]/20 hover:scale-[1.02]"
+            style={{ background: 'linear-gradient(135deg, #D4AF37, #b8962e)', color: '#1a1a1a' }}>
+            Book Now
+          </button>
+        </div>
+      </div>
+    ),
+    question_form: (
+      <div key="qform" className="rounded-2xl overflow-hidden p-5 border border-purple-100 bg-purple-50/30">
+        <p className="text-[10px] text-purple-700 font-medium uppercase tracking-widest mb-3">
+          <MessageCircle size={12} className="inline mr-1" /> Ask a Question
+        </p>
+        <QuestionForm sessionId={id} sessionTpl={sessionTpl} whiteTheme />
+      </div>
+    ),
+  };
+
+  const bodyOrder = getOrder('detail_body') || ['about_section','testimonials','info_cards','booking_sidebar','question_form'];
+  const leftKeys = ['about_section', 'testimonials', 'info_cards'];
+  const rightKeys = ['booking_sidebar', 'question_form'];
+  const orderedLeftKeys = bodyOrder.filter(k => leftKeys.includes(k));
+  const orderedRightKeys = bodyOrder.filter(k => rightKeys.includes(k));
+
   return (
     <>
       <Header />
@@ -234,33 +412,8 @@ function SessionDetailPage() {
           </svg>
 
           <div className="container mx-auto px-6 md:px-8 lg:px-12 relative z-10">
-            <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/40 hover:text-white text-xs mb-8 transition-colors" data-testid="back-btn">
-              <ArrowLeft size={16} /> Back
-            </button>
             <div className="max-w-3xl">
-              <div className="flex items-center gap-3 mb-4">
-                <span className={`text-[10px] px-3 py-1 rounded-full font-medium flex items-center gap-1 ${
-                  session.session_mode === 'offline' ? 'bg-teal-400/15 text-teal-200 border border-teal-400/20' :
-                  session.session_mode === 'both' ? 'bg-purple-300/15 text-purple-200 border border-purple-300/20' :
-                  'bg-blue-400/15 text-blue-200 border border-blue-400/20'
-                }`}>
-                  {session.session_mode === 'offline' ? <MapPin size={12} /> : <Wifi size={12} />}
-                  {modeLabel(session.session_mode)}
-                </span>
-                {session.duration && (
-                  <span className="text-[10px] px-3 py-1 rounded-full bg-white/8 text-white/50 flex items-center gap-1 border border-white/10">
-                    <Clock size={10} /> {session.duration}
-                  </span>
-                )}
-              </div>
-              <h1 className="mb-3" data-testid="session-detail-title"
-                style={applyStyle(hero.title_style || sessionTpl.title_style, { ...HEADING, color: '#fff', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontVariant: 'small-caps', letterSpacing: '0.08em' })}>
-                {session.title}
-              </h1>
-              <div className="w-16 h-0.5 mb-4" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
-              {formatPrice(getPrice(session)) && (
-                <span className="text-xl font-bold text-[#D4AF37]">{formatPrice(getPrice(session))}</span>
-              )}
+              {renderHeroItems()}
             </div>
           </div>
         </div>
@@ -270,108 +423,12 @@ function SessionDetailPage() {
           <div className="max-w-5xl mx-auto grid lg:grid-cols-5 gap-10">
             {/* Left — About + Testimonials */}
             <div className="lg:col-span-3 space-y-8">
-              <div>
-                <h2 className="text-lg font-semibold mb-4" style={applyStyle(sessionTpl.title_style, { fontFamily: "'Cinzel', serif", color: '#4c1d95' })}>About This Session</h2>
-                <div className="text-sm leading-relaxed" style={applyStyle(sessionTpl.description_style, { color: '#4a4a5a', fontFamily: "'Lato', sans-serif" })}
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(session.description) }} />
-              </div>
-
-              {/* Session Testimonials */}
-              {testimonials.length > 0 && (
-                <div data-testid="session-testimonials">
-                  <h2 className="text-lg font-semibold mb-6" style={applyStyle(sessionTpl.testimonial_style, { fontFamily: "'Cinzel', serif", color: '#4c1d95', fontStyle: 'italic' })}>
-                    What Clients Say
-                  </h2>
-                  <div className="space-y-4">
-                    {testimonials.slice(0, 6).map((t, idx) => (
-                      <div key={t.id} data-testid={`session-testimonial-${idx}`}
-                        className="relative bg-purple-50/50 border border-purple-100 rounded-xl p-5">
-                        <Quote size={20} className="text-purple-200 absolute top-3 left-3" />
-                        <p className="text-gray-600 text-sm leading-relaxed italic pl-6 mb-3"
-                          style={applyStyle(sessionTpl.testimonial_style)}>{t.text}</p>
-                        <div className="flex items-center gap-3 pl-6">
-                          {t.client_photo && <img src={resolveImageUrl(t.client_photo)} alt="" className="w-8 h-8 rounded-full object-cover border border-purple-200" />}
-                          <span className="text-xs text-purple-700/80 font-medium">{t.client_name || 'Anonymous'}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Info cards */}
-              <div className="grid md:grid-cols-2 gap-5">
-                <div className="bg-purple-50/40 border border-purple-100 p-5 rounded-xl">
-                  <h3 className="text-sm font-semibold mb-3" style={{ color: '#4c1d95', fontFamily: "'Cinzel', serif" }}>What to Expect</h3>
-                  <ul className="space-y-2 text-gray-600 text-xs">
-                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Personalized healing approach</li>
-                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Safe and supportive environment</li>
-                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Immediate energetic shifts</li>
-                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Practical guidance for integration</li>
-                  </ul>
-                </div>
-                <div className="bg-purple-50/40 border border-purple-100 p-5 rounded-xl">
-                  <h3 className="text-sm font-semibold mb-3" style={{ color: '#4c1d95', fontFamily: "'Cinzel', serif" }}>Who Is This For</h3>
-                  <ul className="space-y-2 text-gray-600 text-xs">
-                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Anyone seeking deep healing</li>
-                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Those ready for transformation</li>
-                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Individuals committed to growth</li>
-                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Open to energetic work</li>
-                  </ul>
-                </div>
-              </div>
+              {orderedLeftKeys.map(key => bodyLeftElements[key])}
             </div>
 
             {/* Right Sidebar — Booking + Question */}
             <div className="lg:col-span-2 space-y-5">
-              {/* Purple gradient booking section with golden waves */}
-              <div className="rounded-2xl overflow-hidden relative" data-testid="booking-section"
-                style={{ background: heroGradient }}>
-                {/* Golden wave overlay */}
-                <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 400 50" preserveAspectRatio="none" style={{ height: '40px', opacity: 0.12 }}>
-                  <path d="M0,25 C100,50 200,0 300,25 C350,37 380,15 400,25 L400,50 L0,50 Z" fill="#D4AF37">
-                    <animate attributeName="d" dur="8s" repeatCount="indefinite" values="M0,25 C100,50 200,0 300,25 C350,37 380,15 400,25 L400,50 L0,50 Z;M0,30 C100,10 200,40 300,20 C350,10 380,35 400,30 L400,50 L0,50 Z;M0,25 C100,50 200,0 300,25 C350,37 380,15 400,25 L400,50 L0,50 Z" />
-                  </path>
-                </svg>
-                <StarField count={15} color="#D4AF37" />
-
-                <div className="relative z-10 p-5">
-                  <p className="text-[10px] text-[#D4AF37] font-medium uppercase tracking-widest mb-4">Book Your Session</p>
-
-                  <BookingCalendar calendar={calendar} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
-
-                  {timeSlots.length > 0 && (
-                    <div className="mt-4">
-                      <p className="text-[10px] text-white/50 font-medium mb-2 uppercase tracking-wider">Available Times</p>
-                      <div className="flex flex-wrap gap-2">
-                        {timeSlots.map((slot, i) => (
-                          <span key={i} className="px-3 py-1.5 rounded-full text-[10px] bg-white/10 text-white/70 border border-white/15 hover:bg-[#D4AF37]/20 hover:text-[#D4AF37] hover:border-[#D4AF37]/30 cursor-pointer transition-all" data-testid={`detail-time-slot-${i}`}>
-                            {slot}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => navigate(`/enroll/session/${session.id}`)}
-                    data-testid="book-now-btn"
-                    className="w-full mt-5 py-3.5 rounded-full text-sm tracking-widest uppercase font-medium transition-all duration-300 shadow-lg hover:shadow-[#D4AF37]/20 hover:scale-[1.02]"
-                    style={{ background: 'linear-gradient(135deg, #D4AF37, #b8962e)', color: '#1a1a1a' }}
-                  >
-                    Book Now
-                  </button>
-                </div>
-              </div>
-
-              {/* Question Form */}
-              <div className="rounded-2xl overflow-hidden p-5 border border-purple-100 bg-purple-50/30">
-                <p className="text-[10px] text-purple-700 font-medium uppercase tracking-widest mb-3">
-                  <MessageCircle size={12} className="inline mr-1" /> Ask a Question
-                </p>
-                <QuestionForm sessionId={id} sessionTpl={sessionTpl} whiteTheme />
-              </div>
-
+              {orderedRightKeys.map(key => bodyRightElements[key])}
               <p className="text-[10px] text-gray-400 text-center leading-relaxed px-4">
                 Sessions conducted online via Zoom or in-person by appointment. Each session is customized to your unique healing needs.
               </p>
