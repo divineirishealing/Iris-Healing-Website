@@ -22,56 +22,45 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive
 
 ## Implemented Features
 
+### Program Timing & Local Timezone (Mar 13, 2026) - COMPLETED
+- [x] Added `timing` and `time_zone` fields to Program backend model
+- [x] Program detail page hero displays duration, start_date, timing, and timezone
+- [x] Local timezone conversion shown in blue ("X:XX PM Your Time (TZ)")
+- [x] Upcoming Programs cards show timing with localized conversion
+- [x] Admin panel supports editing timing and timezone per program
+- [x] Gracefully handles programs without timing data
+- [x] All tests passing (9/9 backend, 100% frontend - iteration 43)
+
 ### Email OTP Verification (Mar 13, 2026) - COMPLETED
 - [x] Switched from Resend to Google Workspace SMTP
 - [x] Sends OTP from noreply@divineirishealing.com via smtp.gmail.com:587
 - [x] 6-digit OTP with 5-minute expiry, max 5 attempts
 - [x] Frontend enrollment page fully updated for email OTP flow
-- [x] Verified end-to-end: enrollment start → send OTP → receive email → verify OTP
-- [x] All backend and frontend tests passing (14/14 backend, 100% frontend)
 
 ### Payment Settings & Anti-Fraud (Mar 13, 2026) - COMPLETED
 - [x] Phone cross-validation for Indian pricing (IP + country + phone must all match India)
-- [x] Foreigners in India with non-+91 phone get AED/USD, not INR
-- [x] Regional currency mapping: UAE/Gulf→AED, US/UK/EU/AU→USD, India→INR
-- [x] Auto country code population in enrollment form when country changes
+- [x] Regional currency mapping: UAE/Gulf->AED, US/UK/EU/AU->USD, India->INR
+- [x] Auto country code population in enrollment form
 - [x] Payment disclaimer text on enrollment pages (configurable from admin)
-- [x] India-specific payment options (Exly, GPay, Bank Transfer) as admin-configurable redirect links
-- [x] New "Payments" admin tab for managing disclaimer and India payment links
-- [x] All tests passing (17/17 backend, 100% frontend - iteration 42)
-- [x] New "API Keys" tab in admin panel sidebar
-- [x] **Fully editable** — paste/edit keys directly in the admin panel
-- [x] Keys stored in MongoDB (api_keys collection), falls back to .env
-- [x] 8 managed keys: Stripe, SMTP Host/Port/User/Pass, Sender Email, Receipt Email, Resend
-- [x] Grouped by service (Payments, Email, Email Config)
-- [x] Password masking for sensitive keys, eye toggle, copy button
-- [x] "Custom" badge for admin-saved keys, "Unsaved" badge for pending changes
-- [x] Save button + sticky bottom save bar
-- [x] Services (email, payments) dynamically read keys from key_manager
-- [x] Backend: GET/PUT /api/admin/api-keys, key_manager.py
-- [x] All tests passing (14/14 backend, 10/10 frontend - iteration 41)
+- [x] India-specific payment options (Exly, GPay, Bank Transfer)
+- [x] New "Payments" admin tab and "API Keys" admin tab
+- [x] Keys stored in MongoDB, falls back to .env
 
 ### Personal Sessions Visual Redesign & Admin Controls
 - [x] Purple gradient intensity controls (homepage & detail page)
-- [x] White background for content area
-- [x] Star field prominence in hero section
-- [x] Comprehensive visibility/reordering panel for homepage & detail page elements
+- [x] Comprehensive visibility/reordering panel
 - [x] Extensive style controls: fonts, colors for hero, body, buttons, calendar
-- [x] Editable info cards ("What to Expect", "Who Is This For")
-- [x] Editable text fields for various UI elements
+- [x] Editable info cards
 - [x] Per-session and global special offer system
 
-### Multi-Item Cart
-- [x] Add sessions with date/time to cart
-- [x] CartContext updated for session items
-- [x] CartPage handles session item display and pricing
-
-### Dynamic Header & Footer Navigation
-- [x] Admin-configurable navigation items
-- [x] Sorted by length, capitalized labels
-- [x] Special link handling (Services → Personal Sessions, Media → media page)
+### Luxury Email Receipt - COMPLETED
+- [x] Customizable HTML receipt template
+- [x] Admin tab with controls for fonts, colors, content toggles
+- [x] Send Preview function
 
 ### Other Completed Features
+- [x] Multi-Item Cart
+- [x] Dynamic Header & Footer Navigation
 - [x] Unified Design System with Cinzel/Lato fonts
 - [x] Program Detail Page with admin sections
 - [x] About Page with admin editors
@@ -85,6 +74,7 @@ Build a pixel-perfect clone of https://divineirishealing.com/ with comprehensive
 - [x] Session calendar, testimonials, questions managers
 - [x] Excel upload for sessions
 - [x] Image upload system
+- [x] Global pricing font control
 
 ## Pending / Upcoming Tasks
 
