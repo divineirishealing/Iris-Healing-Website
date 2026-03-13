@@ -395,6 +395,9 @@ class SiteSettings(BaseModel):
     sections: Optional[Dict] = {}
     # Program section template — defines section structure for ALL program pages
     program_section_template: List[Dict] = []
+    # Footer navigation menu items
+    footer_menu_items: List[Dict] = []  # [{label: "Home", href: "/", visible: true}, ...]
+    footer_show_programs: bool = True  # Show programs column in footer
     # Discount & Loyalty Settings (global for all flagship programs)
     enable_referral: bool = True
     enable_group_discount: bool = False
@@ -500,6 +503,8 @@ class SiteSettingsUpdate(BaseModel):
     sender_emails: Optional[List[Dict]] = None
     sections: Optional[Dict] = None
     program_section_template: Optional[List[Dict]] = None
+    footer_menu_items: Optional[List[Dict]] = None
+    footer_show_programs: Optional[bool] = None
     enable_referral: Optional[bool] = None
     enable_group_discount: Optional[bool] = None
     group_discount_rules: Optional[List[Dict]] = None

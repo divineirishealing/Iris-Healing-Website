@@ -51,6 +51,28 @@ const Footer = () => {
 
   const s = settings || {};
 
+  const DEFAULT_MENU = [
+    { label: 'Home', href: '/', visible: true },
+    { label: 'About', href: '/about', visible: true },
+    { label: 'Media', href: '/media', visible: true },
+    { label: 'Contact', href: '/#contact', visible: true },
+    { label: 'Services', href: '/#sessions', visible: true },
+    { label: 'Transformations', href: '/transformations', visible: true },
+    { label: 'Upcoming Sessions', href: '/sessions', visible: true },
+  ];
+  const footerMenuItems = (s.footer_menu_items?.length ? s.footer_menu_items : DEFAULT_MENU)
+    .filter(item => item.visible !== false)
+    .sort((a, b) => a.label.length - b.label.length);
+
+  const handleMenuClick = (href) => {
+    if (href.startsWith('/#')) {
+      navigate('/');
+      setTimeout(() => document.getElementById(href.replace('/#',''))?.scrollIntoView({ behavior:'smooth' }), 300);
+    } else {
+      navigate(href);
+    }
+  };
+
   const socialLinks = [
     { key: 'facebook', url: s.social_facebook, show: s.show_facebook !== false },
     { key: 'instagram', url: s.social_instagram, show: s.show_instagram !== false },
@@ -89,17 +111,9 @@ const Footer = () => {
           <div>
             <h4 className="text-xs font-medium mb-3 tracking-wider text-gray-300">MENU</h4>
             <ul className="space-y-1.5 text-gray-400 text-[11px]">
-              {[
-                { label: 'Home', href: '/' },
-                { label: 'About', href: '/about' },
-                { label: 'Media', href: '/media' },
-                { label: 'Contact', href: '/#contact' },
-                { label: 'Services', href: '/#sessions' },
-                { label: 'Transformations', href: '/transformations' },
-                { label: 'Upcoming Sessions', href: '/sessions' },
-              ].sort((a, b) => a.label.length - b.label.length).map(item => (
+              {footerMenuItems.map(item => (
                 <li key={item.label}>
-                  <button onClick={() => { if (item.href.startsWith('/#')) { navigate('/'); setTimeout(() => document.getElementById(item.href.replace('/#',''))?.scrollIntoView({ behavior:'smooth' }), 300); } else { navigate(item.href); } }}
+                  <button onClick={() => handleMenuClick(item.href)}
                     className="hover:text-[#D4AF37] transition-colors text-left">{item.label}</button>
                 </li>
               ))}

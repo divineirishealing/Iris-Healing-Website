@@ -48,6 +48,8 @@ async def update_settings(settings: SiteSettingsUpdate):
         update_data['sender_emails'] = raw['sender_emails']
     if raw.get('program_section_template') is not None:
         update_data['program_section_template'] = raw['program_section_template']
+    if raw.get('footer_menu_items') is not None:
+        update_data['footer_menu_items'] = raw['footer_menu_items']
     existing = await db.site_settings.find_one({"id": "site_settings"})
     if not existing:
         full_settings = {**DEFAULT_SETTINGS, **update_data}

@@ -52,6 +52,20 @@ const Header = () => {
     { key: 'linkedin', url: 'https://linkedin.com', show: true },
   ];
 
+  const DEFAULT_NAV = [
+    {label:'Home',path:'/'},
+    {label:'About',path:'/about'},
+    {label:'Media',path:'/media'},
+    {label:'Services',path:'/#sessions'},
+    ...(settings?.sessions_page_visible !== false ? [{label:'Upcoming Sessions',path:'/sessions'}] : []),
+    {label:'Transformations',path:'/transformations'},
+    ...(settings?.blog_page_visible ? [{label:'Blog',path:'/blog'}] : []),
+  ];
+  const headerNavItems = (settings?.footer_menu_items?.length
+    ? settings.footer_menu_items.filter(i => i.visible !== false).map(i => ({ label: i.label, path: i.href }))
+    : DEFAULT_NAV
+  ).sort((a, b) => a.label.length - b.label.length);
+
   const handleNavClick = (path) => {
     setIsMenuOpen(false);
     setIsProgramsOpen(false);
@@ -117,16 +131,7 @@ const Header = () => {
             ))}
           </div>
           <nav className="text-center space-y-5">
-            {[
-              {label:'Home',path:'/'},
-              {label:'About',path:'/about'},
-              {label:'Media',path:'/media'},
-              {label:'Contact',path:'/#contact'},
-              {label:'Services',path:'/#sessions'},
-              ...(settings?.sessions_page_visible !== false ? [{label:'Upcoming Sessions',path:'/sessions'}] : []),
-              {label:'Transformations',path:'/transformations'},
-              ...(settings?.blog_page_visible ? [{label:'Blog',path:'/blog'}] : []),
-            ].sort((a, b) => a.label.length - b.label.length).map(item => (
+            {headerNavItems.map(item => (
               <button key={item.label} onClick={() => handleNavClick(item.path)} className="block w-full text-white text-xl md:text-2xl font-light tracking-[0.15em] hover:text-yellow-200 transition-colors">{item.label}</button>
             ))}
             <div>
