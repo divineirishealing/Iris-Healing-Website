@@ -90,7 +90,12 @@ const ParticipantRow = ({ index, data, onChange, onRemove, canRemove, showReferr
             <option value="">Select</option>{GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
           </select></div>
         <div><label className="text-[9px] text-gray-500">Country</label>
-          <select value={data.country} onChange={e => update('country', e.target.value)} className="w-full border rounded-md px-2 py-1.5 text-xs bg-white h-8">
+          <select value={data.country} onChange={e => {
+            const code = e.target.value;
+            update('country', code);
+            const c = COUNTRIES.find(c => c.code === code);
+            if (c) { update('phone_code', c.phone); update('wa_code', c.phone); }
+          }} className="w-full border rounded-md px-2 py-1.5 text-xs bg-white h-8">
             {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
           </select></div>
       </div>
@@ -158,7 +163,11 @@ const ParticipantRow = ({ index, data, onChange, onRemove, canRemove, showReferr
               className="border rounded-md px-0.5 py-1 text-[10px] w-[60px] bg-white h-8 flex-shrink-0" data-testid={`p-phone-code-${index}`}>
               {COUNTRIES.map(c => <option key={c.code} value={c.phone}>{c.phone}</option>)}
             </select>
-            <Input data-testid={`p-phone-${index}`} type="tel" value={data.phone} onChange={e => update('phone', e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder="Phone (10 digits)" maxLength={10} className="text-xs h-8" />
+            <Input data-testid={`p-phone-${index}`} type="tel" value={data.phone} onChange={e => {
+              const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+              update('phone', val);
+              if (!data.whatsapp || data.whatsapp === data.phone) update('whatsapp', val);
+            }} placeholder="Phone (10 digits)" maxLength={10} className="text-xs h-8" />
           </div>
           <div className="flex gap-0.5">
             <select value={data.wa_code || '+971'} onChange={e => update('wa_code', e.target.value)}
@@ -509,7 +518,11 @@ function EnrollmentPage() {
                           {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}</select></div>
                       <div><label className="text-[9px] text-gray-500">Phone</label>
                         <div className="flex gap-1">
-                          <select value={countryCode} onChange={e => setCountryCode(e.target.value)} className="border rounded-md px-1 py-2 text-xs w-20 bg-white">
+                          <select value={countryCode} onChange={e => {
+                            setCountryCode(e.target.value);
+                            const c = COUNTRIES.find(c => c.phone === e.target.value);
+                            if (c) setBookerCountry(c.code);
+                          }} className="border rounded-md px-1 py-2 text-xs w-20 bg-white">
                             {COUNTRIES.map(c => <option key={c.code} value={c.phone}>{c.phone}</option>)}</select>
                           <Input data-testid="enroll-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, ''))} placeholder="Phone number" className="text-sm flex-1" />
                         </div></div>
@@ -552,26 +565,41 @@ function EnrollmentPage() {
                     </div>
 
                     {/* India payment options */}
-                    {bookerCountry === 'IN' && paymentSettings.india_links.length > 0 && (
+                    {bookerCountry === 'IN' && (
                       <div className="mb-4" data-testid="india-payment-options">
-                        <p className="text-xs font-medium text-gray-700 mb-2">Choose your payment method:</p>
-                        <div className="space-y-2 mb-3">
-                          {paymentSettings.india_links.map((link, i) => (
-                            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
-                              className="flex items-center justify-between w-full border rounded-lg p-3 hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all group"
-                              data-testid={`india-pay-${link.type}`}>
-                              <div>
-                                <span className="text-sm font-medium text-gray-900 group-hover:text-[#D4AF37]">{link.label}</span>
-                                {link.details && <p className="text-[10px] text-gray-500 mt-0.5">{link.details}</p>}
-                              </div>
-                              <ChevronRight size={16} className="text-gray-400 group-hover:text-[#D4AF37]" />
-                            </a>
-                          ))}
+                        {/* Stripe card option first with guidance */}
+                        <div className="border-2 border-[#D4AF37] rounded-lg p-4 mb-3 bg-[#D4AF37]/5">
+                          <div className="flex items-center gap-2 mb-2">
+                            <CreditCard size={16} className="text-[#D4AF37]" />
+                            <span className="text-sm font-semibold text-gray-900">Pay with Card (Stripe)</span>
+                            <span className="text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Recommended</span>
+                          </div>
+                          <p className="text-[10px] text-gray-600 mb-2">Secure international payment. Your card must be <strong>enabled for international transactions</strong>.</p>
+                          <p className="text-[9px] text-gray-400 italic">Contact your bank to enable international payments if not already active.</p>
                         </div>
-                        <div className="relative my-3">
-                          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200" /></div>
-                          <div className="relative flex justify-center"><span className="bg-white px-3 text-[10px] text-gray-400">OR PAY WITH CARD</span></div>
-                        </div>
+
+                        {paymentSettings.india_links.length > 0 && (
+                          <>
+                            <div className="relative my-3">
+                              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200" /></div>
+                              <div className="relative flex justify-center"><span className="bg-white px-3 text-[10px] text-gray-400 uppercase">Or choose an alternative</span></div>
+                            </div>
+                            <p className="text-[10px] text-red-500 font-medium mb-2">Note: Alternative payment methods may incur an additional 10-15% processing charge.</p>
+                            <div className="space-y-2 mb-3">
+                              {paymentSettings.india_links.map((link, i) => (
+                                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center justify-between w-full border rounded-lg p-3 hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all group"
+                                  data-testid={`india-pay-${link.type}`}>
+                                  <div>
+                                    <span className="text-sm font-medium text-gray-900 group-hover:text-[#D4AF37]">{link.label}</span>
+                                    {link.details && <p className="text-[10px] text-gray-500 mt-0.5">{link.details}</p>}
+                                  </div>
+                                  <ChevronRight size={16} className="text-gray-400 group-hover:text-[#D4AF37]" />
+                                </a>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
 
