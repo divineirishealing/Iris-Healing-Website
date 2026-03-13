@@ -57,6 +57,7 @@ const TEMPLATE_STYLE_KEYS = [
   { key: 'section_subtitle_style', label: 'Section Subtitles' },
   { key: 'body_style', label: 'Body / Description Text' },
   { key: 'cta_style', label: 'CTA / Pricing Text' },
+  { key: 'testimonial_title_style', label: 'Testimonials Title' },
 ];
 
 const DARK_SECTION_STYLE_KEYS = [
@@ -225,6 +226,36 @@ const PageHeadersTab = ({ settings, programs = [], onChange }) => {
           <div className="flex items-center gap-2">
             <Label className="text-[9px] text-gray-500">Gold Line Color</Label>
             <input type="color" value={template.accent_color || '#D4AF37'} onChange={e => updateTemplate('accent_color', e.target.value)} className="w-6 h-6 rounded cursor-pointer border" />
+          </div>
+        </div>
+
+        {/* Gold Line Controls */}
+        <div className="mt-4" data-testid="gold-line-controls">
+          <p className="text-[9px] font-semibold text-gray-500 mb-2">GOLD LINE SEPARATORS</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { key: 'hero_line', label: 'Hero (under subtitle)' },
+              { key: 'section_line', label: 'Section Titles' },
+              { key: 'exp_line', label: 'Experience (Dark BG)' },
+              { key: 'cta_line', label: 'CTA Section' },
+            ].map(({ key, label }) => {
+              const lineKey = `${key}_visible`;
+              const gapKey = `${key}_gap`;
+              return (
+                <div key={key} className="bg-white rounded-lg border border-gray-100 p-2.5">
+                  <div className="flex items-center justify-between mb-1">
+                    <Label className="text-[9px] text-gray-500">{label}</Label>
+                    <Switch checked={template[lineKey] !== false} onCheckedChange={v => updateTemplate(lineKey, v)} />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Label className="text-[8px] text-gray-400 whitespace-nowrap">Gap</Label>
+                    <select value={template[gapKey] || '10'} onChange={e => updateTemplate(gapKey, e.target.value)} className="text-[9px] border rounded px-1 py-0.5 flex-1">
+                      {['2','4','6','8','10','12','16','20','24'].map(v => <option key={v} value={v}>{v}px</option>)}
+                    </select>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

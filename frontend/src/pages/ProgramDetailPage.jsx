@@ -112,7 +112,13 @@ function ProgramDetailPage() {
   const SectionTitle = ({ children, style: extra }) => (
     <h2 className="text-center mb-4" style={applyStyle(extra || template.section_title_style, { ...HEADING, fontSize: '1.6rem' })}>{children}</h2>
   );
-  const GoldLine = () => <div className="w-12 h-0.5 mx-auto mb-10" style={{ background: heroAccent }} />;
+  const GoldLine = ({ type = 'section' }) => {
+    const visKey = `${type}_line_visible`;
+    const gapKey = `${type}_line_gap`;
+    if (template[visKey] === false) return null;
+    const gap = template[gapKey] || '10';
+    return <div className="w-12 h-0.5 mx-auto" style={{ background: heroAccent, marginBottom: `${gap}px` }} />;
+  };
   const SubtitleText = ({ children, style: extra }) => (
     <p className="text-center mb-8" style={applyStyle(extra || template.section_subtitle_style, { ...SUBTITLE })}>{children}</p>
   );
@@ -141,7 +147,7 @@ function ProgramDetailPage() {
         <section key={section.id || idx} data-testid={`section-${idx}`} className={`${SECTION_PY} bg-[#f8f8f8]`}>
           <div className={CONTAINER}><div className={NARROW}>
             <SectionTitle style={section.title_style}>{section.title || 'Who It Is For?'}</SectionTitle>
-            <div className="w-12 h-0.5 mx-auto mb-4" style={{ background: heroAccent }} />
+            <GoldLine />
             {section.subtitle && <SubtitleText style={section.subtitle_style}>{section.subtitle}</SubtitleText>}
             {lines.length > 0 && (
               <div className="grid md:grid-cols-2 gap-x-16 gap-y-5 max-w-3xl mx-auto">
@@ -167,7 +173,7 @@ function ProgramDetailPage() {
             <h2 className="text-center mb-4" style={applyStyle(template.exp_title_style, { ...HEADING, color: heroAccent, fontStyle: 'italic', fontSize: '1.6rem' })}>
               {section.title || 'Your Experience'}
             </h2>
-            <div className="w-12 h-0.5 mx-auto mb-12" style={{ background: heroAccent }} />
+            <GoldLine type="exp" />
             {section.subtitle && <p className="text-center mb-8" style={applyStyle(template.exp_subtitle_style, { ...SUBTITLE, color: '#ccc' })}>{section.subtitle}</p>}
             <div className="grid md:grid-cols-12 gap-12 items-center">
               <div className="md:col-span-5 overflow-hidden rounded-md">
@@ -250,7 +256,7 @@ function ProgramDetailPage() {
           {program.title}
         </h1>
         <p className="mb-6" style={applyStyle(template.subtitle_style, { ...LABEL, color: heroAccent })}>{program.category || 'FLAGSHIP PROGRAM'}</p>
-        <div className="w-14 h-0.5" style={{ background: heroAccent }} />
+        {template.hero_line_visible !== false && <div className="w-14 h-0.5" style={{ background: heroAccent, marginTop: `${template.hero_line_gap || '10'}px` }} />}
       </section>
 
       {sections.map((section, idx) => renderSection(section, idx))}
@@ -259,7 +265,7 @@ function ProgramDetailPage() {
       <section className={`${SECTION_PY} bg-white`} data-testid="cta-section">
         <div className={CONTAINER}>
           <div className="max-w-3xl mx-auto text-center">
-            <div className="w-14 h-0.5 mx-auto mb-6" style={{ background: heroAccent }} />
+            <GoldLine type="cta" />
 
             {program.is_flagship && program.duration_tiers?.length > 0 && (
               <div data-testid="duration-tiers" className="max-w-3xl mx-auto mb-10">
@@ -306,7 +312,7 @@ function ProgramDetailPage() {
       {testimonials.length > 0 && (
         <section className="py-16 bg-white" data-testid="testimonials-section">
           <div className={CONTAINER}>
-            <h2 className="text-center mb-10" style={{ ...HEADING, color: heroAccent, fontStyle: 'italic', fontSize: '1.6rem' }}>Testimonials</h2>
+            <h2 className="text-center mb-10" style={applyStyle(template.testimonial_title_style, { ...HEADING, color: heroAccent, fontStyle: 'italic', fontSize: '1.6rem' })}>Testimonials</h2>
             <div className="max-w-5xl mx-auto relative flex items-center justify-center gap-4">
               <button onClick={prevT} data-testid="prev-testimonial" className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 flex-shrink-0"><ChevronLeft size={18} /></button>
               <div className="flex gap-3 overflow-hidden">
