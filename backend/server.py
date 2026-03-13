@@ -10,7 +10,7 @@ from pathlib import Path
 import mimetypes
 
 # Import routes
-from routes import programs, sessions, testimonials, stats, newsletter, upload, payments, webhook, currency, site_settings, enrollment, promotions, discounts
+from routes import programs, sessions, testimonials, stats, newsletter, upload, payments, webhook, currency, site_settings, enrollment, promotions, discounts, session_extras
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -63,6 +63,7 @@ async def serve_image(filename: str):
 # Include all route modules (image route MUST be before upload router)
 app.include_router(programs.router)
 app.include_router(sessions.router)
+app.include_router(session_extras.router)
 app.include_router(testimonials.router)
 app.include_router(stats.router)
 app.include_router(newsletter.router)

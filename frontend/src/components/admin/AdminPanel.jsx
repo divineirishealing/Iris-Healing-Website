@@ -23,6 +23,7 @@ import HomepageSectionsTab from './tabs/HomepageSectionsTab';
 import NewsletterSettingsTab from './tabs/NewsletterSettingsTab';
 import HeaderFooterTab from './tabs/HeaderFooterTab';
 import EnrollmentsTab from './tabs/EnrollmentsTab';
+import { SessionCalendarManager, SessionTestimonialsManager, SessionQuestionsManager } from './tabs/SessionManagerTabs';
 import GlobalStylesTab from './tabs/GlobalStylesTab';
 import PromotionsTab from './tabs/PromotionsTab';
 import ExchangeRatesTab from './tabs/ExchangeRatesTab';
@@ -584,6 +585,15 @@ const AdminPanel = () => {
                   <Button data-testid="add-session-btn" onClick={() => { resetSessionForm(); setShowSessionForm(true); }} className="bg-[#D4AF37] hover:bg-[#b8962e]"><Plus size={16} className="mr-1" /> Add Session</Button>
                 </div>
               </div>
+
+              {/* Unified Calendar Manager */}
+              <SessionCalendarManager toast={toast} />
+
+              {/* Session Testimonials Manager */}
+              <SessionTestimonialsManager sessions={sessions} toast={toast} />
+
+              {/* Session Questions Manager */}
+              <SessionQuestionsManager sessions={sessions} toast={toast} />
 
               {showSessionForm && (
                 <div data-testid="session-form" className="bg-white rounded-lg p-6 mb-6 shadow-sm border">

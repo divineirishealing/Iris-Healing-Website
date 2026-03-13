@@ -298,6 +298,39 @@ const PageHeadersTab = ({ settings, programs = [], onChange }) => {
           <Plus size={12} /> Add Section
         </Button>
       </div>
+
+      {/* ===== PERSONAL SESSIONS — SHARED STYLES ===== */}
+      <div className="mt-6 mb-2 flex items-center gap-2">
+        <p className="text-[10px] font-semibold text-gray-500">PERSONAL SESSIONS — SHARED STYLES</p>
+        <span className="text-[8px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-medium">Applies to all session pages</span>
+      </div>
+      <div className="bg-gradient-to-br from-indigo-50/50 to-white rounded-xl border border-indigo-100 p-4" data-testid="session-template-section">
+        <p className="text-[9px] text-gray-500 mb-3">Font & color changes here apply to <strong>every</strong> personal session card and detail page.</p>
+        {(() => {
+          const sessionTpl = heroes['session_template'] || {};
+          const updateSessionTpl = (field, value) => updateHero('session_template', field, value);
+          const SESSION_STYLE_KEYS = [
+            { key: 'title_style', label: 'Session Title' },
+            { key: 'description_style', label: 'Description' },
+            { key: 'duration_style', label: 'Duration / Type' },
+            { key: 'price_style', label: 'Price' },
+            { key: 'testimonial_style', label: 'Testimonial Text' },
+            { key: 'question_label_style', label: 'Question Form Labels' },
+          ];
+          return (
+            <div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {SESSION_STYLE_KEYS.map(({ key, label }) => (
+                  <div key={key} className="bg-white rounded-lg border border-gray-100 p-2.5">
+                    <Label className="text-[9px] text-gray-500 font-semibold block mb-1">{label}</Label>
+                    <StyleCell style={sessionTpl[key] || {}} onStyleChange={v => updateSessionTpl(key, v)} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+      </div>
     </div>
   );
 };

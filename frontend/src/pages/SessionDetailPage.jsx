@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Clock, Wifi, MapPin, Quote, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowLeft, Clock, Wifi, MapPin, Quote, ChevronLeft, ChevronRight, Send, MessageCircle } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButtons from '../components/FloatingButtons';
@@ -9,9 +9,10 @@ import { useCurrency } from '../context/CurrencyContext';
 import { renderMarkdown } from '../lib/renderMarkdown';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import { HEADING, SUBTITLE } from '../lib/designTokens';
+import { resolveImageUrl } from '../lib/imageUtils';
+import StarField from '../components/ui/StarField';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
 
 const applyStyle = (styleObj, defaults = {}) => {
   if (!styleObj || Object.keys(styleObj).length === 0) return defaults;
@@ -19,14 +20,16 @@ const applyStyle = (styleObj, defaults = {}) => {
 };
 
 /* ---- Calendar Component ---- */
-const BookingCalendar = ({ availableDates = [], selectedDate, onSelectDate }) => {
+const BookingCalendar = ({ calendar = {}, selectedDate, onSelectDate }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const monthName = currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
-  const availableSet = useMemo(() => new Set(availableDates), [availableDates]);
+  const availableSet = useMemo(() => new Set(calendar.available_dates || []), [calendar.available_dates]);
+  const minAdvance = calendar.min_advance_days || 7;
+  const blockWeekends = calendar.block_weekends !== false;
 
   const days = [];
   for (let i = 0; i < firstDay; i++) days.push(null);
@@ -39,30 +42,29 @@ const BookingCalendar = ({ availableDates = [], selectedDate, onSelectDate }) =>
   };
   const isSelected = (day) => {
     if (!day || !selectedDate) return false;
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return dateStr === selectedDate;
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` === selectedDate;
   };
   const isPast = (day) => {
     if (!day) return false;
-    const minDate = new Date(); minDate.setHours(0,0,0,0); minDate.setDate(minDate.getDate() + 7);
+    const minDate = new Date(); minDate.setHours(0,0,0,0); minDate.setDate(minDate.getDate() + minAdvance);
     return new Date(year, month, day) < minDate;
   };
   const isWeekend = (day) => {
     if (!day) return false;
     const dow = new Date(year, month, day).getDay();
-    return dow === 0 || dow === 6;
+    return blockWeekends && (dow === 0 || dow === 6);
   };
 
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100" data-testid="session-detail-calendar">
+    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20" data-testid="session-detail-calendar">
       <div className="flex items-center justify-between mb-4">
-        <button onClick={() => setCurrentMonth(new Date(year, month - 1))} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400"><ChevronLeft size={18} /></button>
-        <span className="text-sm font-semibold text-gray-800 tracking-wide">{monthName}</span>
-        <button onClick={() => setCurrentMonth(new Date(year, month + 1))} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400"><ChevronRight size={18} /></button>
+        <button onClick={() => setCurrentMonth(new Date(year, month - 1))} className="p-1.5 rounded-full hover:bg-white/10 text-white/60"><ChevronLeft size={18} /></button>
+        <span className="text-sm font-semibold text-white tracking-wide">{monthName}</span>
+        <button onClick={() => setCurrentMonth(new Date(year, month + 1))} className="p-1.5 rounded-full hover:bg-white/10 text-white/60"><ChevronRight size={18} /></button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-center mb-2">
         {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-          <div key={d} className={`text-[10px] font-medium py-1 ${d === 'Su' || d === 'Sa' ? 'text-red-300' : 'text-gray-400'}`}>{d}</div>
+          <div key={d} className={`text-[10px] font-medium py-1 ${d === 'Su' || d === 'Sa' ? 'text-red-300/50' : 'text-white/40'}`}>{d}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
@@ -74,28 +76,68 @@ const BookingCalendar = ({ availableDates = [], selectedDate, onSelectDate }) =>
           const disabled = !day || past || weekend || !available;
           return (
             <button key={i} disabled={disabled}
-              onClick={() => {
-                if (day && available && !weekend && !past) {
-                  onSelectDate(`${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
-                }
-              }}
+              onClick={() => { if (day && available && !weekend && !past) onSelectDate(`${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`); }}
               className={`h-9 w-full rounded-lg text-xs transition-all ${
                 !day ? '' :
-                weekend ? 'text-red-200 cursor-not-allowed' :
-                selected ? 'bg-purple-600 text-white font-bold shadow-md' :
-                available && !past ? 'bg-purple-50 text-purple-700 hover:bg-purple-100 cursor-pointer font-medium' :
-                past ? 'text-gray-200' : 'text-gray-300'
+                weekend ? 'text-red-300/30 cursor-not-allowed' :
+                selected ? 'bg-[#D4AF37] text-[#1a1a1a] font-bold shadow-lg' :
+                available && !past ? 'bg-white/15 text-white hover:bg-[#D4AF37]/40 cursor-pointer font-medium' :
+                past ? 'text-white/15' : 'text-white/20'
               }`}
             >{day || ''}</button>
           );
         })}
       </div>
-      <div className="mt-3 flex items-center gap-3 text-[10px] text-gray-400">
-        {availableDates.length > 0 && <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-purple-50 border border-purple-200" /> Available</span>}
-        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-50" /> Weekend</span>
-        <span>Min 7 days advance</span>
+      <div className="mt-3 flex items-center gap-3 text-[10px] text-white/40">
+        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-white/15 border border-white/20" /> Available</span>
+        <span>Min {minAdvance} days advance</span>
       </div>
     </div>
+  );
+};
+
+/* ---- Question Form ---- */
+const QuestionForm = ({ sessionId, sessionTpl }) => {
+  const [form, setForm] = useState({ name: '', email: '', question: '' });
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.question) return;
+    setSending(true);
+    try {
+      await axios.post(`${BACKEND_URL}/api/session-extras/questions`, { ...form, session_id: sessionId });
+      setSent(true);
+    } catch { /* silent */ }
+    setSending(false);
+  };
+
+  if (sent) return (
+    <div className="text-center py-8 px-6">
+      <div className="w-12 h-12 rounded-full bg-[#D4AF37]/20 flex items-center justify-center mx-auto mb-3">
+        <MessageCircle size={20} className="text-[#D4AF37]" />
+      </div>
+      <p className="text-white font-medium text-sm mb-1">Thank you for your question!</p>
+      <p className="text-white/50 text-xs">You will receive a response within 7 working days.</p>
+    </div>
+  );
+
+  return (
+    <form onSubmit={submit} className="space-y-3" data-testid="session-question-form">
+      <p className="text-white/70 text-xs mb-2">Have a question? We'll respond within <span className="text-[#D4AF37] font-medium">7 working days</span>.</p>
+      <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your name" required
+        className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/50" style={applyStyle(sessionTpl?.question_label_style)} />
+      <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} type="email" placeholder="Your email" required
+        className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/50" style={applyStyle(sessionTpl?.question_label_style)} />
+      <textarea value={form.question} onChange={e => setForm({ ...form, question: e.target.value })} placeholder="Your question..." required rows={3}
+        className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/50 resize-none" style={applyStyle(sessionTpl?.question_label_style)} />
+      <button type="submit" disabled={sending}
+        className="w-full py-2.5 rounded-lg text-xs tracking-wider uppercase font-medium bg-[#D4AF37] hover:bg-[#b8962e] text-[#1a1a1a] transition-colors flex items-center justify-center gap-2"
+        data-testid="submit-question-btn">
+        <Send size={12} /> {sending ? 'Sending...' : 'Send Question'}
+      </button>
+    </form>
   );
 };
 
@@ -107,20 +149,29 @@ function SessionDetailPage() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [calendar, setCalendar] = useState({});
+  const [testimonials, setTestimonials] = useState([]);
+  const [currentT, setCurrentT] = useState(0);
 
   useEffect(() => {
     if (settings && settings.sessions_page_visible === false) navigate('/', { replace: true });
   }, [settings, navigate]);
 
-  useEffect(() => { loadSession(); }, [id]);
-
-  const loadSession = async () => {
+  const loadData = useCallback(async () => {
     try {
-      const response = await axios.get(`${API}/sessions/${id}`);
-      setSession(response.data);
-    } catch (error) { console.error('Error loading session:', error); }
+      const [sesRes, calRes, tRes] = await Promise.all([
+        axios.get(`${BACKEND_URL}/api/sessions/${id}`),
+        axios.get(`${BACKEND_URL}/api/session-extras/calendar`),
+        axios.get(`${BACKEND_URL}/api/session-extras/testimonials?session_id=${id}`),
+      ]);
+      setSession(sesRes.data);
+      setCalendar(calRes.data);
+      setTestimonials(tRes.data);
+    } catch (error) { console.error('Error:', error); }
     finally { setLoading(false); }
-  };
+  }, [id]);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   const modeLabel = (mode) => {
     if (mode === 'offline') return 'In-Person';
@@ -128,134 +179,180 @@ function SessionDetailPage() {
     return 'Online';
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="text-xl text-gray-600">Loading...</div></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center" style={{ background: '#1e1033' }}><p className="text-white/40 text-xs">Loading...</p></div>;
   if (!session) return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: '#1e1033' }}>
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Session Not Found</h2>
-        <button onClick={() => navigate('/')} className="px-6 py-2 bg-purple-600 text-white rounded-full text-sm">Back to Home</button>
+        <h2 className="text-2xl font-bold text-white mb-4">Session Not Found</h2>
+        <button onClick={() => navigate('/')} className="px-6 py-2 bg-[#D4AF37] text-[#1a1a1a] rounded-full text-sm">Back to Home</button>
       </div>
     </div>
   );
 
   const hero = settings?.page_heroes?.sessions || {};
+  const sessionTpl = settings?.page_heroes?.session_template || {};
+  const timeSlots = calendar.time_slots || session.time_slots || [];
 
   return (
     <>
       <Header />
-      <div className="min-h-screen">
-        {/* Hero gradient banner */}
-        <div className="relative pt-20 pb-16 overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #1e1033 0%, #2d1b69 25%, #4c1d95 50%, #6d28d9 75%, #7c3aed 100%)' }}>
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #a78bfa, transparent 70%)' }} />
-          <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #c084fc, transparent 70%)' }} />
+      <div className="min-h-screen" style={{ background: '#0f0a1a' }}>
+        {/* Hero — Iris Purple Glossy with Golden Sprinkles */}
+        <div className="relative pt-20 pb-20 overflow-hidden" data-testid="session-hero"
+          style={{ background: 'linear-gradient(160deg, #1a0e2e 0%, #2a1252 20%, #3b1a6e 40%, #4c1d95 60%, #5b21b6 80%, #4c1d95 100%)' }}>
+          {/* Golden star particles */}
+          <StarField count={40} color="#D4AF37" />
+          {/* Glossy iris overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(139, 92, 246, 0.3), transparent 60%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(212, 175, 55, 0.08), transparent 50%)',
+          }} />
+          {/* Subtle golden wave at bottom */}
+          <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ height: '60px' }}>
+            <path d="M0,40 C360,80 720,10 1080,50 C1260,65 1380,25 1440,40 L1440,80 L0,80 Z" fill="rgba(212, 175, 55, 0.08)" />
+            <path d="M0,50 C240,30 480,70 720,40 C960,10 1200,60 1440,30 L1440,80 L0,80 Z" fill="rgba(212, 175, 55, 0.04)" />
+          </svg>
 
           <div className="container mx-auto px-6 md:px-8 lg:px-12 relative z-10">
-            <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/60 hover:text-white text-xs mb-8 transition-colors" data-testid="back-btn">
+            <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/40 hover:text-white text-xs mb-8 transition-colors" data-testid="back-btn">
               <ArrowLeft size={16} /> Back
             </button>
             <div className="max-w-3xl">
               <div className="flex items-center gap-3 mb-4">
                 <span className={`text-[10px] px-3 py-1 rounded-full font-medium flex items-center gap-1 ${
-                  session.session_mode === 'offline' ? 'bg-teal-500/20 text-teal-200' :
-                  session.session_mode === 'both' ? 'bg-purple-300/20 text-purple-200' :
-                  'bg-blue-400/20 text-blue-200'
+                  session.session_mode === 'offline' ? 'bg-teal-400/15 text-teal-200 border border-teal-400/20' :
+                  session.session_mode === 'both' ? 'bg-purple-300/15 text-purple-200 border border-purple-300/20' :
+                  'bg-blue-400/15 text-blue-200 border border-blue-400/20'
                 }`}>
                   {session.session_mode === 'offline' ? <MapPin size={12} /> : <Wifi size={12} />}
                   {modeLabel(session.session_mode)}
                 </span>
                 {session.duration && (
-                  <span className="text-[10px] px-3 py-1 rounded-full bg-white/10 text-white/60 flex items-center gap-1">
+                  <span className="text-[10px] px-3 py-1 rounded-full bg-white/8 text-white/50 flex items-center gap-1 border border-white/10">
                     <Clock size={10} /> {session.duration}
                   </span>
                 )}
               </div>
-              <h1 className="mb-2" style={applyStyle(hero.title_style, { ...HEADING, color: '#fff', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontVariant: 'small-caps', letterSpacing: '0.08em' })} data-testid="session-detail-title">
+              <h1 className="mb-3" data-testid="session-detail-title"
+                style={applyStyle(hero.title_style || sessionTpl.title_style, { ...HEADING, color: '#fff', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontVariant: 'small-caps', letterSpacing: '0.08em' })}>
                 {session.title}
               </h1>
-              <p className="mb-4" style={applyStyle(hero.subtitle_style, { color: 'rgba(255,255,255,0.5)', fontFamily: "'Lato', sans-serif", fontSize: '14px' })}>
-                {hero.subtitle_text || ''}
-              </p>
+              <div className="w-16 h-0.5 mb-4" style={{ background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
               {formatPrice(getPrice(session)) && (
-                <span className="text-xl font-bold" style={{ color: '#c084fc' }}>{formatPrice(getPrice(session))}</span>
+                <span className="text-xl font-bold text-[#D4AF37]">{formatPrice(getPrice(session))}</span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Content */}
+        {/* Main Content */}
         <div className="container mx-auto px-6 md:px-8 lg:px-12 py-12">
           <div className="max-w-5xl mx-auto grid lg:grid-cols-5 gap-10">
-            {/* Left content */}
+            {/* Left — About + Testimonials */}
             <div className="lg:col-span-3 space-y-8">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4" style={{ fontFamily: "'Cinzel', serif" }}>About This Session</h2>
-                <div className="text-gray-600 text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(session.description) }} />
+                <h2 className="text-lg font-semibold mb-4" style={applyStyle(sessionTpl.title_style, { fontFamily: "'Cinzel', serif", color: '#D4AF37' })}>About This Session</h2>
+                <div className="text-sm leading-relaxed" style={applyStyle(sessionTpl.description_style, { color: '#b0a8c0', fontFamily: "'Lato', sans-serif" })}
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(session.description) }} />
               </div>
 
-              {/* Testimonial */}
-              {session.testimonial_text && (
-                <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100 relative" data-testid="session-detail-testimonial">
-                  <Quote size={24} className="text-purple-200 absolute top-4 left-4" />
-                  <p className="text-gray-700 text-sm leading-relaxed italic pl-8"
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(session.testimonial_text) }} />
-                </div>
-              )}
-
-              <div className="grid md:grid-cols-2 gap-5">
-                <div className="bg-white border border-gray-100 p-5 rounded-xl shadow-sm">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">What to Expect</h3>
-                  <ul className="space-y-2 text-gray-600 text-xs">
-                    <li className="flex items-start gap-2"><span className="text-purple-500 mt-0.5">&#10003;</span> Personalized healing approach</li>
-                    <li className="flex items-start gap-2"><span className="text-purple-500 mt-0.5">&#10003;</span> Safe and supportive environment</li>
-                    <li className="flex items-start gap-2"><span className="text-purple-500 mt-0.5">&#10003;</span> Immediate energetic shifts</li>
-                    <li className="flex items-start gap-2"><span className="text-purple-500 mt-0.5">&#10003;</span> Practical guidance for integration</li>
-                  </ul>
-                </div>
-                <div className="bg-white border border-gray-100 p-5 rounded-xl shadow-sm">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Who Is This For</h3>
-                  <ul className="space-y-2 text-gray-600 text-xs">
-                    <li className="flex items-start gap-2"><span className="text-purple-500 mt-0.5">&#10003;</span> Anyone seeking deep healing</li>
-                    <li className="flex items-start gap-2"><span className="text-purple-500 mt-0.5">&#10003;</span> Those ready for transformation</li>
-                    <li className="flex items-start gap-2"><span className="text-purple-500 mt-0.5">&#10003;</span> Individuals committed to growth</li>
-                    <li className="flex items-start gap-2"><span className="text-purple-500 mt-0.5">&#10003;</span> Open to energetic work</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Right sidebar — Booking */}
-            <div className="lg:col-span-2 space-y-5">
-              <BookingCalendar
-                availableDates={session.available_dates || []}
-                selectedDate={selectedDate}
-                onSelectDate={setSelectedDate}
-              />
-
-              {(session.time_slots && session.time_slots.length > 0) && (
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                  <p className="text-xs text-gray-500 font-medium mb-3 uppercase tracking-wider">Available Times</p>
-                  <div className="flex flex-wrap gap-2">
-                    {session.time_slots.map((slot, i) => (
-                      <span key={i} className="px-3 py-1.5 rounded-full text-xs bg-purple-50 text-purple-700 border border-purple-100 hover:bg-purple-100 cursor-pointer transition-all" data-testid={`detail-time-slot-${i}`}>
-                        {slot}
-                      </span>
+              {/* Session Testimonials */}
+              {testimonials.length > 0 && (
+                <div data-testid="session-testimonials">
+                  <h2 className="text-lg font-semibold mb-6" style={applyStyle(sessionTpl.testimonial_style, { fontFamily: "'Cinzel', serif", color: '#D4AF37', fontStyle: 'italic' })}>
+                    What Clients Say
+                  </h2>
+                  <div className="space-y-4">
+                    {testimonials.slice(0, 6).map((t, idx) => (
+                      <div key={t.id} data-testid={`session-testimonial-${idx}`}
+                        className="relative bg-white/5 border border-white/10 rounded-xl p-5 backdrop-blur-sm">
+                        <Quote size={20} className="text-[#D4AF37]/30 absolute top-3 left-3" />
+                        <p className="text-white/70 text-sm leading-relaxed italic pl-6 mb-3"
+                          style={applyStyle(sessionTpl.testimonial_style)}>{t.text}</p>
+                        <div className="flex items-center gap-3 pl-6">
+                          {t.client_photo && <img src={resolveImageUrl(t.client_photo)} alt="" className="w-8 h-8 rounded-full object-cover border border-[#D4AF37]/30" />}
+                          <span className="text-xs text-[#D4AF37]/80 font-medium">{t.client_name || 'Anonymous'}</span>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              <button
-                onClick={() => navigate(`/enroll/session/${session.id}`)}
-                data-testid="book-now-btn"
-                className="w-full py-3.5 rounded-full text-sm tracking-widest uppercase font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] text-white"
-                style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)' }}
-              >
-                Book Now
-              </button>
+              {/* Info cards */}
+              <div className="grid md:grid-cols-2 gap-5">
+                <div className="bg-white/5 border border-white/10 p-5 rounded-xl backdrop-blur-sm">
+                  <h3 className="text-sm font-semibold mb-3" style={{ color: '#D4AF37', fontFamily: "'Cinzel', serif" }}>What to Expect</h3>
+                  <ul className="space-y-2 text-white/60 text-xs">
+                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Personalized healing approach</li>
+                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Safe and supportive environment</li>
+                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Immediate energetic shifts</li>
+                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Practical guidance for integration</li>
+                  </ul>
+                </div>
+                <div className="bg-white/5 border border-white/10 p-5 rounded-xl backdrop-blur-sm">
+                  <h3 className="text-sm font-semibold mb-3" style={{ color: '#D4AF37', fontFamily: "'Cinzel', serif" }}>Who Is This For</h3>
+                  <ul className="space-y-2 text-white/60 text-xs">
+                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Anyone seeking deep healing</li>
+                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Those ready for transformation</li>
+                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Individuals committed to growth</li>
+                    <li className="flex items-start gap-2"><span className="text-[#D4AF37] mt-0.5">&#10038;</span> Open to energetic work</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
 
-              <p className="text-[10px] text-gray-400 text-center leading-relaxed">
-                All sessions are conducted online via Zoom or through in-person appointments based on availability. Each session is customized to your unique needs.
+            {/* Right Sidebar — Booking + Question */}
+            <div className="lg:col-span-2 space-y-5">
+              {/* Purple gradient booking section with golden waves */}
+              <div className="rounded-2xl overflow-hidden relative" data-testid="booking-section"
+                style={{ background: 'linear-gradient(180deg, #2a1252 0%, #3b1a6e 40%, #4c1d95 70%, #3b1a6e 100%)' }}>
+                {/* Golden wave overlay */}
+                <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 400 50" preserveAspectRatio="none" style={{ height: '40px', opacity: 0.12 }}>
+                  <path d="M0,25 C100,50 200,0 300,25 C350,37 380,15 400,25 L400,50 L0,50 Z" fill="#D4AF37">
+                    <animate attributeName="d" dur="8s" repeatCount="indefinite" values="M0,25 C100,50 200,0 300,25 C350,37 380,15 400,25 L400,50 L0,50 Z;M0,30 C100,10 200,40 300,20 C350,10 380,35 400,30 L400,50 L0,50 Z;M0,25 C100,50 200,0 300,25 C350,37 380,15 400,25 L400,50 L0,50 Z" />
+                  </path>
+                </svg>
+                <StarField count={15} color="#D4AF37" />
+
+                <div className="relative z-10 p-5">
+                  <p className="text-[10px] text-[#D4AF37] font-medium uppercase tracking-widest mb-4">Book Your Session</p>
+
+                  <BookingCalendar calendar={calendar} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+
+                  {timeSlots.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-[10px] text-white/50 font-medium mb-2 uppercase tracking-wider">Available Times</p>
+                      <div className="flex flex-wrap gap-2">
+                        {timeSlots.map((slot, i) => (
+                          <span key={i} className="px-3 py-1.5 rounded-full text-[10px] bg-white/10 text-white/70 border border-white/15 hover:bg-[#D4AF37]/20 hover:text-[#D4AF37] hover:border-[#D4AF37]/30 cursor-pointer transition-all" data-testid={`detail-time-slot-${i}`}>
+                            {slot}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => navigate(`/enroll/session/${session.id}`)}
+                    data-testid="book-now-btn"
+                    className="w-full mt-5 py-3.5 rounded-full text-sm tracking-widest uppercase font-medium transition-all duration-300 shadow-lg hover:shadow-[#D4AF37]/20 hover:scale-[1.02]"
+                    style={{ background: 'linear-gradient(135deg, #D4AF37, #b8962e)', color: '#1a1a1a' }}
+                  >
+                    Book Now
+                  </button>
+                </div>
+              </div>
+
+              {/* Question Form */}
+              <div className="rounded-2xl overflow-hidden p-5 border border-white/10 bg-white/5 backdrop-blur-sm">
+                <p className="text-[10px] text-[#D4AF37] font-medium uppercase tracking-widest mb-3">
+                  <MessageCircle size={12} className="inline mr-1" /> Ask a Question
+                </p>
+                <QuestionForm sessionId={id} sessionTpl={sessionTpl} />
+              </div>
+
+              <p className="text-[10px] text-white/25 text-center leading-relaxed px-4">
+                Sessions conducted online via Zoom or in-person by appointment. Each session is customized to your unique healing needs.
               </p>
             </div>
           </div>
