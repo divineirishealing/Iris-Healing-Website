@@ -102,6 +102,7 @@ const SessionsSection = ({ sectionConfig }) => {
   const { addSessionItem } = useCart();
   const { toast } = useToast();
   const [sessions, setSessions] = useState([]);
+  const safeSessions = Array.isArray(sessions) ? sessions : [];
   const [selectedSession, setSelectedSession] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
@@ -151,11 +152,24 @@ const SessionsSection = ({ sectionConfig }) => {
   useEffect(() => { loadSessions(); }, []);
 
   const loadSessions = async () => {
-    try {
-      const response = await axios.get(`${API}/sessions?visible_only=true`);
-      if (response.data && response.data.length > 0) setSessions(response.data);
-    } catch (error) { console.error('Error loading sessions:', error); }
-  };
+  try {
+    const response = await axios.get(`${API}/sessions?visible_only=true`);
+    const data = response.data;
+
+    const normalizedSessions = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.sessions)
+      ? data.sessions
+      : Array.isArray(data?.data)
+      ? data.data
+      : [];
+
+    setSessions(normalizedSessions);
+  } catch (error) {
+    console.error('Error loading sessions:', error);
+    setSessions([]);
+  }
+};
 
   const modeIcon = (mode) => {
     if (mode === 'offline') return <MapPin size={12} />;
@@ -204,7 +218,7 @@ const SessionsSection = ({ sectionConfig }) => {
           <aside className="w-full lg:w-[340px] lg:min-w-[340px] flex-shrink-0" data-testid="sessions-list">
             <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-purple-100/50 shadow-sm overflow-hidden">
               <div className="max-h-[520px] overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(139,92,246,0.15) transparent' }}>
-                {sessions.map((session) => (
+                {safeSessions.map((session) => (
                   <button
                     key={session.id}
                     data-testid={`session-tab-${session.id}`}
