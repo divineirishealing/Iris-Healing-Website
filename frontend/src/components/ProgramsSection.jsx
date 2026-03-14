@@ -153,7 +153,7 @@ const ProgramsSection = ({ sectionConfig }) => {
   const navigate = useNavigate();
   const [programs, setPrograms] = useState([]);
   const [hero, setHero] = useState({});
-
+  const safePrograms = Array.isArray(programs) ? programs : [];
   useEffect(() => {
     axios.get(`${API}/programs?visible_only=true`).then(r => {
       if (r.data?.length > 0) setPrograms(r.data);
