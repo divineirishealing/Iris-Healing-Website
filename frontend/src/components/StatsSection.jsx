@@ -94,7 +94,7 @@ const ParticleCanvas = () => {
 
 const StatsSection = ({ sectionConfig }) => {
   const [stats, setStats] = useState(mockStats);
-
+  const safeStats = Array.isArray(stats) ? stats : [];
   useEffect(() => {
     loadStats();
   }, []);
@@ -122,7 +122,7 @@ const StatsSection = ({ sectionConfig }) => {
         pointerEvents: 'none',
       }}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: '80px' }}>
-          {stats.map((stat, index) => {
+          {safeStats.map((stat, index) => {
             const icons = ['fa-users', 'fa-calendar-alt', 'fa-infinity', 'fa-award'];
             const iconClass = stat.icon || icons[index] || 'fa-star';
             const valueStyle = stat.value_style || {};
