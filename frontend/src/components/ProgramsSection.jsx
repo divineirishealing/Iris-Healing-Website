@@ -174,14 +174,15 @@ const ProgramsSection = ({ sectionConfig }) => {
     <section id="programs" data-testid="programs-section" className="py-12 bg-white">
       <div className={CONTAINER}>
         <h2 className="text-center mb-4" style={applySectionStyle(titleStyle, { ...HEADING, fontSize: 'clamp(1.5rem, 3vw, 2rem)' })}>{title}</h2>
-        {(subtitle || (!programs.some(p => p.enable_in_person) && !sectionConfig)) && (
+        {(subtitle || (!safePrograms.some(p => p.enable_in_person) && !sectionConfig)) && (
+      
           <p className="text-center text-xs text-gray-400 mb-16" style={applySectionStyle(subtitleStyle, {})}>{subtitle || 'All sessions are conducted online via Zoom or through remote distance healing — no in-person sessions at this time.'}</p>
         )}
-        {!subtitle && programs.some(p => p.enable_in_person) && <div className="mb-16" />}
+        {!subtitle && safePrograms.some(p => p.enable_in_person) && <div className="mb-16" />}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {programs.slice(0, 6).map(p => <ProgramCard key={p.id} program={p} />)}
+          {safePrograms.slice(0, 6).map(p => <ProgramCard key={p.id} program={p} />)}
         </div>
-        {programs.length > 6 && (
+        {safePrograms.length > 6 && (
           <div className="text-center mt-12">
             <button onClick={() => navigate('/programs')} className="bg-[#D4AF37] hover:bg-[#b8962e] text-white px-8 py-3 rounded-full text-sm transition-all duration-300 shadow-lg tracking-wider">
               View All Programs
