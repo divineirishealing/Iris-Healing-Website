@@ -10,6 +10,7 @@ const API = `${BACKEND_URL}/api`;
 
 const TestimonialsSection = ({ sectionConfig, inline }) => {
   const [testimonials, setTestimonials] = useState([]);
+  const safeTestimonials = Array.isArray(testimonials) ? testimonials : [];
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [activeTab, setActiveTab] = useState('video');
@@ -22,16 +23,25 @@ const TestimonialsSection = ({ sectionConfig, inline }) => {
   const loadTestimonials = async () => {
     try {
       const response = await axios.get(`${API}/testimonials?visible_only=true`);
-      if (response.data && response.data.length > 0) {
-        setTestimonials(response.data);
-      }
+      const data = response.data;
+  
+      const normalizedTestimonials = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.testimonials)
+        ? data.testimonials
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
+  
+      setTestimonials(normalizedTestimonials);
     } catch (error) {
       console.log('Error loading testimonials');
+      setTestimonials([]);
     }
   };
 
-  const videoTestimonials = testimonials.filter(t => t.type === 'video' && t.videoId);
-  const graphicTestimonials = testimonials.filter(t => t.type === 'graphic' && t.image);
+  const videoTestimonials = safeTestimonials.filter(t => t.type === 'video' && t.videoId);
+  const graphicTestimonials = safeTestimonials.filter(t => t.type === 'graphic' && t.image);
   const displayList = activeTab === 'video' ? videoTestimonials : graphicTestimonials;
 
   const scroll = (dir) => {
@@ -47,7 +57,7 @@ const TestimonialsSection = ({ sectionConfig, inline }) => {
     return resolveImageUrl(t.image);
   };
 
-  if (testimonials.length === 0) return null;
+  if (safeTestimonials.length === 0) return null;
 
   const cardWidth = inline ? 'w-60' : 'w-72 md:w-80';
   const cardHeight = inline ? 'h-40' : 'h-48 md:h-52';
